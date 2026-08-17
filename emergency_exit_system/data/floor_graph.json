@@ -1,0 +1,27 @@
+{
+  "nodes": {
+    "You"        : [90,  260, "user"],
+    "CorridorA"  : [230, 260, "corridor"],
+    "CorridorB"  : [380, 260, "corridor"],
+    "CorridorC"  : [230, 380, "corridor"],
+    "Lab"        : [230, 140, "room"],
+    "ClassRoom"  : [380, 140, "room"],
+    "Exit_North" : [540, 140, "exit"],
+    "Exit_East"  : [540, 260, "exit"],
+    "Exit_South" : [380, 420, "exit"],
+    "Staircase"  : [90,  380, "staircase"]
+  },
+  "edges": [
+    ["You",       "CorridorA",  12],
+    ["CorridorA", "Lab",        10],
+    ["CorridorA", "CorridorB",  15],
+    ["CorridorA", "CorridorC",  12],
+    ["CorridorA", "Staircase",  14],
+    ["Lab",       "ClassRoom",  10],
+    ["ClassRoom", "Exit_North",  8],
+    ["CorridorB", "Exit_North", 18],
+    ["CorridorB", "Exit_East",  10],
+    ["CorridorC", "Exit_South", 10],
+    ["Staircase", "Exit_South", 20]
+  ]
+}

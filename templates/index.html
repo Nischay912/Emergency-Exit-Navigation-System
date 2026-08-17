@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>Emergency Exit Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08091a;--card:#0f1629;--panel:#111e38;--border:#1e2f55;
+  --red:#e94560;--purple:#7c3aed;--green:#10b981;--amber:#f59e0b;
+  --blue:#3b82f6;--text:#e2e8f0;--muted:#64748b;
+  --low:#10b981;--med:#f59e0b;--high:#ef4444;
+}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+
+/* HEADER */
+header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--panel);border-bottom:2px solid var(--red);flex-shrink:0;z-index:20;}
+.logo{display:flex;align-items:center;gap:8px;}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--red),#900);border-radius:7px;display:grid;place-items:center;font-size:15px;}
+.logo h1{font-size:.85rem;font-weight:800;color:var(--red);}
+.logo p{font-size:.6rem;color:var(--muted);}
+.hdr-right{display:flex;gap:8px;align-items:center;}
+.badge{display:flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:.65rem;font-weight:700;}
+.badge-cam{background:#1a0d2e;border:1px solid var(--purple);color:#a78bfa;}
+.badge-live{background:#0d1f12;border:1px solid var(--green);color:var(--green);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LAYOUT */
+.app{display:flex;height:calc(100vh - 52px);}
+
+/* DESKTOP SIDEBAR */
+.sidebar{width:260px;min-width:240px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:14px 12px;gap:12px;flex-shrink:0;}
+.map-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+canvas{display:block;width:100%;height:100%;}
+.canvas-wrap{flex:1;overflow:hidden;position:relative;}
+.info-bar{height:36px;display:flex;align-items:center;padding:0 16px;gap:8px;font-size:.78rem;font-weight:600;color:var(--green);background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;}
+.info-bar.warn{color:var(--high);}
+
+/* SIDEBAR WIDGETS */
+.sec{margin-bottom:4px;}
+.sec-lbl{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.loc-card{background:#0c1e3c;border:1px solid var(--blue);border-radius:10px;padding:10px 12px;}
+.loc-card .at{font-size:.62rem;color:var(--muted);}
+.loc-card .name{font-size:1rem;font-weight:800;color:var(--blue);margin:2px 0;}
+.loc-card .hint{font-size:.6rem;color:var(--muted);}
+.loc-select{width:100%;background:#0c1e3c;color:var(--text);border:1px solid var(--blue);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:.78rem;margin-top:6px;cursor:pointer;}
+.loc-select:focus{outline:none;border-color:var(--purple);}
+.rec-card{background:linear-gradient(135deg,#1a0f00,#201a00);border:1px solid var(--amber);border-radius:10px;padding:10px 12px;}
+.rec-card .rl{font-size:.62rem;color:var(--muted);}
+.rec-card .re{font-size:1.05rem;font-weight:800;color:var(--amber);}
+.rec-card .rp{font-size:.65rem;color:#94a3b8;margin-top:3px;word-break:break-all;line-height:1.5;}
+.exit-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:5px;transition:border-color .3s;}
+.exit-row.best{border-color:var(--amber);}
+.exit-row-name{font-size:.75rem;font-weight:600;}
+.cpill{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;}
+.cpill.Low{background:#052e16;color:var(--low);border:1px solid var(--low);}
+.cpill.Medium{background:#1c1200;color:var(--med);border:1px solid var(--med);}
+.cpill.High{background:#200;color:var(--high);border:1px solid var(--high);}
+.leg-row{display:flex;align-items:center;gap:7px;font-size:.65rem;color:var(--muted);margin-bottom:4px;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.leg-sq{width:10px;height:5px;border-radius:2px;flex-shrink:0;}
+
+/* MOBILE: bottom sheet layout */
+@media(max-width:768px){
+  header{height:46px;}
+  .app{flex-direction:column;height:calc(100vh - 46px);}
+  .sidebar{
+    width:100%;min-width:0;flex-direction:column;
+    height:48%;max-height:48%;
+    border-right:none;border-top:2px solid var(--red);
+    order:2;padding:10px 12px;overflow-y:auto;
+    flex-shrink:0;
+  }
+  .map-col{height:52%;order:1;flex:none;}
+  .info-bar{height:30px;font-size:.7rem;}
+  /* collapse legend on mobile */
+  .sec.legend-sec{display:none;}
+  /* horizontal exits list */
+  #exitList{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;}
+  .exit-row{min-width:130px;flex:1;}
+  /* compact location card */
+  .loc-card .hint{display:none;}
+}
+@media(max-width:480px){
+  .badge-cam{display:none;}
+  .logo p{display:none;}
+}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* WALK MODE */
+.walk-card{background:linear-gradient(135deg,#0d1e3c,#0a1628);border:1px solid var(--purple);border-radius:10px;padding:10px 12px;}
+.walk-btn{width:100%;padding:9px;border:none;border-radius:8px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:6px;}
+.walk-btn:last-child{margin:0;}
+.walk-btn.start{background:var(--purple);color:#fff;}
+.walk-btn.stop{background:#991b1b;color:#fff;}
+.walk-btn.calib{background:#0e4429;border:1px solid var(--green);color:var(--green);}
+.walk-btn:hover{opacity:.88;transform:translateY(-1px);}
+.walk-status{font-size:.65rem;color:var(--muted);text-align:center;margin-top:4px;line-height:1.5;}
+.walk-status .steps{color:var(--purple);font-weight:700;}
+.walk-status .heading{color:var(--amber);font-weight:700;}
+.walk-status .drift{color:var(--high);font-weight:700;}
+.walk-status.active{color:var(--green);}
+.dir-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:6px 0;}
+.dir-btn{padding:8px;border:1px solid var(--border);border-radius:6px;background:#0a1020;color:var(--text);font-size:1rem;cursor:pointer;transition:all .15s;}
+.dir-btn:hover{background:var(--purple);border-color:var(--purple);}
+.dir-btn:active{transform:scale(.93);}
+.compass-ring{display:flex;align-items:center;justify-content:center;margin:6px 0;}
+.compass-svg{transition:transform .3s;}
+/* overlay toast */
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a0d2e;border:1px solid var(--purple);border-radius:10px;padding:10px 18px;font-size:.78rem;font-weight:600;color:#a78bfa;opacity:0;transition:all .4s;z-index:100;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* NAV OVERLAY — full-screen navigation mode */
+.nav-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;}
+.nav-overlay.active{display:flex;}
+/* Top instruction card */
+.nav-top{background:linear-gradient(160deg,#0d1e3c,#0a1020);padding:20px 18px 14px;border-bottom:2px solid var(--red);flex-shrink:0;}
+.nav-street{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.nav-arrow-row{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
+.nav-arrow{font-size:3.5rem;line-height:1;transition:all .4s;filter:drop-shadow(0 0 12px #7c3aed88);}
+.nav-instruction{flex:1;}
+.nav-action{font-size:1.5rem;font-weight:900;color:var(--text);line-height:1.1;}
+.nav-target{font-size:.85rem;color:var(--purple);font-weight:600;margin-top:4px;}
+.nav-dist{font-size:.72rem;color:var(--muted);margin-top:2px;}
+/* Next step */
+.nav-next{background:#0a1020;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:.75rem;}
+.nav-next-icon{font-size:1.2rem;opacity:.7;}
+.nav-next-txt{color:var(--muted);}
+.nav-next-txt strong{color:var(--text);}
+/* Progress bar */
+.nav-progress-wrap{padding:10px 18px 6px;flex-shrink:0;}
+.nav-prog-label{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:5px;}
+.nav-prog-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.nav-prog-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--green));border-radius:3px;transition:width .6s ease;}
+/* Step list */
+.nav-steps-wrap{padding:0 18px;flex:1;overflow-y:auto;}
+.nav-step-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.nav-step-item:last-child{border:none;}
+.nav-step-arrow{font-size:1.4rem;width:30px;text-align:center;flex-shrink:0;}
+.nav-step-info{flex:1;}
+.nav-step-action{font-size:.82rem;font-weight:700;}
+.nav-step-sub{font-size:.65rem;color:var(--muted);margin-top:1px;}
+.nav-step-badge{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:10px;background:#052e16;color:var(--green);border:1px solid var(--green);}
+.nav-step-item.current .nav-step-action{color:var(--amber);}
+.nav-step-item.current .nav-step-arrow{filter:drop-shadow(0 0 6px var(--amber));}
+.nav-step-item.done .nav-step-action{color:var(--muted);text-decoration:line-through;}
+/* Map section inside nav */
+.nav-map-wrap{height:200px;min-height:140px;flex-shrink:0;position:relative;}
+.nav-map-wrap canvas{width:100%;height:100%;}
+/* Bottom nav bar */
+.nav-bottom{display:flex;gap:10px;padding:10px 16px 14px;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;}
+.nav-close-btn{flex:1;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;background:var(--border);color:var(--text);}
+.nav-demo-btn{flex:2;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--purple),#4f46e5);color:#fff;transition:all .2s;}
+.nav-demo-btn:hover{opacity:.88;transform:translateY(-1px);}
+.nav-demo-btn.stop{background:#991b1b;}
+/* Nav trigger button in sidebar */
+.nav-trigger{width:100%;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--red),#b91c1c);color:#fff;letter-spacing:.3px;transition:all .2s;box-shadow:0 4px 20px #e9456044;}
+.nav-trigger:hover{transform:translateY(-2px);box-shadow:0 6px 24px #e9456066;}
+.nav-trigger:active{transform:translateY(0);}
+@media(max-width:768px){.nav-action{font-size:1.2rem;}.nav-arrow{font-size:2.8rem;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">&#128680;</div>
+    <div><h1>Emergency Exit System</h1><p>ISE Dept &mdash; AI Evacuation Guide</p></div>
+  </div>
+  <div class="hdr-right">
+    <div class="badge badge-cam">&#128247; YOLO: Main Entrance</div>
+    <div class="badge badge-live"><span class="live-dot"></span>LIVE</div>
+  </div>
+</header>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sec">
+      <div class="sec-lbl">Your Location</div>
+      <div class="loc-card">
+        <div class="at">You are at</div>
+        <div class="name" id="userLbl">--</div>
+        <div class="hint">&#128205; Scan QR code or select below</div>
+        <select class="loc-select" id="locSelect" onchange="changeLocation(this.value)">
+          <option value="">-- Select your location --</option>
+        </select>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl">Recommended Exit</div>
+      <div class="rec-card">
+        <div class="rl">Safest Exit</div>
+        <div class="re" id="bestName">--</div>
+        <div class="rp" id="pathTxt">Computing...</div>
+      </div>
+      <button class="nav-trigger" style="margin-top:8px" onclick="openNavigation()">&#128679; Navigate to Exit &rarr;</button>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl">All Exits &mdash; Live Crowd</div>
+      <div id="exitList"></div>
+    </div>
+    <!-- WALK MODE -->
+    <div class="sec">
+      <div class="sec-lbl">&#x1F6B6; Walking Mode (PDR)</div>
+      <div class="walk-card">
+        <button class="walk-btn calib" id="calibBtn" onclick="startCalibration()">&#127759; Calibrate North Direction</button>
+        <button class="walk-btn start" id="walkBtn" onclick="toggleWalkMode()">&#x1F6B6; Start Walking Mode</button>
+        <!-- Manual direction pad (fallback) -->
+        <div class="dir-pad" id="dirPad" style="display:none">
+          <div></div>
+          <button class="dir-btn" onclick="manualStep(0)">&#8593;</button>
+          <div></div>
+          <button class="dir-btn" onclick="manualStep(270)">&#8592;</button>
+          <button class="dir-btn" onclick="manualStep(-1)">&#128205;</button>
+          <button class="dir-btn" onclick="manualStep(90)">&#8594;</button>
+          <div></div>
+          <button class="dir-btn" onclick="manualStep(180)">&#8595;</button>
+          <div></div>
+        </div>
+        <div class="compass-ring" id="compassRing" style="display:none">
+          <svg class="compass-svg" id="compassSvg" width="60" height="60" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="28" fill="none" stroke="#1e3a5f" stroke-width="2"/>
+            <polygon points="30,6 34,30 30,34 26,30" fill="#ef4444"/>
+            <polygon points="30,54 34,30 30,26 26,30" fill="#94a3b8"/>
+            <text x="30" y="4" text-anchor="middle" font-size="7" fill="#ef4444" font-family="Inter">N</text>
+            <text x="30" y="59" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">S</text>
+            <text x="56" y="33" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">E</text>
+            <text x="4"  y="33" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">W</text>
+          </svg>
+        </div>
+        <div class="walk-status" id="walkStatus">Scan QR or pick location, then start walking</div>
+      </div>
+    </div>
+    <div class="sec legend-sec">
+      <div class="sec-lbl">Legend</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#ef4444"></div>Your Location</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#10b981"></div>Exit / Staircase</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#f59e0b"></div>Best Exit</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#3b82f6"></div>Room / Lab</div>
+      <div class="leg-row"><div class="leg-sq" style="background:#f59e0b"></div>Safest Path</div>
+    </div>
+  </div>
+  <div class="map-col">
+    <div class="canvas-wrap" id="cWrap"><canvas id="floorMap"></canvas></div>
+    <div class="info-bar" id="infoBar">Initialising...</div>
+  </div>
+</div>
+
+<script>
+const USER_NODE_INIT="{{user_node}}";
+const POLL_MS=4000;
+const CROWD_MULT={Low:1,Medium:2.5,High:6};
+const LEVEL_THRESH={low:20,med:55};
+
+let GRAPH=null,crowdData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
+
+function countToLevel(n){return n<=LEVEL_THRESH.low?"Low":n<=LEVEL_THRESH.med?"Medium":"High";}
+
+/* DIJKSTRA */
+function buildAdj(){
+  const adj={};
+  Object.keys(GRAPH.nodes).forEach(n=>adj[n]=[]);
+  GRAPH.edges.forEach(([u,v,d])=>{
+    const lu=countToLevel(crowdData[u]?.count||0);
+    const lv=countToLevel(crowdData[v]?.count||0);
+    adj[u].push([v,d*(CROWD_MULT[lv]||1)]);
+    adj[v].push([u,d*(CROWD_MULT[lu]||1)]);
+  });
+  return adj;
+}
+function dijkstra(start,adj){
+  const dist={},prev={};
+  Object.keys(adj).forEach(n=>{dist[n]=Infinity;prev[n]=null;});
+  dist[start]=0;
+  const q=[[0,start]];
+  while(q.length){
+    q.sort((a,b)=>a[0]-b[0]);
+    const[c,u]=q.shift();
+    if(c>dist[u])continue;
+    for(const[v,w]of adj[u]){const nc=c+w;if(nc<dist[v]){dist[v]=nc;prev[v]=u;q.push([nc,v]);}}
+  }
+  return{dist,prev};
+}
+function getPath(prev,s,t){const p=[];let n=t;while(n){p.push(n);n=prev[n];}p.reverse();return p[0]===s?p:[];}
+
+/* CANVAS */
+const canvas=document.getElementById("floorMap");
+const ctx=canvas.getContext("2d");
+const DW=880,DH=580;
+let sx=1,sy=1;
+const X=x=>x*sx,Y=y=>y*sy,R=r=>r*Math.min(sx,sy);
+
+/* Room rectangles for floor-plan style drawing */
+const ROOM_RECTS={
+  HOD_Cabin:   {x:20, y:140,w:115,h:85, icon:"\uD83D\uDC54",fill:"#0d1e3c",label:"HOD Cabin"},
+  Server_Room: {x:20, y:245,w:115,h:75, icon:"\uD83D\uDDA5",fill:"#0d1e3c",label:"Server Room"},
+  Lobby:       {x:20, y:335,w:115,h:80, icon:"\uD83C\uDFE2",fill:"#0d2230",label:"Lobby"},
+  Staff_Room:  {x:185,y:20, w:150,h:100,icon:"\uD83D\uDC65",fill:"#0d1e3c",label:"Staff Room"},
+  Lab_1:       {x:385,y:20, w:145,h:100,icon:"\uD83D\uDD2C",fill:"#0d1a3c",label:"Lab 1"},
+  Lab_2:       {x:580,y:20, w:145,h:115,icon:"\uD83D\uDD2C",fill:"#0d1a3c",label:"Lab 2"},
+  Classroom_1: {x:385,y:175,w:145,h:100,icon:"\uD83D\uDCDA",fill:"#0d1e3c",label:"Classroom 1"},
+  Classroom_2: {x:580,y:175,w:145,h:115,icon:"\uD83D\uDCDA",fill:"#0d1e3c",label:"Classroom 2"},
+  Classroom_3: {x:385,y:440,w:145,h:100,icon:"\uD83D\uDCDA",fill:"#0d1e3c",label:"Classroom 3"},
+};
+const CORRIDORS=[
+  {x:135,y:330,w:695,h:50,fill:"#0c1525"},
+  {x:135,y:120,w:50, h:215,fill:"#0c1525"},
+  {x:530,y:120,w:50, h:320,fill:"#0c1525"},
+];
+/* Node centers mapped onto floor plan */
+const NODE_POS={
+  HOD_Cabin:     [77,  183],
+  Server_Room:   [77,  283],
+  Lobby:         [77,  375],
+  Staff_Room:    [260, 70 ],
+  Lab_1:         [457, 70 ],
+  Lab_2:         [652, 77 ],
+  Classroom_1:   [457, 225],
+  Classroom_2:   [652, 232],
+  Classroom_3:   [457, 490],
+  CorridorMain:  [390, 355],
+  CorridorNorth: [160, 230],
+  CorridorSouth: [390, 490],
+  CorridorEast:  [555, 355],
+  Main_Entrance: [77,  540],
+  Staircase_North:[160,20 ],
+  Exit_East:     [830, 355],
+  Exit_South:    [390, 555],
+  Exit_West:     [20,  355],
+};
+
+function resizeCanvas(){
+  const w=canvas.parentElement;
+  canvas.width=w.clientWidth;
+  canvas.height=w.clientHeight;
+  sx=canvas.width/DW;sy=canvas.height/DH;
+}
+
+function drawRoundRect(x,y,w,h,r,fill,stroke,lw){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw||1;ctx.stroke();}
+}
+
+function render(){
+  if(!GRAPH)return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  /* background */
+  const bg=ctx.createLinearGradient(0,0,0,canvas.height);
+  bg.addColorStop(0,"#07091a");bg.addColorStop(1,"#080c1e");
+  ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  /* grid */
+  ctx.strokeStyle="rgba(30,47,85,0.4)";ctx.lineWidth=1;
+  for(let gx=0;gx<canvas.width;gx+=R(55)){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,canvas.height);ctx.stroke();}
+  for(let gy=0;gy<canvas.height;gy+=R(55)){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(canvas.width,gy);ctx.stroke();}
+
+  /* Dijkstra */
+  const adj=buildAdj();
+  const{dist,prev}=dijkstra(currentUser,adj);
+  let bExit=null,bCost=Infinity;
+  GRAPH.exit_nodes.forEach(e=>{if(dist[e]<bCost){bCost=dist[e];bExit=e;}});
+  bestExit=bExit;
+  const path=bExit?getPath(prev,currentUser,bExit):[];
+  const pathSet=new Set();
+  for(let i=0;i<path.length-1;i++){pathSet.add(path[i]+"|"+path[i+1]);pathSet.add(path[i+1]+"|"+path[i]);}
+
+  /* building outline */
+  ctx.shadowBlur=0;
+  drawRoundRect(X(15),Y(15),X(850),Y(550),R(12),null,"#1e3a5f",R(2));
+
+  /* corridors */
+  CORRIDORS.forEach(c=>{
+    drawRoundRect(X(c.x),Y(c.y),X(c.w),Y(c.h),R(4),c.fill,"#1a3050",R(1));
+  });
+
+  /* room rectangles */
+  Object.entries(ROOM_RECTS).forEach(([name,r])=>{
+    const onPath=path.includes(name);
+    const isUser=name===currentUser;
+    const stroke=isUser?"#ef4444":onPath?"#f59e0b44":"#1e3a5f";
+    const lw=isUser||onPath?R(2):R(1);
+    drawRoundRect(X(r.x),Y(r.y),X(r.w),Y(r.h),R(6),r.fill,stroke,lw);
+    /* room label */
+    ctx.fillStyle=isUser?"#fca5a5":onPath?"#fcd34d":"#475569";
+    ctx.font=`600 ${R(8)}px Inter`;
+    ctx.textAlign="center";ctx.textBaseline="middle";
+    const cx=X(r.x+r.w/2),cy=Y(r.y+r.h/2);
+    ctx.fillText(r.label,cx,cy+R(8));
+    /* icon */
+    ctx.font=`${R(14)}px serif`;
+    ctx.fillText(r.icon,cx,cy-R(5));
+  });
+
+  /* edges */
+  GRAPH.edges.forEach(([u,v,d])=>{
+    const pu=NODE_POS[u]||GRAPH.nodes[u];
+    const pv=NODE_POS[v]||GRAPH.nodes[v];
+    if(!pu||!pv)return;
+    const onP=pathSet.has(u+"|"+v);
+    ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
+    if(onP){ctx.strokeStyle="#f59e0b";ctx.lineWidth=R(5);ctx.setLineDash([]);ctx.shadowColor="#f59e0b";ctx.shadowBlur=R(8);}
+    else{ctx.strokeStyle="#1e3a5f";ctx.lineWidth=R(1.5);ctx.setLineDash([R(4),R(5)]);ctx.shadowBlur=0;}
+    ctx.stroke();ctx.setLineDash([]);ctx.shadowBlur=0;
+  });
+
+  /* animated dash on path */
+  if(path.length>=2){
+    animT=(animT+1)%50;
+    for(let i=0;i<path.length-1;i++){
+      const pu=NODE_POS[path[i]],pv=NODE_POS[path[i+1]];
+      if(!pu||!pv)continue;
+      ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
+      ctx.strokeStyle="rgba(255,255,255,0.3)";ctx.lineWidth=R(5);
+      ctx.setLineDash([R(8),R(12)]);ctx.lineDashOffset=-animT;ctx.stroke();ctx.setLineDash([]);
+    }
+  }
+
+  /* exit nodes */
+  const exits=GRAPH.exit_nodes;
+  exits.forEach(name=>{
+    const pos=NODE_POS[name]||GRAPH.nodes[name];
+    if(!pos)return;
+    const[xr,yr]=pos;
+    const x=X(xr),y=Y(yr);
+    const isBest=name===bExit;
+    const lvl=crowdData[name]?.level||"Low";
+    const clr={Low:"#10b981",Medium:"#f59e0b",High:"#ef4444"}[lvl];
+    const r=R(isBest?20:16);
+
+    if(isBest){
+      const g=0.5+0.5*Math.sin(Date.now()/400);
+      ctx.beginPath();ctx.arc(x,y,r+R(10),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(245,158,11,${g})`;ctx.lineWidth=R(2.5);ctx.stroke();
+    }
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=isBest?"#f59e0b":clr;
+    ctx.shadowColor=isBest?"#f59e0b":clr;ctx.shadowBlur=R(12);
+    ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle="rgba(255,255,255,0.3)";ctx.lineWidth=R(1.5);ctx.stroke();
+
+    /* crowd badge */
+    const bw=R(40),bh=R(14);
+    const bx=x-bw/2,by=y-r-R(20);
+    ctx.fillStyle=clr+"44";
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,R(4));else ctx.rect(bx,by,bw,bh);ctx.fill();
+    ctx.strokeStyle=clr;ctx.lineWidth=R(1);ctx.stroke();
+    ctx.fillStyle=clr;ctx.font=`bold ${R(8)}px Inter`;ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(lvl,x,by+bh/2);
+
+    /* label */
+    ctx.fillStyle=isBest?"#fcd34d":"#94a3b8";
+    ctx.font=`600 ${R(8)}px Inter`;ctx.textBaseline="top";
+    ctx.fillText(name.replace(/_/g," "),x,y+r+R(4));
+
+    /* camera icon */
+    if(name===GRAPH.camera_exit){
+      ctx.font=`${R(10)}px serif`;ctx.fillText("\uD83D\uDCF7",x+r+R(4),y-r);
+    }
+  });
+
+  /* user pin */
+  const upos=NODE_POS[currentUser]||GRAPH.nodes[currentUser];
+  if(upos){
+    const[xr,yr]=upos;const x=X(xr),y=Y(yr);
+    const p=0.5+0.5*Math.sin(Date.now()/500);
+    ctx.beginPath();ctx.arc(x,y,R(10)+p*R(4),0,Math.PI*2);
+    ctx.strokeStyle=`rgba(239,68,68,${0.5*p})`;ctx.lineWidth=R(2);ctx.stroke();
+    ctx.beginPath();ctx.arc(x,y,R(10),0,Math.PI*2);
+    ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=R(15);ctx.fill();ctx.shadowBlur=0;
+    ctx.font=`bold ${R(9)}px Inter`;ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText("YOU",x,y);
+  }
+
+  /* watermark */
+  ctx.fillStyle="rgba(30,47,85,0.7)";ctx.font=`italic ${R(9)}px Inter`;
+  ctx.textAlign="center";ctx.textBaseline="top";
+  ctx.fillText("ISE Department - 3rd Floor | Emergency Exit Map",X(440),Y(8));
+
+  updateSidebar(bExit,bCost,path);
+  requestAnimationFrame(render);
+}
+
+function updateSidebar(best,cost,path){
+  document.getElementById("userLbl").textContent=currentUser.replace(/_/g," ");
+  document.getElementById("bestName").textContent=best?best.replace(/_/g," "):"None";
+  document.getElementById("pathTxt").textContent=path.length?
+    "Path: "+path.map(n=>n.replace(/_/g," ")).join(" \u2192 "):"No path found";
+  const ib=document.getElementById("infoBar");
+  if(best){
+    const lvl=crowdData[best]?.level||"Low";
+    ib.innerHTML=`&#10003; <strong>Go to:</strong> ${best.replace(/_/g," ")} &nbsp;|&nbsp; Crowd: <strong>${lvl}</strong> &nbsp;|&nbsp; Score: <strong>${cost.toFixed(0)}</strong>`;
+    ib.className="info-bar";
+  }else{
+    ib.textContent="No reachable exit found!";ib.className="info-bar warn";
+  }
+  /* update exit pills */
+  document.querySelectorAll(".exit-row").forEach(el=>{
+    const n=el.dataset.exit;
+    const lvl=crowdData[n]?.level||"Low";
+    const pill=el.querySelector(".cpill");
+    if(pill){pill.textContent=lvl;pill.className="cpill "+lvl;}
+    el.className="exit-row"+(n===best?" best":"");
+  });
+}
+
+function buildExitList(){
+  const el=document.getElementById("exitList");
+  el.innerHTML="";
+  (GRAPH.exit_nodes||[]).forEach(name=>{
+    const row=document.createElement("div");
+    row.className="exit-row";row.dataset.exit=name;
+    row.innerHTML=`<span class="exit-row-name">${name.replace(/_/g," ")}</span><span class="cpill Low">Low</span>`;
+    el.appendChild(row);
+  });
+}
+
+function buildLocSelect(){
+  const sel=document.getElementById("locSelect");
+  const nodes=Object.keys(GRAPH.nodes);
+  nodes.forEach(n=>{
+    const o=document.createElement("option");
+    o.value=n;o.textContent=n.replace(/_/g," ");
+    if(n===currentUser)o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function changeLocation(node){
+  if(!node)return;
+  currentUser=node;
+  document.getElementById("userLbl").textContent=node.replace(/_/g," ");
+  history.replaceState({},"","/locate/"+node);
+}
+
+async function init(){
+  try{
+    const r=await fetch("/api/graph");
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    GRAPH=await r.json();
+    buildExitList();
+    buildLocSelect();
+    await pollCrowd();
+    setInterval(pollCrowd,POLL_MS);
+    resizeCanvas();
+    window.addEventListener("resize",()=>{resizeCanvas();});
+    render();
+    document.getElementById("infoBar").textContent="";
+  }catch(e){
+    document.getElementById("infoBar").textContent="Connecting to server...";
+    setTimeout(init, 3000);
+  }
+}
+
+async function pollCrowd(){
+  try{const r=await fetch("/api/crowd");crowdData=await r.json();}catch(_){}
+}
+
+init();
+</script>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  PDR — Pedestrian Dead Reckoning Engine
+//  Uses: DeviceMotion (steps) + DeviceOrientation (compass)
+//  Fallback: Manual arrow-pad for desktop/demo
+// ═══════════════════════════════════════════════
+
+const PDR = {
+  active: false,
+  // Position in DESIGN coordinates (same space as NODE_POS)
+  pos: {x: 0, y: 0},
+  // Step detection
+  stepCount: 0,
+  lastMag: 0,
+  stepCooldown: false,
+  STEP_THRESH: 10,       // m/s² spike to count as step
+  STEP_LEN: 22,          // design units per step (~1m on floor)
+  // Compass
+  heading: 0,            // degrees, magnetic
+  northOffset: 0,        // calibration: magnetic north → map north
+  calibrated: false,
+  // Drift tracking
+  stepsSinceCorrection: 0,
+  // Trail
+  trail: [],
+  MAX_TRAIL: 40,
+  // Sensor mode
+  sensorMode: false,     // true = real sensors, false = d-pad
+};
+
+// ── UTILS ──────────────────────────────────────
+
+function showToast(msg, dur=2500) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), dur);
+}
+
+function setWalkStatus(html) {
+  document.getElementById("walkStatus").innerHTML = html;
+}
+
+// Project a point onto the nearest graph edge segment
+function projectOnSegment(px, py, ax, ay, bx, by) {
+  const dx = bx-ax, dy = by-ay;
+  const len2 = dx*dx + dy*dy;
+  if (len2 === 0) return {x:ax, y:ay, t:0};
+  let t = ((px-ax)*dx + (py-ay)*dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  return {x: ax + t*dx, y: ay + t*dy, t};
+}
+
+function snapToPath(x, y) {
+  if (!GRAPH) return {x, y};
+  let minDist = Infinity, best = {x, y};
+  GRAPH.edges.forEach(([u, v]) => {
+    const pu = NODE_POS[u] || GRAPH.nodes[u];
+    const pv = NODE_POS[v] || GRAPH.nodes[v];
+    if (!pu || !pv) return;
+    const proj = projectOnSegment(x, y, pu[0], pu[1], pv[0], pv[1]);
+    const dist = Math.hypot(x - proj.x, y - proj.y);
+    if (dist < minDist) { minDist = dist; best = proj; }
+  });
+  // Only snap if reasonably close to a path (within 80 design units)
+  return minDist < 80 ? best : {x, y};
+}
+
+function findNearestNode(x, y, threshold=50) {
+  let minD = threshold, found = null;
+  Object.entries(NODE_POS).forEach(([name, [nx, ny]]) => {
+    const d = Math.hypot(x-nx, y-ny);
+    if (d < minD) { minD = d; found = name; }
+  });
+  return found;
+}
+
+// ── MOVEMENT CORE ────────────────────────────────
+
+function applyStep(headingDeg) {
+  // headingDeg = degrees clockwise from map-north
+  // Map north = -y direction in design space
+  const rad = (headingDeg * Math.PI) / 180;
+  const dx =  PDR.STEP_LEN * Math.sin(rad);
+  const dy = -PDR.STEP_LEN * Math.cos(rad);
+
+  let nx = PDR.pos.x + dx;
+  let ny = PDR.pos.y + dy;
+
+  // Clamp to building bounds (design space)
+  nx = Math.max(10, Math.min(870, nx));
+  ny = Math.max(10, Math.min(570, ny));
+
+  // Snap to nearest corridor/edge
+  const snapped = snapToPath(nx, ny);
+  PDR.pos = snapped;
+
+  // Add to trail
+  PDR.trail.push({...PDR.pos});
+  if (PDR.trail.length > PDR.MAX_TRAIL) PDR.trail.shift();
+
+  PDR.stepCount++;
+  PDR.stepsSinceCorrection++;
+
+  // Check if near a node — auto-snap and announce
+  const near = findNearestNode(PDR.pos.x, PDR.pos.y, 40);
+  if (near && near !== currentUser) {
+    currentUser = near;
+    document.getElementById("userLbl").textContent = near.replace(/_/g," ");
+    const sel = document.getElementById("locSelect");
+    if (sel) sel.value = near;
+    showToast("📍 Arrived: " + near.replace(/_/g," "));
+    PDR.stepsSinceCorrection = 0;
+    PDR.trail = [];
+  }
+
+  updateWalkStatus();
+}
+
+function updateWalkStatus() {
+  if (!PDR.active) return;
+  const driftWarning = PDR.stepsSinceCorrection > 30
+    ? `<br><span class="drift">⚠ Drift: scan QR to correct</span>` : "";
+  setWalkStatus(
+    `<span class="walk-status active">🚶 Walking...</span><br>` +
+    `Steps: <span class="steps">${PDR.stepCount}</span> &nbsp;` +
+    (PDR.sensorMode
+      ? `Heading: <span class="heading">${Math.round(PDR.heading)}°</span>`
+      : `Mode: <span class="heading">Manual pad</span>`) +
+    driftWarning
+  );
+}
+
+// ── DRAW WALKING OVERLAY ─────────────────────────
+// Called from render() — draws trail + confidence circle
+function drawWalkOverlay() {
+  if (!PDR.active && PDR.trail.length === 0) return;
+
+  // Trail
+  if (PDR.trail.length > 1) {
+    ctx.beginPath();
+    ctx.moveTo(X(PDR.trail[0].x), Y(PDR.trail[0].y));
+    PDR.trail.forEach((p, i) => {
+      if (i > 0) ctx.lineTo(X(p.x), Y(p.y));
+    });
+    ctx.strokeStyle = "rgba(124,58,237,0.5)";
+    ctx.lineWidth = R(3);
+    ctx.setLineDash([R(3), R(4)]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Free-moving dot (shown when NOT snapped to a node)
+  const nearNode = findNearestNode(PDR.pos.x, PDR.pos.y, 35);
+  if (!nearNode && PDR.active) {
+    const drift = Math.min(PDR.stepsSinceCorrection / 30, 1);
+    // Confidence circle (grows with drift)
+    ctx.beginPath();
+    ctx.arc(X(PDR.pos.x), Y(PDR.pos.y), R(10 + drift*20), 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(239,68,68,${0.15 + drift*0.1})`;
+    ctx.lineWidth = R(1);
+    ctx.stroke();
+
+    // Main dot
+    ctx.beginPath();
+    ctx.arc(X(PDR.pos.x), Y(PDR.pos.y), R(10), 0, Math.PI*2);
+    ctx.fillStyle = "#ef4444";
+    ctx.shadowColor = "#ef4444"; ctx.shadowBlur = R(14);
+    ctx.fill(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = R(1.5); ctx.stroke();
+
+    // "YOU" label
+    ctx.font = `bold ${R(9)}px Inter`;
+    ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("YOU", X(PDR.pos.x), Y(PDR.pos.y));
+  }
+}
+
+// Expose for use in render() — patch render to call this
+const _origRender = window._renderPatchDone;
+
+// ── SENSOR SETUP ────────────────────────────────
+
+function requestSensors() {
+  // iOS 13+ requires explicit permission for DeviceMotion/Orientation
+  if (typeof DeviceMotionEvent !== "undefined" &&
+      typeof DeviceMotionEvent.requestPermission === "function") {
+    DeviceMotionEvent.requestPermission().then(state => {
+      if (state === "granted") {
+        attachSensors();
+      } else {
+        fallbackManualMode();
+      }
+    }).catch(() => fallbackManualMode());
+  } else if (typeof DeviceMotionEvent !== "undefined") {
+    // Android / other — no permission needed
+    attachSensors();
+  } else {
+    fallbackManualMode();
+  }
+}
+
+function attachSensors() {
+  PDR.sensorMode = true;
+  window.addEventListener("devicemotion", onDeviceMotion, {passive:true});
+  window.addEventListener("deviceorientation", onDeviceOrientation, {passive:true});
+  showToast("✅ Motion sensors active!");
+  document.getElementById("compassRing").style.display = "flex";
+}
+
+function fallbackManualMode() {
+  PDR.sensorMode = false;
+  showToast("📱 No sensors — use arrow pad below");
+  document.getElementById("dirPad").style.display = "grid";
+  setWalkStatus("Use ↑↓←→ buttons to move on map");
+}
+
+function onDeviceMotion(event) {
+  if (!PDR.active) return;
+  const acc = event.acceleration || event.accelerationIncludingGravity;
+  if (!acc) return;
+  const mag = Math.sqrt((acc.x||0)**2 + (acc.y||0)**2 + (acc.z||0)**2);
+
+  // Step detection: look for rising edge crossing threshold
+  if (mag > PDR.STEP_THRESH && PDR.lastMag <= PDR.STEP_THRESH && !PDR.stepCooldown) {
+    PDR.stepCooldown = true;
+    const mapHeading = ((PDR.heading - PDR.northOffset) + 360) % 360;
+    applyStep(mapHeading);
+    setTimeout(() => { PDR.stepCooldown = false; }, 350);
+  }
+  PDR.lastMag = mag;
+}
+
+function onDeviceOrientation(event) {
+  // webkitCompassHeading = iOS (degrees from magnetic north, clockwise)
+  // alpha = Android (degrees, counter-clockwise from arbitrary reference)
+  let h = 0;
+  if (event.webkitCompassHeading != null) {
+    h = event.webkitCompassHeading;
+  } else if (event.alpha != null) {
+    h = (360 - event.alpha) % 360;
+  }
+  PDR.heading = h;
+
+  // Rotate compass SVG
+  const svg = document.getElementById("compassSvg");
+  if (svg) svg.style.transform = `rotate(${-h}deg)`;
+}
+
+// ── CALIBRATION ──────────────────────────────────
+// User stands at a known spot facing toward the map's "North" exit
+// Records the current compass heading as the offset
+
+function startCalibration() {
+  if (!PDR.sensorMode && PDR.active) {
+    showToast("Calibration only needed for sensor mode");
+    return;
+  }
+  // Request sensors if not yet done
+  if (!PDR.sensorMode) {
+    requestSensors();
+    setTimeout(() => {
+      if (PDR.sensorMode) doCalibration();
+    }, 1000);
+  } else {
+    doCalibration();
+  }
+}
+
+function doCalibration() {
+  PDR.northOffset = PDR.heading;
+  PDR.calibrated = true;
+  showToast(`✅ North set! Offset: ${Math.round(PDR.northOffset)}°`, 3000);
+  document.getElementById("calibBtn").textContent = "✅ Calibrated (tap to redo)";
+}
+
+// ── MANUAL PAD ───────────────────────────────────
+// headingDeg: 0=up, 90=right, 180=down, 270=left, -1=snap to nearest node
+
+function manualStep(headingDeg) {
+  if (!PDR.active) {
+    showToast("Start Walking Mode first");
+    return;
+  }
+  if (headingDeg === -1) {
+    // Snap to nearest node
+    const near = findNearestNode(PDR.pos.x, PDR.pos.y, 200);
+    if (near) {
+      currentUser = near;
+      PDR.pos = {x: NODE_POS[near][0], y: NODE_POS[near][1]};
+      PDR.stepsSinceCorrection = 0;
+      PDR.trail = [];
+      showToast("📍 Snapped to: " + near.replace(/_/g," "));
+    }
+    return;
+  }
+  applyStep(headingDeg);
+}
+
+// ── TOGGLE WALK MODE ─────────────────────────────
+
+function toggleWalkMode() {
+  PDR.active = !PDR.active;
+  const btn = document.getElementById("walkBtn");
+
+  if (PDR.active) {
+    // Start: set position from current user node
+    const startPos = NODE_POS[currentUser];
+    if (!startPos) {
+      showToast("⚠ Please select your location first");
+      PDR.active = false;
+      return;
+    }
+    PDR.pos = {x: startPos[0], y: startPos[1]};
+    PDR.stepCount = 0;
+    PDR.stepsSinceCorrection = 0;
+    PDR.trail = [];
+
+    btn.textContent = "⏹ Stop Walking Mode";
+    btn.className = "walk-btn stop";
+
+    // Try real sensors first
+    requestSensors();
+    showToast("🚶 Walking mode ON — move your phone!");
+
+    // Always show d-pad (useful as fallback)
+    setTimeout(() => {
+      if (!PDR.sensorMode) {
+        document.getElementById("dirPad").style.display = "grid";
+      } else {
+        document.getElementById("dirPad").style.display = "grid"; // show both
+        document.getElementById("compassRing").style.display = "flex";
+      }
+    }, 800);
+
+  } else {
+    // Stop
+    btn.textContent = "🚶 Start Walking Mode";
+    btn.className = "walk-btn start";
+    window.removeEventListener("devicemotion", onDeviceMotion);
+    window.removeEventListener("deviceorientation", onDeviceOrientation);
+    PDR.sensorMode = false;
+    PDR.trail = [];
+    document.getElementById("dirPad").style.display = "none";
+    document.getElementById("compassRing").style.display = "none";
+    setWalkStatus("Scan QR or pick location, then start walking");
+    showToast("Walking mode OFF");
+  }
+}
+
+// ── PATCH render() to include walk overlay ───────
+// We wrap the global render loop to add our overlay
+
+const _baseRender = render; // save original
+(function patchRender() {
+  const origAnim = requestAnimationFrame;
+  // inject drawWalkOverlay call after exit nodes are drawn, before watermark
+  // We do this by monkeypatching ctx.fillText for the watermark line
+  // Simpler: override the animframe loop
+  let patched = false;
+  const checkAndPatch = setInterval(() => {
+    if (typeof render === "function" && !patched) {
+      patched = true;
+      clearInterval(checkAndPatch);
+      // Patch: after render draws watermark, draw walk overlay on top
+      const origFill = ctx.fillText.bind(ctx);
+      // Instead, hook into render's RAF loop cleanly:
+      // We'll just draw in a separate overlay RAF
+      function walkOverlayLoop() {
+        drawWalkOverlay();
+        requestAnimationFrame(walkOverlayLoop);
+      }
+      walkOverlayLoop();
+    }
+  }, 100);
+})();
+
+// Also update currentUser position in Dijkstra when PDR moves it
+// Override the position used for Dijkstra to be PDR.pos when in walk mode
+const _origBuildAdj = buildAdj;
+</script>
+
+<!-- NAVIGATION OVERLAY -->
+<div class="nav-overlay" id="navOverlay">
+  <!-- Current instruction (top) -->
+  <div class="nav-top">
+    <div class="nav-street" id="navStreet">Navigating from <span id="navFrom">--</span></div>
+    <div class="nav-arrow-row">
+      <div class="nav-arrow" id="navArrow">&#8593;</div>
+      <div class="nav-instruction">
+        <div class="nav-action" id="navAction">Computing route...</div>
+        <div class="nav-target" id="navTarget"></div>
+        <div class="nav-dist" id="navDist"></div>
+      </div>
+    </div>
+    <div class="nav-next" id="navNextCard" style="display:none">
+      <div class="nav-next-icon" id="navNextIcon">&#8593;</div>
+      <div class="nav-next-txt">Then: <strong id="navNextTxt"></strong></div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="nav-progress-wrap">
+    <div class="nav-prog-label">
+      <span id="navProgLabel">Step 1 of --</span>
+      <span id="navProgDist">--m remaining</span>
+    </div>
+    <div class="nav-prog-bar"><div class="nav-prog-fill" id="navProgFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Mini map canvas -->
+  <div class="nav-map-wrap"><canvas id="navCanvas"></canvas></div>
+
+  <!-- Step-by-step list -->
+  <div class="nav-steps-wrap">
+    <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 0 6px">All Steps</div>
+    <div id="navStepList"></div>
+  </div>
+
+  <!-- Bottom buttons -->
+  <div class="nav-bottom">
+    <button class="nav-close-btn" onclick="closeNavigation()">&#10005; Close</button>
+    <button class="nav-demo-btn" id="navDemoBtn" onclick="toggleDemoWalk()">&#9654; Auto Demo Walk</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  NAVIGATION ENGINE — Turn-by-Turn + Auto Demo Walk
+// ═══════════════════════════════════════════════
+
+const NAV = {
+  steps: [],          // [{arrow, action, target, dist, node}]
+  currentStep: 0,
+  totalDist: 0,
+  demoRunning: false,
+  demoInterval: null,
+  demoPos: null,      // {x,y} animated position
+  demoSegT: 0,        // interpolation 0→1 along current segment
+  demoAnimFrame: null,
+};
+
+// Arrow emoji → heading text
+const ARROWS = {
+  "↑":"Go Straight", "→":"Turn Right", "←":"Turn Left",
+  "↗":"Bear Right",  "↖":"Bear Left",  "↓":"Turn Around",
+  "🚨":"EMERGENCY EXIT", "🏁":"You have arrived"
+};
+
+// ── DIRECTION CALCULATION ─────────────────────────
+
+function getAngle(fromPos, toPos) {
+  // Returns angle in degrees: 0=up, 90=right, 180=down, 270=left
+  const dx = toPos[0] - fromPos[0];
+  const dy = toPos[1] - fromPos[1]; // y+ = down in canvas
+  let a = Math.atan2(dx, -dy) * 180 / Math.PI;
+  if (a < 0) a += 360;
+  return a;
+}
+
+function getTurnArrow(inAngle, outAngle) {
+  let diff = outAngle - inAngle;
+  while (diff > 180) diff -= 360;
+  while (diff < -180) diff += 360;
+  if (Math.abs(diff) < 25)  return "↑";
+  if (diff > 25 && diff < 65)  return "↗";
+  if (diff >= 65 && diff < 135) return "→";
+  if (diff >= 135) return "↓";
+  if (diff < -25 && diff > -65) return "↖";
+  if (diff <= -65 && diff > -135) return "←";
+  return "↓";
+}
+
+function getNodeLabel(name) {
+  const types = GRAPH ? GRAPH.nodes[name] : null;
+  if (!types) return name.replace(/_/g," ");
+  const t = types[2];
+  if (t==="exit"||t==="staircase") return "\uD83D\uDEAA " + name.replace(/_/g," ");
+  if (t==="room") return "\uD83C\uDFEB " + name.replace(/_/g," ");
+  return name.replace(/_/g," ");
+}
+
+function getEdgeDist(u, v) {
+  const edge = GRAPH.edges.find(([a,b])=>(a===u&&b===v)||(a===v&&b===u));
+  return edge ? edge[2] : 10;
+}
+
+// ── BUILD STEP LIST FROM PATH ──────────────────────
+
+function buildNavSteps(path) {
+  const steps = [];
+  if (!path || path.length < 2) return steps;
+
+  let prevAngle = null;
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const u = path[i], v = path[i+1];
+    const pu = NODE_POS[u] || GRAPH.nodes[u];
+    const pv = NODE_POS[v] || GRAPH.nodes[v];
+    if (!pu || !pv) continue;
+
+    const outAngle = getAngle(pu, pv);
+    let arrow = "↑";
+
+    if (i === 0) {
+      // First step — cardinal direction
+      const a = outAngle;
+      if (a < 45 || a >= 315) arrow = "↑";
+      else if (a < 135) arrow = "→";
+      else if (a < 225) arrow = "↓";
+      else arrow = "←";
+    } else {
+      arrow = getTurnArrow(prevAngle, outAngle);
+    }
+
+    const dist = getEdgeDist(u, v);
+    const isExit = GRAPH.exit_nodes.includes(v);
+
+    steps.push({
+      arrow,
+      action: i === 0 ? "Head " + cardinalName(outAngle) : ARROWS[arrow] || arrow,
+      target: getNodeLabel(v),
+      dist,
+      node: v,
+      isExit,
+      fromPos: pu,
+      toPos: pv,
+    });
+
+    prevAngle = outAngle;
+  }
+
+  // Final step
+  if (steps.length > 0) {
+    steps[steps.length-1].arrow = "\uD83D\uDEA8";
+    steps[steps.length-1].action = "EMERGENCY EXIT";
+  }
+
+  return steps;
+}
+
+function cardinalName(angle) {
+  if (angle < 45 || angle >= 315) return "North";
+  if (angle < 135) return "East";
+  if (angle < 225) return "South";
+  return "West";
+}
+
+// ── OPEN / CLOSE NAVIGATION ────────────────────────
+
+function openNavigation() {
+  const overlay = document.getElementById("navOverlay");
+  overlay.classList.add("active");
+
+  // Build steps from current best path
+  const adj = buildAdj();
+  const {dist, prev} = dijkstra(currentUser, adj);
+  let bExit = null, bCost = Infinity;
+  GRAPH.exit_nodes.forEach(e => { if(dist[e]<bCost){bCost=dist[e];bExit=e;} });
+  const path = bExit ? getPath(prev, currentUser, bExit) : [];
+
+  NAV.steps = buildNavSteps(path);
+  NAV.currentStep = 0;
+  NAV.totalDist = NAV.steps.reduce((s, st) => s + st.dist, 0);
+
+  document.getElementById("navFrom").textContent = currentUser.replace(/_/g," ");
+  renderNavStepList();
+  updateNavDisplay();
+  renderNavMiniMap(path);
+}
+
+function closeNavigation() {
+  document.getElementById("navOverlay").classList.remove("active");
+  stopDemoWalk();
+}
+
+// ── NAV DISPLAY ────────────────────────────────────
+
+function updateNavDisplay() {
+  const step = NAV.steps[NAV.currentStep];
+  if (!step) {
+    document.getElementById("navAction").textContent = "\uD83C\uDFC1 You have arrived!";
+    document.getElementById("navArrow").textContent = "\uD83C\uDFC1";
+    document.getElementById("navTarget").textContent = "";
+    document.getElementById("navDist").textContent = "";
+    document.getElementById("navNextCard").style.display = "none";
+    document.getElementById("navProgFill").style.width = "100%";
+    document.getElementById("navProgLabel").textContent = "Arrived!";
+    document.getElementById("navProgDist").textContent = "0m remaining";
+    return;
+  }
+
+  document.getElementById("navArrow").textContent = step.arrow;
+  document.getElementById("navAction").textContent = step.action;
+  document.getElementById("navTarget").textContent = "→ " + step.target;
+  document.getElementById("navDist").textContent = "~" + step.dist + " meters";
+
+  // Progress
+  const stepsLeft = NAV.steps.length - NAV.currentStep;
+  const distLeft = NAV.steps.slice(NAV.currentStep).reduce((s,st)=>s+st.dist,0);
+  document.getElementById("navProgLabel").textContent = `Step ${NAV.currentStep+1} of ${NAV.steps.length}`;
+  document.getElementById("navProgDist").textContent = `~${distLeft}m remaining`;
+  const pct = Math.round((1 - distLeft/NAV.totalDist) * 100);
+  document.getElementById("navProgFill").style.width = pct + "%";
+
+  // Next step preview
+  const nextStep = NAV.steps[NAV.currentStep + 1];
+  if (nextStep) {
+    document.getElementById("navNextCard").style.display = "flex";
+    document.getElementById("navNextIcon").textContent = nextStep.arrow;
+    document.getElementById("navNextTxt").textContent = nextStep.action + " → " + nextStep.target;
+  } else {
+    document.getElementById("navNextCard").style.display = "none";
+  }
+
+  // Update step list highlights
+  document.querySelectorAll(".nav-step-item").forEach((el, i) => {
+    el.className = "nav-step-item" +
+      (i === NAV.currentStep ? " current" : i < NAV.currentStep ? " done" : "");
+  });
+
+  // Scroll current step into view
+  const curEl = document.querySelector(".nav-step-item.current");
+  if (curEl) curEl.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function renderNavStepList() {
+  const list = document.getElementById("navStepList");
+  list.innerHTML = NAV.steps.map((step, i) => `
+    <div class="nav-step-item${i===0?" current":""}">
+      <div class="nav-step-arrow">${step.arrow}</div>
+      <div class="nav-step-info">
+        <div class="nav-step-action">${step.action}</div>
+        <div class="nav-step-sub">${step.target} &nbsp;&bull;&nbsp; ~${step.dist}m</div>
+      </div>
+      ${step.isExit ? '<span class="nav-step-badge">EXIT</span>' : ""}
+    </div>
+  `).join("");
+}
+
+// ── MINI MAP in NAV OVERLAY ────────────────────────
+
+function renderNavMiniMap(path) {
+  const nc = document.getElementById("navCanvas");
+  const nwrap = nc.parentElement;
+  nc.width = nwrap.clientWidth;
+  nc.height = nwrap.clientHeight;
+  const nctx = nc.getContext("2d");
+
+  const nDW = 880, nDH = 580;
+  const nsx = nc.width/nDW, nsy = nc.height/nDH;
+  const NX = x => x*nsx, NY = y => y*nsy, NR = r => r*Math.min(nsx,nsy);
+
+  // Background
+  nctx.fillStyle = "#080c1e";
+  nctx.fillRect(0,0,nc.width,nc.height);
+
+  // Path segments highlighted
+  const pathSet = new Set();
+  for(let i=0;i<path.length-1;i++){
+    pathSet.add(path[i]+"|"+path[i+1]);
+    pathSet.add(path[i+1]+"|"+path[i]);
+  }
+
+  GRAPH.edges.forEach(([u,v,d]) => {
+    const pu = NODE_POS[u]||GRAPH.nodes[u];
+    const pv = NODE_POS[v]||GRAPH.nodes[v];
+    if(!pu||!pv) return;
+    const onP = pathSet.has(u+"|"+v);
+    nctx.beginPath();
+    nctx.moveTo(NX(pu[0]),NY(pu[1]));
+    nctx.lineTo(NX(pv[0]),NY(pv[1]));
+    nctx.strokeStyle = onP ? "#f59e0b" : "#1e3a5f";
+    nctx.lineWidth = onP ? NR(4) : NR(1);
+    nctx.setLineDash(onP?[]:[NR(3),NR(4)]);
+    nctx.shadowColor = onP?"#f59e0b":"transparent";
+    nctx.shadowBlur = onP?NR(6):0;
+    nctx.stroke();
+    nctx.setLineDash([]);
+    nctx.shadowBlur=0;
+  });
+
+  // Directional arrows on path
+  for(let i=0;i<path.length-1;i++){
+    const pu = NODE_POS[path[i]]||GRAPH.nodes[path[i]];
+    const pv = NODE_POS[path[i+1]]||GRAPH.nodes[path[i+1]];
+    if(!pu||!pv) continue;
+    const mx = NX((pu[0]+pv[0])/2), my = NY((pu[1]+pv[1])/2);
+    const angle = Math.atan2(pv[1]-pu[1], pv[0]-pu[0]);
+    nctx.save();
+    nctx.translate(mx,my);
+    nctx.rotate(angle);
+    nctx.fillStyle="#f59e0b";
+    nctx.beginPath();
+    nctx.moveTo(NR(6),0);
+    nctx.lineTo(-NR(4),-NR(3));
+    nctx.lineTo(-NR(4),NR(3));
+    nctx.closePath();
+    nctx.fill();
+    nctx.restore();
+  }
+
+  // Nodes
+  path.forEach((name,i) => {
+    const pos = NODE_POS[name]||GRAPH.nodes[name];
+    if(!pos) return;
+    const isStart = i===0, isEnd = i===path.length-1;
+    nctx.beginPath();
+    nctx.arc(NX(pos[0]),NY(pos[1]),NR(isStart||isEnd?12:7),0,Math.PI*2);
+    nctx.fillStyle = isEnd?"#f59e0b":isStart?"#ef4444":"rgba(245,158,11,0.5)";
+    nctx.shadowColor = isEnd?"#f59e0b":isStart?"#ef4444":"transparent";
+    nctx.shadowBlur = NR(8);
+    nctx.fill();
+    nctx.shadowBlur=0;
+    // Label
+    nctx.fillStyle="#fff";
+    nctx.font=`bold ${NR(8)}px Inter`;
+    nctx.textAlign="center";
+    nctx.textBaseline="middle";
+    nctx.fillText(isStart?"YOU":isEnd?"\uD83D\uDEA8":"",NX(pos[0]),NY(pos[1]));
+  });
+
+  // Store for demo walk animation
+  NAV._miniCtx = nctx;
+  NAV._miniCanvas = nc;
+  NAV._miniPath = path;
+  NAV._nsx = nsx; NAV._nsy = nsy;
+}
+
+// ── AUTO DEMO WALK ─────────────────────────────────
+
+function toggleDemoWalk() {
+  if (NAV.demoRunning) {
+    stopDemoWalk();
+  } else {
+    startDemoWalk();
+  }
+}
+
+function startDemoWalk() {
+  if (NAV.steps.length === 0) { showToast("No route to walk"); return; }
+  NAV.demoRunning = true;
+  NAV.currentStep = 0;
+  NAV.demoPos = {...NAV.steps[0].fromPos};
+  const btn = document.getElementById("navDemoBtn");
+  btn.textContent = "\u23F9 Stop Demo";
+  btn.className = "nav-demo-btn stop";
+
+  // Animate through steps
+  walkDemoStep(0);
+}
+
+function walkDemoStep(stepIdx) {
+  if (!NAV.demoRunning || stepIdx >= NAV.steps.length) {
+    finishDemoWalk(); return;
+  }
+
+  NAV.currentStep = stepIdx;
+  updateNavDisplay();
+
+  const step = NAV.steps[stepIdx];
+  const fromPos = step.fromPos;
+  const toPos   = step.toPos;
+
+  // Update main map user position (currentUser = from node of this step)
+  if (stepIdx === 0) {
+    // already at start
+  } else {
+    // Move main map dot to fromPos
+    const prevNode = NAV._miniPath[stepIdx];
+    if (prevNode) {
+      currentUser = prevNode;
+      const sel = document.getElementById("locSelect");
+      if (sel) sel.value = prevNode;
+      document.getElementById("userLbl").textContent = prevNode.replace(/_/g," ");
+    }
+  }
+
+  // Smooth interpolation: move dot from fromPos to toPos over (dist * 40)ms
+  const duration = Math.max(1200, step.dist * 40); // ms
+  const startTime = performance.now();
+
+  function animFrame(now) {
+    if (!NAV.demoRunning) return;
+    const t = Math.min((now - startTime) / duration, 1);
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out
+
+    // Update PDR position for overlay drawing
+    PDR.pos = {
+      x: fromPos[0] + (toPos[0]-fromPos[0]) * ease,
+      y: fromPos[1] + (toPos[1]-fromPos[1]) * ease,
+    };
+    PDR.active = true;
+
+    if (t < 1) {
+      NAV.demoAnimFrame = requestAnimationFrame(animFrame);
+    } else {
+      // Arrived at next node
+      PDR.pos = {...toPos};
+      // Update currentUser to toNode
+      const toNode = NAV._miniPath[stepIdx+1];
+      if (toNode) {
+        currentUser = toNode;
+        const sel = document.getElementById("locSelect");
+        if (sel) sel.value = toNode;
+        document.getElementById("userLbl").textContent = toNode.replace(/_/g," ");
+        showToast("\uD83D\uDCCD Arrived: " + toNode.replace(/_/g," "));
+      }
+      // Pause 800ms then next step
+      setTimeout(() => walkDemoStep(stepIdx+1), 800);
+    }
+  }
+
+  NAV.demoAnimFrame = requestAnimationFrame(animFrame);
+}
+
+function finishDemoWalk() {
+  NAV.demoRunning = false;
+  NAV.currentStep = NAV.steps.length; // past end
+  const btn = document.getElementById("navDemoBtn");
+  btn.textContent = "\uD83C\uDFC1 Arrived! Walk Again";
+  btn.className = "nav-demo-btn";
+  btn.onclick = () => { NAV.currentStep=0; startDemoWalk(); };
+  showToast("\uD83D\uDEA8 You have reached the exit!", 3500);
+  updateNavDisplay();
+}
+
+function stopDemoWalk() {
+  NAV.demoRunning = false;
+  PDR.active = false;
+  if (NAV.demoAnimFrame) cancelAnimationFrame(NAV.demoAnimFrame);
+  const btn = document.getElementById("navDemoBtn");
+  btn.textContent = "\u25B6 Auto Demo Walk";
+  btn.className = "nav-demo-btn";
+  btn.onclick = toggleDemoWalk;
+}
+
+// Refresh navigation instructions when crowd data changes (separate interval, no override)
+setInterval(async () => {
+  if (document.getElementById("navOverlay") &&
+      document.getElementById("navOverlay").classList.contains("active") &&
+      !NAV.demoRunning && GRAPH) {
+    openNavigation();
+  }
+}, 5000);
+
+</script>
+</body>
+</html>
+

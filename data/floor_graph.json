@@ -1,0 +1,48 @@
+{
+  "nodes": {
+    "Main_Entrance":   [100, 460, "exit"],
+    "Lobby":           [100, 360, "corridor"],
+    "CorridorMain":    [280, 360, "corridor"],
+    "CorridorNorth":   [280, 200, "corridor"],
+    "CorridorSouth":   [280, 500, "corridor"],
+    "CorridorEast":    [500, 360, "corridor"],
+
+    "HOD_Cabin":       [100, 200, "room"],
+    "Staff_Room":      [280, 100, "room"],
+    "Lab_1":           [500, 100, "room"],
+    "Lab_2":           [680, 200, "room"],
+    "Classroom_1":     [500, 250, "room"],
+    "Classroom_2":     [680, 360, "room"],
+    "Classroom_3":     [500, 500, "room"],
+    "Server_Room":     [100, 280, "room"],
+
+    "Staircase_North": [280, 60,  "staircase"],
+    "Exit_East":       [820, 360, "exit"],
+    "Exit_South":      [280, 580, "exit"],
+    "Exit_West":       [60,  360, "exit"]
+  },
+  "edges": [
+    ["Main_Entrance",   "Lobby",           8],
+    ["Lobby",           "CorridorMain",    20],
+    ["Lobby",           "Server_Room",     8],
+    ["Lobby",           "Exit_West",       5],
+    ["Server_Room",     "HOD_Cabin",       10],
+    ["HOD_Cabin",       "CorridorNorth",   18],
+    ["CorridorMain",    "CorridorNorth",   16],
+    ["CorridorMain",    "CorridorSouth",   14],
+    ["CorridorMain",    "CorridorEast",    22],
+    ["CorridorNorth",   "Staff_Room",      12],
+    ["CorridorNorth",   "Staircase_North", 14],
+    ["CorridorNorth",   "Classroom_1",     12],
+    ["Staff_Room",      "Lab_1",           14],
+    ["Lab_1",           "Lab_2",           18],
+    ["Lab_2",           "CorridorEast",    16],
+    ["Classroom_1",     "Classroom_2",     16],
+    ["Classroom_2",     "CorridorEast",    12],
+    ["CorridorEast",    "Exit_East",       10],
+    ["CorridorSouth",   "Classroom_3",     12],
+    ["CorridorSouth",   "Exit_South",      10]
+  ],
+  "exit_nodes": ["Main_Entrance", "Staircase_North", "Exit_East", "Exit_South", "Exit_West"],
+  "camera_exit": "Main_Entrance"
+}

@@ -1,0 +1,15 @@
+{
+  "HOD_Cabin":    0,
+  "Staff_Room":   12,
+  "Lab_1":        8,
+  "Lab_2":        5,
+  "Classroom_1":  22,
+  "Classroom_2":  18,
+  "Classroom_3":  30,
+  "Server_Room":  2,
+  "Lobby":        6,
+  "CorridorMain": 0,
+  "CorridorNorth":0,
+  "CorridorSouth":0,
+  "CorridorEast": 0
+}

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Panel &mdash; Emergency Exit System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08091a;--card:#0f1629;--panel:#111e38;--border:#1e2f55;
+  --red:#e94560;--purple:#7c3aed;--green:#10b981;--amber:#f59e0b;
+  --blue:#3b82f6;--text:#e2e8f0;--muted:#64748b;
+  --low:#10b981;--med:#f59e0b;--high:#ef4444;
+}
+html,body{min-height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+header{background:var(--panel);border-bottom:2px solid var(--red);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+header h1{font-size:.95rem;font-weight:800;color:var(--red);}
+header p{font-size:.65rem;color:var(--muted);margin-top:1px;}
+.badge-live{display:flex;align-items:center;gap:6px;background:#0d1f12;border:1px solid var(--green);border-radius:20px;padding:5px 14px;font-size:.72rem;font-weight:700;color:var(--green);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.main{max-width:1300px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:1fr 320px;gap:24px;}
+@media(max-width:900px){.main{grid-template-columns:1fr;}}
+
+h2{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.stat-v{font-size:1.6rem;font-weight:900;line-height:1;}
+.stat-l{font-size:.65rem;color:var(--muted);margin-top:4px;}
+.stat.red .stat-v{color:var(--red);}
+.stat.green .stat-v{color:var(--green);}
+.stat.amber .stat-v{color:var(--amber);}
+.stat.blue .stat-v{color:var(--blue);}
+
+/* SECTIONS */
+.section-title{font-size:.85rem;font-weight:700;border-left:3px solid var(--red);padding-left:10px;margin-bottom:14px;}
+
+/* EXIT CARDS */
+.exits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:28px;}
+.exit-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color .3s;}
+.exit-card.cam{border-color:var(--purple);}
+.exit-card.danger{border-color:var(--high);}
+.ec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ec-name{font-size:.9rem;font-weight:700;}
+.tags{display:flex;gap:6px;}
+.tag{font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:10px;}
+.tag-exit{background:#052e16;color:var(--green);border:1px solid var(--green);}
+.tag-cam{background:#1a0d2e;color:#a78bfa;border:1px solid var(--purple);}
+
+/* NUMERIC SLIDER */
+.slider-wrap{margin-bottom:10px;}
+.slider-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.slider-label{font-size:.72rem;color:var(--muted);}
+.slider-val{display:flex;align-items:center;gap:8px;}
+.count-input{width:62px;background:#0a1020;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.9rem;font-weight:700;text-align:center;padding:3px 6px;}
+.count-input:focus{outline:none;border-color:var(--blue);}
+.level-badge{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;}
+.level-badge.Low{background:#052e16;color:var(--low);border:1px solid var(--low);}
+.level-badge.Medium{background:#1c1200;color:var(--med);border:1px solid var(--med);}
+.level-badge.High{background:#200;color:var(--high);border:1px solid var(--high);}
+input[type=range]{width:100%;appearance:none;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--blue);border:2px solid #fff;cursor:pointer;box-shadow:0 0 6px #3b82f644;}
+.range-marks{display:flex;justify-content:space-between;margin-top:4px;}
+.range-mark{font-size:.58rem;color:var(--muted);}
+.yolo-note{background:#1a0d2e;border:1px solid var(--purple);border-radius:6px;padding:6px 10px;font-size:.65rem;color:#a78bfa;margin-top:8px;}
+
+/* ROOMS GRID */
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:28px;}
+.room-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.room-card.occupied{border-color:var(--amber);}
+.room-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.room-name{font-size:.82rem;font-weight:700;}
+.occ-badge{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:10px;}
+.occ-badge.vacant{background:#0d1f12;color:var(--green);border:1px solid var(--green);}
+.occ-badge.occupied{background:#1a1200;color:var(--amber);border:1px solid var(--amber);}
+.occ-badge.crowded{background:#200;color:var(--high);border:1px solid var(--high);}
+.room-count-wrap{display:flex;align-items:center;gap:10px;}
+.room-count-wrap label{font-size:.7rem;color:var(--muted);}
+.room-cnt-input{width:70px;background:#0a1020;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.88rem;font-weight:700;text-align:center;padding:4px 6px;}
+.room-cnt-input:focus{outline:none;border-color:var(--amber);}
+.mini-btns{display:flex;gap:6px;margin-top:8px;}
+.mini-btn{flex:1;padding:5px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-family:inherit;font-size:.68rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.mini-btn:hover{background:var(--border);color:var(--text);}
+
+/* RIGHT PANEL */
+.right{display:flex;flex-direction:column;gap:16px;}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:.78rem;}
+.status-row:last-child{border:none;}
+.sr-l{color:var(--muted);}
+.action-btn{width:100%;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all .2s;}
+.action-btn:last-child{margin:0;}
+.action-btn:hover{transform:translateY(-1px);opacity:.88;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-stop{background:#991b1b;color:#fff;}
+.btn-green{background:#065f46;color:#fff;}
+.btn-dark{background:var(--border);color:var(--text);}
+.btn-link{background:var(--panel);color:var(--text);border:1px solid var(--border);}
+.log-list{max-height:180px;overflow-y:auto;}
+.log-e{font-size:.65rem;color:var(--muted);padding:3px 0;border-bottom:1px solid #0f1629;}
+.log-e span{color:var(--text);}
+/* alert */
+.alert{display:none;background:#200;border:1px solid var(--high);border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:700;color:var(--high);margin-bottom:16px;animation:flash 1s ease-in-out infinite;}
+.alert.show{display:block;}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:.45}}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>&#128295; Admin Control Panel &mdash; Emergency Exit System</h1>
+    <p>ISE Department &nbsp;|&nbsp; Full floor monitoring &amp; crowd control</p>
+  </div>
+  <div class="badge-live"><span class="dot"></span>CONNECTED</div>
+</header>
+
+<div class="main">
+  <div>
+    <div class="alert" id="alertBanner">&#128308; EMERGENCY MODE ACTIVE &mdash; Re-evaluating all exits!</div>
+
+    <!-- STATS -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat blue"><div class="stat-v" id="statTotal">0</div><div class="stat-l">Total People on Floor</div></div>
+      <div class="stat red"><div class="stat-v" id="statHigh">0</div><div class="stat-l">High Crowd Exits</div></div>
+      <div class="stat amber"><div class="stat-v" id="statMed">0</div><div class="stat-l">Medium Crowd Exits</div></div>
+      <div class="stat green"><div class="stat-v" id="statLow">0</div><div class="stat-l">Low Crowd Exits</div></div>
+    </div>
+
+    <!-- EXITS -->
+    <div class="section-title">Exit Crowd Control (Camera / Manual)</div>
+    <div class="exits-grid" id="exitsGrid"></div>
+
+    <!-- ROOMS -->
+    <div class="section-title">Room &amp; Corridor Occupancy</div>
+    <div class="rooms-grid" id="roomsGrid"></div>
+  </div>
+
+  <div class="right">
+    <div class="panel">
+      <h2>Live Exit Status</h2>
+      <div id="liveStatus"></div>
+    </div>
+    <div class="panel">
+      <h2>Actions</h2>
+      <button class="action-btn btn-purple" id="simBtn" onclick="toggleSim()">&#127922; Start Auto-Simulate</button>
+      <button class="action-btn btn-red" id="emergBtn" onclick="toggleEmergency()">&#128308; Trigger Emergency Mode</button>
+      <button class="action-btn btn-green" onclick="resetAll()">&#10003; Reset All to Low</button>
+      <a href="/"><button class="action-btn btn-link">&#128065; View Floor Map</button></a>
+    </div>
+    <div class="panel">
+      <h2>Event Log</h2>
+      <div class="log-list" id="logList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let GRAPH=null,crowdData={},roomData={},simRunning=false,simInterval=null,emergency=false;
+
+const THRESH={low:20,med:55};
+function toLevel(n){return n<=THRESH.low?"Low":n<=THRESH.med?"Medium":"High";}
+function roomOccLabel(n){return n===0?"Vacant":n<=10?"Occupied":"Crowded";}
+
+async function init(){
+  const r=await fetch("/api/graph");GRAPH=await r.json();
+  await refreshAll();
+  buildExitGrid();
+  buildRoomGrid();
+  setInterval(refreshAll,4000);
+}
+
+async function refreshAll(){
+  const [cr,rr]=await Promise.all([fetch("/api/crowd"),fetch("/api/rooms")]);
+  crowdData=await cr.json();
+  roomData=await rr.json();
+  updateExitGrid();
+  updateRoomGrid();
+  updateLiveStatus();
+  updateStats();
+}
+
+/* ── EXITS ── */
+function buildExitGrid(){
+  const g=document.getElementById("exitsGrid");g.innerHTML="";
+  (GRAPH.exit_nodes||[]).forEach(name=>{
+    const isCam=name===GRAPH.camera_exit;
+    const d=document.createElement("div");
+    d.className="exit-card"+(isCam?" cam":"");d.id="ex-"+name;
+    const cnt=crowdData[name]?.count||0;
+    const lvl=crowdData[name]?.level||"Low";
+    d.innerHTML=`
+      <div class="ec-head">
+        <div class="ec-name">${name.replace(/_/g," ")}</div>
+        <div class="tags">
+          <span class="tag tag-exit">EXIT</span>
+          ${isCam?'<span class="tag tag-cam">&#128247; YOLO</span>':""}
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-top">
+          <span class="slider-label">People at exit</span>
+          <div class="slider-val">
+            <input type="number" class="count-input" id="ni-${name}" value="${cnt}" min="0" max="100"
+              onchange="setExitCount('${name}',+this.value)" oninput="syncSlider('${name}',+this.value)"/>
+            <span class="level-badge ${lvl}" id="lb-${name}">${lvl}</span>
+          </div>
+        </div>
+        <input type="range" id="sl-${name}" min="0" max="100" value="${cnt}"
+          oninput="syncInput('${name}',+this.value)"/>
+        <div class="range-marks">
+          <span class="range-mark">0 &mdash; Low</span>
+          <span class="range-mark">20</span>
+          <span class="range-mark">55</span>
+          <span class="range-mark">100 &mdash; High</span>
+        </div>
+      </div>
+      ${isCam?'<div class="yolo-note">&#128247; YOLO auto-updates this exit every 5s. Manual override active.</div>':""}
+    `;
+    g.appendChild(d);
+  });
+}
+
+function syncSlider(name,val){
+  const sl=document.getElementById("sl-"+name);
+  if(sl)sl.value=val;
+  updateExitBadge(name,val);
+}
+function syncInput(name,val){
+  const ni=document.getElementById("ni-"+name);
+  if(ni)ni.value=val;
+  updateExitBadge(name,val);
+  setExitCount(name,val);
+}
+function updateExitBadge(name,cnt){
+  const lvl=toLevel(cnt);
+  const lb=document.getElementById("lb-"+name);
+  if(lb){lb.textContent=lvl;lb.className="level-badge "+lvl;}
+  const card=document.getElementById("ex-"+name);
+  if(card){card.className="exit-card"+(name===GRAPH.camera_exit?" cam":"")+(lvl==="High"?" danger":"");}
+}
+
+async function setExitCount(name,val){
+  val=Math.max(0,Math.min(100,Math.round(val)));
+  await fetch("/api/crowd",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({[name]:val})});
+  crowdData[name]={count:val,level:toLevel(val)};
+  updateLiveStatus();updateStats();
+  addLog(`${name.replace(/_/g," ")} crowd: ${val} people (${toLevel(val)})`);
+}
+
+function updateExitGrid(){
+  (GRAPH.exit_nodes||[]).forEach(name=>{
+    const cnt=crowdData[name]?.count||0;
+    const ni=document.getElementById("ni-"+name);
+    const sl=document.getElementById("sl-"+name);
+    if(ni&&document.activeElement!==ni)ni.value=cnt;
+    if(sl&&document.activeElement!==sl)sl.value=cnt;
+    updateExitBadge(name,cnt);
+  });
+}
+
+/* ── ROOMS ── */
+function buildRoomGrid(){
+  const g=document.getElementById("roomsGrid");g.innerHTML="";
+  Object.entries(roomData).forEach(([name,cnt])=>{
+    const d=document.createElement("div");
+    const oLbl=roomOccLabel(cnt);
+    d.className="room-card"+(cnt>0?" occupied":"");d.id="rm-"+name;
+    d.innerHTML=`
+      <div class="room-head">
+        <div class="room-name">${name.replace(/_/g," ")}</div>
+        <span class="occ-badge ${oLbl}" id="rb-${name}">${oLbl}</span>
+      </div>
+      <div class="room-count-wrap">
+        <label>People inside:</label>
+        <input type="number" class="room-cnt-input" id="rc-${name}" value="${cnt}" min="0" max="200"
+          onchange="setRoomCount('${name}',+this.value)"/>
+      </div>
+      <div class="mini-btns">
+        <button class="mini-btn" onclick="setRoomCount('${name}',0)">Empty</button>
+        <button class="mini-btn" onclick="setRoomCount('${name}',10)">~10</button>
+        <button class="mini-btn" onclick="setRoomCount('${name}',30)">~30</button>
+        <button class="mini-btn" onclick="setRoomCount('${name}',60)">~60</button>
+      </div>
+    `;
+    g.appendChild(d);
+  });
+}
+
+async function setRoomCount(name,val){
+  val=Math.max(0,Math.round(val));
+  const ri=document.getElementById("rc-"+name);if(ri)ri.value=val;
+  const oLbl=roomOccLabel(val);
+  const rb=document.getElementById("rb-"+name);
+  if(rb){rb.textContent=oLbl;rb.className="occ-badge "+oLbl;}
+  const card=document.getElementById("rm-"+name);
+  if(card)card.className="room-card"+(val>0?" occupied":"");
+  await fetch("/api/rooms",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({[name]:val})});
+  roomData[name]=val;updateStats();
+  addLog(`${name.replace(/_/g," ")}: ${val} people`);
+}
+
+function updateRoomGrid(){
+  Object.entries(roomData).forEach(([name,cnt])=>{
+    const ri=document.getElementById("rc-"+name);
+    if(ri&&document.activeElement!==ri)ri.value=cnt;
+    const oLbl=roomOccLabel(cnt);
+    const rb=document.getElementById("rb-"+name);
+    if(rb){rb.textContent=oLbl;rb.className="occ-badge "+oLbl;}
+  });
+}
+
+/* ── STATUS + STATS ── */
+function updateLiveStatus(){
+  const el=document.getElementById("liveStatus");
+  el.innerHTML=(GRAPH.exit_nodes||[]).map(name=>{
+    const d=crowdData[name]||{count:0,level:"Low"};
+    const isCam=name===GRAPH.camera_exit?"&#128247; ":"";
+    return `<div class="status-row"><span class="sr-l">${isCam}${name.replace(/_/g," ")}</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:.72rem;color:var(--muted)">${d.count} ppl</span>
+        <span class="level-badge ${d.level}">${d.level}</span>
+      </div></div>`;
+  }).join("");
+}
+
+function updateStats(){
+  const exits=GRAPH.exit_nodes||[];
+  let total=Object.values(roomData).reduce((a,b)=>a+b,0);
+  let hi=0,mid=0,lo=0;
+  exits.forEach(e=>{
+    const c=crowdData[e]?.count||0;total+=c;
+    const lvl=toLevel(c);
+    if(lvl==="High")hi++;else if(lvl==="Medium")mid++;else lo++;
+  });
+  document.getElementById("statTotal").textContent=total;
+  document.getElementById("statHigh").textContent=hi;
+  document.getElementById("statMed").textContent=mid;
+  document.getElementById("statLow").textContent=lo;
+}
+
+/* ── ACTIONS ── */
+const LEVELS=["Low","Medium","High"],W=[.5,.3,.2];
+function wrand(){let r=Math.random(),a=0;for(let i=0;i<LEVELS.length;i++){a+=W[i];if(r<=a)return i*35;}return 0;}
+
+async function simStep(){
+  const u={};(GRAPH.exit_nodes||[]).forEach(n=>{u[n]=wrand();});
+  await fetch("/api/crowd",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(u)});
+  Object.entries(u).forEach(([n,v])=>{crowdData[n]={count:v,level:toLevel(v)};});
+  updateExitGrid();updateLiveStatus();updateStats();addLog("Auto-simulate update");
+}
+
+function toggleSim(){
+  simRunning=!simRunning;
+  const b=document.getElementById("simBtn");
+  if(simRunning){b.textContent="&#9209; Stop Simulation";b.className="action-btn btn-stop";simStep();simInterval=setInterval(simStep,4000);}
+  else{b.textContent="&#127922; Start Auto-Simulate";b.className="action-btn btn-purple";clearInterval(simInterval);}
+}
+
+async function toggleEmergency(){
+  emergency=!emergency;
+  const b=document.getElementById("emergBtn");
+  const alert=document.getElementById("alertBanner");
+  if(emergency){
+    b.textContent="&#10003; Cancel Emergency";b.className="action-btn btn-green";alert.classList.add("show");
+    const u={};(GRAPH.exit_nodes||[]).forEach((n,i)=>{u[n]=i===0?80:5;});
+    await fetch("/api/crowd",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(u)});
+    Object.entries(u).forEach(([n,v])=>{crowdData[n]={count:v,level:toLevel(v)};});
+    updateExitGrid();updateLiveStatus();updateStats();addLog("EMERGENCY MODE TRIGGERED");
+  }else{
+    b.textContent="&#128308; Trigger Emergency Mode";b.className="action-btn btn-red";alert.classList.remove("show");
+    await resetAll();
+  }
+}
+
+async function resetAll(){
+  const u={};(GRAPH.exit_nodes||[]).forEach(n=>{u[n]=0;});
+  await fetch("/api/crowd",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(u)});
+  Object.entries(u).forEach(([n,v])=>{crowdData[n]={count:0,level:"Low"};});
+  updateExitGrid();updateLiveStatus();updateStats();addLog("All exits reset to 0");
+}
+
+function addLog(msg){
+  const log=document.getElementById("logList");
+  const t=new Date().toLocaleTimeString();
+  const e=document.createElement("div");e.className="log-e";
+  e.innerHTML=`<span>[${t}]</span> ${msg}`;
+  log.prepend(e);
+  if(log.children.length>40)log.lastChild.remove();
+}
+
+init();
+</script>
+</body>
+</html>
