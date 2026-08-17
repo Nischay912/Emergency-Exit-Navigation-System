@@ -48,12 +48,12 @@ canvas{display:block;width:100%;height:100%;}
 .loc-card .hint{font-size:.6rem;color:var(--muted);}
 .loc-select{width:100%;background:#0c1e3c;color:var(--text);border:1px solid var(--blue);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:.78rem;margin-top:6px;cursor:pointer;}
 .loc-select:focus{outline:none;border-color:var(--purple);}
-.rec-card{background:linear-gradient(135deg,#1a0f00,#201a00);border:1px solid var(--amber);border-radius:10px;padding:10px 12px;}
+.rec-card{background:linear-gradient(135deg,#150d2e,#1a1040);border:1px solid var(--purple);border-radius:10px;padding:10px 12px;}
 .rec-card .rl{font-size:.62rem;color:var(--muted);}
-.rec-card .re{font-size:1.05rem;font-weight:800;color:var(--amber);}
+.rec-card .re{font-size:1.05rem;font-weight:800;color:#a855f7;}
 .rec-card .rp{font-size:.65rem;color:#94a3b8;margin-top:3px;word-break:break-all;line-height:1.5;}
 .exit-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:5px;transition:border-color .3s;}
-.exit-row.best{border-color:var(--amber);}
+.exit-row.best{border-color:#a855f7;}
 .exit-row-name{font-size:.75rem;font-weight:600;}
 .cpill{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;}
 .cpill.Low{background:#052e16;color:var(--low);border:1px solid var(--low);}
@@ -65,28 +65,35 @@ canvas{display:block;width:100%;height:100%;}
 
 /* MOBILE: bottom sheet layout */
 @media(max-width:768px){
-  header{height:46px;}
-  .app{flex-direction:column;height:calc(100vh - 46px);}
+  header{height:44px;}
+  .app{flex-direction:column;height:calc(100vh - 44px);}
   .sidebar{
     width:100%;min-width:0;flex-direction:column;
-    height:48%;max-height:48%;
+    height:42%;max-height:42%;
     border-right:none;border-top:2px solid var(--red);
-    order:2;padding:10px 12px;overflow-y:auto;
-    flex-shrink:0;
+    order:2;padding:8px 12px;overflow-y:auto;
+    flex-shrink:0;gap:8px;
   }
-  .map-col{height:52%;order:1;flex:none;}
-  .info-bar{height:30px;font-size:.7rem;}
-  /* collapse legend on mobile */
+  .map-col{height:58%;order:1;flex:none;}
+  .info-bar{height:34px;font-size:.75rem;padding:0 12px;}
+  /* collapse legend + walk mode on mobile (not needed for QR scan use-case) */
   .sec.legend-sec{display:none;}
+  .sec.walk-sec{display:none;}
   /* horizontal exits list */
   #exitList{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;}
   .exit-row{min-width:130px;flex:1;}
   /* compact location card */
   .loc-card .hint{display:none;}
+  /* bigger nav overlay text on mobile */
+  .nav-action{font-size:1.3rem;}
+  .nav-arrow{font-size:3rem;}
+  .nav-compass-badge{font-size:.82rem!important;padding:6px 14px!important;}
 }
 @media(max-width:480px){
   .badge-cam{display:none;}
   .logo p{display:none;}
+  .sidebar{height:40%;max-height:40%;}
+  .map-col{height:60%;}
 }
 
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -150,7 +157,7 @@ canvas{display:block;width:100%;height:100%;}
 .nav-step-item.done .nav-step-action{color:var(--muted);text-decoration:line-through;}
 /* Map section inside nav */
 .nav-map-wrap{height:200px;min-height:140px;flex-shrink:0;position:relative;}
-.nav-map-wrap canvas{width:100%;height:100%;}
+.nav-map-wrap canvas{width:100%;height:100%;display:block;}
 /* Bottom nav bar */
 .nav-bottom{display:flex;gap:10px;padding:10px 16px 14px;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;}
 .nav-close-btn{flex:1;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;background:var(--border);color:var(--text);}
@@ -161,6 +168,25 @@ canvas{display:block;width:100%;height:100%;}
 .nav-trigger{width:100%;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--red),#b91c1c);color:#fff;letter-spacing:.3px;transition:all .2s;box-shadow:0 4px 20px #e9456044;}
 .nav-trigger:hover{transform:translateY(-2px);box-shadow:0 6px 24px #e9456066;}
 .nav-trigger:active{transform:translateY(0);}
+/* Compass direction badge in nav overlay */
+.nav-compass-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:linear-gradient(135deg,#0d2e3c,#0a1e2e);
+  border:1.5px solid #0ea5e9;border-radius:20px;
+  padding:5px 14px;font-size:.78rem;font-weight:800;
+  color:#38bdf8;letter-spacing:.5px;margin-top:6px;
+  box-shadow:0 0 10px #0ea5e922;
+}
+.nav-compass-badge .compass-icon{font-size:1rem;}
+/* Calibration instruction card */
+.calib-card{
+  background:linear-gradient(135deg,#0a1e10,#0d2818);
+  border:1px solid #16a34a;border-radius:8px;
+  padding:9px 12px;margin-top:6px;font-size:.67rem;
+  color:#4ade80;line-height:1.6;display:none;
+}
+.calib-card.show{display:block;}
+.calib-card strong{color:#86efac;font-weight:700;}
 @media(max-width:768px){.nav-action{font-size:1.2rem;}.nav-arrow{font-size:2.8rem;}}
 </style>
 </head>
@@ -203,33 +229,52 @@ canvas{display:block;width:100%;height:100%;}
       <div id="exitList"></div>
     </div>
     <!-- WALK MODE -->
-    <div class="sec">
+    <div class="sec walk-sec">
       <div class="sec-lbl">&#x1F6B6; Walking Mode (PDR)</div>
       <div class="walk-card">
         <button class="walk-btn calib" id="calibBtn" onclick="startCalibration()">&#127759; Calibrate North Direction</button>
-        <button class="walk-btn start" id="walkBtn" onclick="toggleWalkMode()">&#x1F6B6; Start Walking Mode</button>
-        <!-- Manual direction pad (fallback) -->
-        <div class="dir-pad" id="dirPad" style="display:none">
-          <div></div>
-          <button class="dir-btn" onclick="manualStep(0)">&#8593;</button>
-          <div></div>
-          <button class="dir-btn" onclick="manualStep(270)">&#8592;</button>
-          <button class="dir-btn" onclick="manualStep(-1)">&#128205;</button>
-          <button class="dir-btn" onclick="manualStep(90)">&#8594;</button>
-          <div></div>
-          <button class="dir-btn" onclick="manualStep(180)">&#8595;</button>
-          <div></div>
+        <!-- Calibration instruction card -->
+        <div class="calib-card" id="calibCard">
+          <strong>How to calibrate:</strong><br>
+          1. Stand still at your current location.<br>
+          2. Face toward the <strong>Staircase North</strong> side of the building (top of floor map).<br>
+          3. Tap the button — your phone compass records that as Map-North.<br>
+          4. Walk and the map dot follows you via compass + step detection.
         </div>
-        <div class="compass-ring" id="compassRing" style="display:none">
-          <svg class="compass-svg" id="compassSvg" width="60" height="60" viewBox="0 0 60 60">
-            <circle cx="30" cy="30" r="28" fill="none" stroke="#1e3a5f" stroke-width="2"/>
-            <polygon points="30,6 34,30 30,34 26,30" fill="#ef4444"/>
-            <polygon points="30,54 34,30 30,26 26,30" fill="#94a3b8"/>
-            <text x="30" y="4" text-anchor="middle" font-size="7" fill="#ef4444" font-family="Inter">N</text>
-            <text x="30" y="59" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">S</text>
-            <text x="56" y="33" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">E</text>
-            <text x="4"  y="33" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">W</text>
-          </svg>
+        <button class="walk-btn start" id="walkBtn" onclick="toggleWalkMode()">&#x1F6B6; Start Walking Mode</button>
+        <!-- Sensor status panel (replaces the confusing arrow pad) -->
+        <div id="sensorPanel" style="display:none;margin-top:6px">
+          <div id="sensorStatusRow" style="
+            display:flex;align-items:center;gap:8px;padding:7px 10px;
+            background:#0a1a10;border:1px solid #16a34a;border-radius:8px;
+            font-size:.68rem;color:#4ade80;margin-bottom:6px;
+          ">
+            <span style="font-size:1rem">&#128246;</span>
+            <span id="sensorStatusTxt">Waiting for sensors...</span>
+          </div>
+          <!-- Live compass heading -->
+          <div id="liveHeadingRow" style="
+            display:flex;align-items:center;justify-content:space-between;
+            padding:6px 10px;background:#0a1020;border:1px solid var(--border);
+            border-radius:8px;font-size:.68rem;
+          ">
+            <span style="color:var(--muted)">Phone facing:</span>
+            <span id="liveHeadingTxt" style="color:#38bdf8;font-weight:700">-- &#176;</span>
+            <div class="compass-ring" id="compassRing">
+              <svg class="compass-svg" id="compassSvg" width="42" height="42" viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="28" fill="none" stroke="#1e3a5f" stroke-width="2"/>
+                <polygon points="30,6 34,30 30,34 26,30" fill="#ef4444"/>
+                <polygon points="30,54 34,30 30,26 26,30" fill="#94a3b8"/>
+                <text x="30" y="4" text-anchor="middle" font-size="7" fill="#ef4444" font-family="Inter">N</text>
+                <text x="56" y="33" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">E</text>
+                <text x="4"  y="33" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="Inter">W</text>
+              </svg>
+            </div>
+          </div>
+          <!-- Step count -->
+          <div style="text-align:center;margin-top:5px;font-size:.65rem;color:var(--muted)">
+            Steps detected: <strong id="stepCountTxt" style="color:var(--purple)">0</strong>
+          </div>
         </div>
         <div class="walk-status" id="walkStatus">Scan QR or pick location, then start walking</div>
       </div>
@@ -238,9 +283,9 @@ canvas{display:block;width:100%;height:100%;}
       <div class="sec-lbl">Legend</div>
       <div class="leg-row"><div class="leg-dot" style="background:#ef4444"></div>Your Location</div>
       <div class="leg-row"><div class="leg-dot" style="background:#10b981"></div>Exit / Staircase</div>
-      <div class="leg-row"><div class="leg-dot" style="background:#f59e0b"></div>Best Exit</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#a855f7"></div>★ Safest Exit</div>
       <div class="leg-row"><div class="leg-dot" style="background:#3b82f6"></div>Room / Lab</div>
-      <div class="leg-row"><div class="leg-sq" style="background:#f59e0b"></div>Safest Path</div>
+      <div class="leg-row"><div class="leg-sq" style="background:#f59e0b"></div>Route Path</div>
     </div>
   </div>
   <div class="map-col">
@@ -255,17 +300,23 @@ const POLL_MS=4000;
 const CROWD_MULT={Low:1,Medium:2.5,High:6};
 const LEVEL_THRESH={low:20,med:55};
 
-let GRAPH=null,crowdData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
+let GRAPH=null,crowdData={},roomData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
 
 function countToLevel(n){return n<=LEVEL_THRESH.low?"Low":n<=LEVEL_THRESH.med?"Medium":"High";}
 
 /* DIJKSTRA */
+// Get effective crowd count for any node (exit crowd OR room occupancy)
+function getNodeCount(n){
+  if(crowdData[n]!==undefined) return crowdData[n]?.count||0;
+  if(roomData[n]!==undefined)  return roomData[n]||0;
+  return 0;
+}
 function buildAdj(){
   const adj={};
   Object.keys(GRAPH.nodes).forEach(n=>adj[n]=[]);
   GRAPH.edges.forEach(([u,v,d])=>{
-    const lu=countToLevel(crowdData[u]?.count||0);
-    const lv=countToLevel(crowdData[v]?.count||0);
+    const lu=countToLevel(getNodeCount(u));
+    const lv=countToLevel(getNodeCount(v));
     adj[u].push([v,d*(CROWD_MULT[lv]||1)]);
     adj[v].push([u,d*(CROWD_MULT[lu]||1)]);
   });
@@ -333,10 +384,15 @@ const NODE_POS={
 };
 
 function resizeCanvas(){
-  const w=canvas.parentElement;
-  canvas.width=w.clientWidth;
-  canvas.height=w.clientHeight;
-  sx=canvas.width/DW;sy=canvas.height/DH;
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  // Physical pixels = CSS pixels × DPR
+  canvas.width  = Math.round(wrap.clientWidth  * dpr);
+  canvas.height = Math.round(wrap.clientHeight * dpr);
+  // Scale drawing so all coordinates stay in CSS-pixel space
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sx = wrap.clientWidth  / DW;
+  sy = wrap.clientHeight / DH;
 }
 
 function drawRoundRect(x,y,w,h,r,fill,stroke,lw){
@@ -348,19 +404,23 @@ function drawRoundRect(x,y,w,h,r,fill,stroke,lw){
 
 function render(){
   if(!GRAPH)return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // Use CSS dimensions for drawing (ctx is already scaled by DPR via setTransform)
+  const cw = canvas.width  / (window.devicePixelRatio||1);
+  const ch = canvas.height / (window.devicePixelRatio||1);
+  ctx.clearRect(0,0,cw,ch);
 
-  /* background */
-  const bg=ctx.createLinearGradient(0,0,0,canvas.height);
-  bg.addColorStop(0,"#07091a");bg.addColorStop(1,"#080c1e");
-  ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
+  /* === BACKGROUND === */
+  const bg=ctx.createLinearGradient(0,0,0,ch);
+  bg.addColorStop(0,"#060818");bg.addColorStop(1,"#07091e");
+  ctx.fillStyle=bg;ctx.fillRect(0,0,cw,ch);
 
-  /* grid */
-  ctx.strokeStyle="rgba(30,47,85,0.4)";ctx.lineWidth=1;
-  for(let gx=0;gx<canvas.width;gx+=R(55)){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,canvas.height);ctx.stroke();}
-  for(let gy=0;gy<canvas.height;gy+=R(55)){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(canvas.width,gy);ctx.stroke();}
+  /* subtle dot-grid (much lighter than before) */
+  ctx.fillStyle="rgba(30,47,85,0.25)";
+  for(let gx=0;gx<cw;gx+=R(40))for(let gy=0;gy<ch;gy+=R(40)){
+    ctx.beginPath();ctx.arc(gx,gy,R(0.8),0,Math.PI*2);ctx.fill();
+  }
 
-  /* Dijkstra */
+  /* === DIJKSTRA === */
   const adj=buildAdj();
   const{dist,prev}=dijkstra(currentUser,adj);
   let bExit=null,bCost=Infinity;
@@ -370,58 +430,103 @@ function render(){
   const pathSet=new Set();
   for(let i=0;i<path.length-1;i++){pathSet.add(path[i]+"|"+path[i+1]);pathSet.add(path[i+1]+"|"+path[i]);}
 
-  /* building outline */
-  ctx.shadowBlur=0;
-  drawRoundRect(X(15),Y(15),X(850),Y(550),R(12),null,"#1e3a5f",R(2));
+  /* === BUILDING OUTLINE === */
+  ctx.save();
+  ctx.shadowColor="#1e3a5f";ctx.shadowBlur=R(20);
+  drawRoundRect(X(15),Y(15),X(850),Y(550),R(14),null,"rgba(56,100,160,0.5)",R(2));
+  ctx.restore();
 
-  /* corridors */
+  /* === CORRIDORS (slightly lighter fill for contrast) === */
   CORRIDORS.forEach(c=>{
-    drawRoundRect(X(c.x),Y(c.y),X(c.w),Y(c.h),R(4),c.fill,"#1a3050",R(1));
+    drawRoundRect(X(c.x),Y(c.y),X(c.w),Y(c.h),R(3),"#101c32","rgba(56,100,160,0.3)",R(0.5));
   });
 
-  /* room rectangles */
-  Object.entries(ROOM_RECTS).forEach(([name,r])=>{
-    const onPath=path.includes(name);
-    const isUser=name===currentUser;
-    const stroke=isUser?"#ef4444":onPath?"#f59e0b44":"#1e3a5f";
-    const lw=isUser||onPath?R(2):R(1);
-    drawRoundRect(X(r.x),Y(r.y),X(r.w),Y(r.h),R(6),r.fill,stroke,lw);
-    /* room label */
-    ctx.fillStyle=isUser?"#fca5a5":onPath?"#fcd34d":"#475569";
-    ctx.font=`600 ${R(8)}px Inter`;
-    ctx.textAlign="center";ctx.textBaseline="middle";
-    const cx=X(r.x+r.w/2),cy=Y(r.y+r.h/2);
-    ctx.fillText(r.label,cx,cy+R(8));
-    /* icon */
-    ctx.font=`${R(14)}px serif`;
-    ctx.fillText(r.icon,cx,cy-R(5));
-  });
-
-  /* edges */
+  /* === EDGES === */
   GRAPH.edges.forEach(([u,v,d])=>{
     const pu=NODE_POS[u]||GRAPH.nodes[u];
     const pv=NODE_POS[v]||GRAPH.nodes[v];
     if(!pu||!pv)return;
     const onP=pathSet.has(u+"|"+v);
     ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
-    if(onP){ctx.strokeStyle="#f59e0b";ctx.lineWidth=R(5);ctx.setLineDash([]);ctx.shadowColor="#f59e0b";ctx.shadowBlur=R(8);}
-    else{ctx.strokeStyle="#1e3a5f";ctx.lineWidth=R(1.5);ctx.setLineDash([R(4),R(5)]);ctx.shadowBlur=0;}
+    if(onP){
+      ctx.strokeStyle="#f59e0b";ctx.lineWidth=R(6);
+      ctx.setLineDash([]);ctx.shadowColor="#f59e0b";ctx.shadowBlur=R(12);
+    }else{
+      ctx.strokeStyle="rgba(56,100,160,0.35)";ctx.lineWidth=R(1.5);
+      ctx.setLineDash([R(4),R(6)]);ctx.shadowBlur=0;
+    }
     ctx.stroke();ctx.setLineDash([]);ctx.shadowBlur=0;
   });
 
-  /* animated dash on path */
+  /* animated flow on safe path */
   if(path.length>=2){
-    animT=(animT+1)%50;
+    animT=(animT+1)%60;
     for(let i=0;i<path.length-1;i++){
       const pu=NODE_POS[path[i]],pv=NODE_POS[path[i+1]];
       if(!pu||!pv)continue;
       ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
-      ctx.strokeStyle="rgba(255,255,255,0.3)";ctx.lineWidth=R(5);
-      ctx.setLineDash([R(8),R(12)]);ctx.lineDashOffset=-animT;ctx.stroke();ctx.setLineDash([]);
+      ctx.strokeStyle="rgba(255,255,255,0.25)";ctx.lineWidth=R(6);
+      ctx.setLineDash([R(10),R(15)]);ctx.lineDashOffset=-animT*1.5;ctx.stroke();ctx.setLineDash([]);
     }
   }
 
-  /* exit nodes */
+  /* === ROOM RECTANGLES (premium card style) === */
+  Object.entries(ROOM_RECTS).forEach(([name,r])=>{
+    const onPath=path.includes(name);
+    const isUser=name===currentUser;
+
+    // Fill: richer colors with more contrast
+    let fill, borderClr, borderW;
+    if(isUser){
+      fill="#1a0a0a"; borderClr="#ef4444"; borderW=R(2.5);
+    } else if(onPath){
+      fill="#1a1200"; borderClr="#f59e0b"; borderW=R(2);
+    } else {
+      fill="#0d1630"; borderClr="rgba(56,100,160,0.5)"; borderW=R(1);
+    }
+
+    // Draw room card with inner gradient
+    ctx.save();
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(X(r.x),Y(r.y),X(r.w),Y(r.h),R(8));
+    else ctx.rect(X(r.x),Y(r.y),X(r.w),Y(r.h));
+    const roomGrad = ctx.createLinearGradient(X(r.x),Y(r.y),X(r.x),Y(r.y+r.h));
+    if(isUser){
+      roomGrad.addColorStop(0,"#1f0a0a");roomGrad.addColorStop(1,"#150505");
+    } else if(onPath){
+      roomGrad.addColorStop(0,"#1a1400");roomGrad.addColorStop(1,"#110e00");
+    } else {
+      roomGrad.addColorStop(0,"#0f1a38");roomGrad.addColorStop(1,"#080e20");
+    }
+    ctx.fillStyle=roomGrad;ctx.fill();
+    ctx.strokeStyle=borderClr;ctx.lineWidth=borderW;ctx.stroke();
+    ctx.restore();
+
+    // Icon
+    const cx=X(r.x+r.w/2), cy=Y(r.y+r.h/2);
+    const iconSize=Math.max(R(15),11);
+    ctx.font=`${iconSize}px serif`;
+    ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(r.icon,cx,cy-Math.max(R(7),5));
+
+    // Label with background pill for readability
+    const labelSize=Math.max(R(9),10); // minimum 10px
+    ctx.font=`700 ${labelSize}px Inter`;
+    const labelW=ctx.measureText(r.label).width+R(8);
+    const labelH=labelSize+R(5);
+    const lx=cx-labelW/2, ly=cy+Math.max(R(5),4);
+    // pill bg
+    ctx.fillStyle=isUser?"rgba(239,68,68,0.25)":onPath?"rgba(245,158,11,0.2)":"rgba(15,22,45,0.8)";
+    if(ctx.roundRect) ctx.roundRect(lx,ly,labelW,labelH,R(4));
+    else ctx.rect(lx,ly,labelW,labelH);
+    ctx.fill();
+    // text
+    ctx.fillStyle=isUser?"#fca5a5":onPath?"#fde68a":"#93c5fd";
+    ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(r.label,cx,ly+labelH/2);
+  });
+
+  /* === EXIT NODES === */
   const exits=GRAPH.exit_nodes;
   exits.forEach(name=>{
     const pos=NODE_POS[name]||GRAPH.nodes[name];
@@ -431,56 +536,102 @@ function render(){
     const isBest=name===bExit;
     const lvl=crowdData[name]?.level||"Low";
     const clr={Low:"#10b981",Medium:"#f59e0b",High:"#ef4444"}[lvl];
-    const r=R(isBest?20:16);
+    const bestClr="#a855f7";
+    const r=R(isBest?22:17);
 
+    // Pulsing outer ring for best exit
     if(isBest){
-      const g=0.5+0.5*Math.sin(Date.now()/400);
-      ctx.beginPath();ctx.arc(x,y,r+R(10),0,Math.PI*2);
-      ctx.strokeStyle=`rgba(245,158,11,${g})`;ctx.lineWidth=R(2.5);ctx.stroke();
+      const pulse=0.4+0.6*Math.sin(Date.now()/350);
+      ctx.beginPath();ctx.arc(x,y,r+R(12),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.6})`;ctx.lineWidth=R(3);ctx.stroke();
+      ctx.beginPath();ctx.arc(x,y,r+R(6),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.3})`;ctx.lineWidth=R(8);ctx.stroke();
     }
-    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.fillStyle=isBest?"#f59e0b":clr;
-    ctx.shadowColor=isBest?"#f59e0b":clr;ctx.shadowBlur=R(12);
-    ctx.fill();ctx.shadowBlur=0;
-    ctx.strokeStyle="rgba(255,255,255,0.3)";ctx.lineWidth=R(1.5);ctx.stroke();
 
-    /* crowd badge */
-    const bw=R(40),bh=R(14);
-    const bx=x-bw/2,by=y-r-R(20);
-    ctx.fillStyle=clr+"44";
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,R(4));else ctx.rect(bx,by,bw,bh);ctx.fill();
-    ctx.strokeStyle=clr;ctx.lineWidth=R(1);ctx.stroke();
-    ctx.fillStyle=clr;ctx.font=`bold ${R(8)}px Inter`;ctx.textAlign="center";ctx.textBaseline="middle";
+    // Main circle
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=isBest?bestClr:clr;
+    ctx.shadowColor=isBest?bestClr:clr;ctx.shadowBlur=R(16);
+    ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle="rgba(255,255,255,0.4)";ctx.lineWidth=R(2);ctx.stroke();
+
+    // Crowd level badge above node
+    const badgeSize=Math.max(R(8.5),9);
+    ctx.font=`700 ${badgeSize}px Inter`;
+    const bw=ctx.measureText(lvl).width+R(12),bh=badgeSize+R(6);
+    const bx=x-bw/2,by=y-r-R(4)-bh;
+    ctx.fillStyle=clr+"33";
+    if(ctx.roundRect) ctx.roundRect(bx,by,bw,bh,R(5));else ctx.rect(bx,by,bw,bh);
+    ctx.fill();
+    ctx.strokeStyle=clr;ctx.lineWidth=R(1.2);ctx.stroke();
+    ctx.fillStyle=clr;ctx.textAlign="center";ctx.textBaseline="middle";
     ctx.fillText(lvl,x,by+bh/2);
 
-    /* label */
-    ctx.fillStyle=isBest?"#fcd34d":"#94a3b8";
-    ctx.font=`600 ${R(8)}px Inter`;ctx.textBaseline="top";
-    ctx.fillText(name.replace(/_/g," "),x,y+r+R(4));
+    // Exit name label
+    const nameSize=Math.max(R(8.5),9);
+    ctx.font=`700 ${nameSize}px Inter`;
+    const label=name.replace(/_/g," ");
+    const nw=ctx.measureText(label).width+R(10),nh=nameSize+R(6);
+    const nx=x-nw/2,ny=y+r+R(5);
+    ctx.fillStyle=isBest?"rgba(168,85,247,0.25)":"rgba(10,15,30,0.75)";
+    if(ctx.roundRect) ctx.roundRect(nx,ny,nw,nh,R(4));else ctx.rect(nx,ny,nw,nh);
+    ctx.fill();
+    ctx.fillStyle=isBest?"#e9d5ff":"#cbd5e1";
+    ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(label,x,ny+nh/2);
 
-    /* camera icon */
+    // SAFEST tag
+    if(isBest){
+      const tagSize=Math.max(R(7.5),8);
+      ctx.font=`800 ${tagSize}px Inter`;
+      const tw=ctx.measureText("★ SAFEST").width+R(10),th=tagSize+R(5);
+      const tx=x-tw/2,ty=ny+nh+R(3);
+      ctx.fillStyle="rgba(168,85,247,0.35)";
+      if(ctx.roundRect) ctx.roundRect(tx,ty,tw,th,R(4));else ctx.rect(tx,ty,tw,th);
+      ctx.fill();
+      ctx.strokeStyle="#a855f7";ctx.lineWidth=R(1);ctx.stroke();
+      ctx.fillStyle="#e9d5ff";ctx.textAlign="center";ctx.textBaseline="middle";
+      ctx.fillText("★ SAFEST",x,ty+th/2);
+    }
+
+    // Camera icon
     if(name===GRAPH.camera_exit){
-      ctx.font=`${R(10)}px serif`;ctx.fillText("\uD83D\uDCF7",x+r+R(4),y-r);
+      ctx.font=`${Math.max(R(11),10)}px serif`;ctx.fillText("📷",x+r+R(4),y-r);
     }
   });
 
-  /* user pin */
-  const upos=NODE_POS[currentUser]||GRAPH.nodes[currentUser];
-  if(upos){
-    const[xr,yr]=upos;const x=X(xr),y=Y(yr);
-    const p=0.5+0.5*Math.sin(Date.now()/500);
-    ctx.beginPath();ctx.arc(x,y,R(10)+p*R(4),0,Math.PI*2);
-    ctx.strokeStyle=`rgba(239,68,68,${0.5*p})`;ctx.lineWidth=R(2);ctx.stroke();
-    ctx.beginPath();ctx.arc(x,y,R(10),0,Math.PI*2);
-    ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=R(15);ctx.fill();ctx.shadowBlur=0;
-    ctx.font=`bold ${R(9)}px Inter`;ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText("YOU",x,y);
+  /* === USER PIN === */
+  {
+    let xr, yr;
+    if (typeof NAV !== 'undefined' && NAV.demoRunning && PDR.active) {
+      xr = PDR.pos.x; yr = PDR.pos.y;
+    } else {
+      const upos = NODE_POS[currentUser]||GRAPH.nodes[currentUser];
+      if (upos) { xr = upos[0]; yr = upos[1]; } else { xr = null; }
+    }
+    if (xr !== null && xr !== undefined) {
+      const x=X(xr),y=Y(yr);
+      const p=0.5+0.5*Math.sin(Date.now()/500);
+      // Outer pulse
+      ctx.beginPath();ctx.arc(x,y,R(14)+p*R(6),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(239,68,68,${0.4*p})`;ctx.lineWidth=R(3);ctx.stroke();
+      // Inner fill
+      ctx.beginPath();ctx.arc(x,y,R(14),0,Math.PI*2);
+      ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=R(20);ctx.fill();ctx.shadowBlur=0;
+      ctx.strokeStyle="rgba(255,255,255,0.5)";ctx.lineWidth=R(2);ctx.stroke();
+      // YOU label
+      const youSize=Math.max(R(10),10);
+      ctx.font=`800 ${youSize}px Inter`;ctx.fillStyle="#fff";
+      ctx.textAlign="center";ctx.textBaseline="middle";
+      ctx.fillText("YOU",x,y);
+    }
   }
 
-  /* watermark */
-  ctx.fillStyle="rgba(30,47,85,0.7)";ctx.font=`italic ${R(9)}px Inter`;
+  /* === WATERMARK === */
+  ctx.fillStyle="rgba(56,100,160,0.5)";
+  ctx.font=`italic ${Math.max(R(8.5),9)}px Inter`;
   ctx.textAlign="center";ctx.textBaseline="top";
-  ctx.fillText("ISE Department - 3rd Floor | Emergency Exit Map",X(440),Y(8));
+  ctx.fillText("ISE Dept — 3rd Floor | Emergency Exit System",X(440),Y(8));
 
   updateSidebar(bExit,bCost,path);
   requestAnimationFrame(render);
@@ -494,7 +645,7 @@ function updateSidebar(best,cost,path){
   const ib=document.getElementById("infoBar");
   if(best){
     const lvl=crowdData[best]?.level||"Low";
-    ib.innerHTML=`&#10003; <strong>Go to:</strong> ${best.replace(/_/g," ")} &nbsp;|&nbsp; Crowd: <strong>${lvl}</strong> &nbsp;|&nbsp; Score: <strong>${cost.toFixed(0)}</strong>`;
+    ib.innerHTML=`&#10003; <strong style="color:#d8b4fe">★ Safest Exit:</strong> <span style="color:#d8b4fe">${best.replace(/_/g," ")}</span> &nbsp;|&nbsp; Crowd: <strong>${lvl}</strong> &nbsp;|&nbsp; Score: <strong>${cost.toFixed(0)}</strong>`;
     ib.className="info-bar";
   }else{
     ib.textContent="No reachable exit found!";ib.className="info-bar warn";
@@ -535,7 +686,6 @@ function changeLocation(node){
   if(!node)return;
   currentUser=node;
   document.getElementById("userLbl").textContent=node.replace(/_/g," ");
-  history.replaceState({},"","/locate/"+node);
 }
 
 async function init(){
@@ -558,7 +708,14 @@ async function init(){
 }
 
 async function pollCrowd(){
-  try{const r=await fetch("/api/crowd");crowdData=await r.json();}catch(_){}
+  try{
+    const [cr,rr]=await Promise.all([fetch("/api/crowd"),fetch("/api/rooms")]);
+    crowdData=await cr.json();
+    // roomData: raw counts from /api/rooms
+    const raw=await rr.json();
+    // Normalize — rooms API returns plain numbers, store as-is for getNodeCount()
+    roomData=raw;
+  }catch(_){}
 }
 
 init();
@@ -702,10 +859,14 @@ function updateWalkStatus() {
 
 // ── DRAW WALKING OVERLAY ─────────────────────────
 // Called from render() — draws trail + confidence circle
+// During demo walk the main render() pin already handles the YOU dot,
+// so this overlay only adds the PDR trail for manual walk mode.
 function drawWalkOverlay() {
+  // During demo, the main render loop handles the pin — skip overlay dot
+  if (typeof NAV !== 'undefined' && NAV.demoRunning) return;
   if (!PDR.active && PDR.trail.length === 0) return;
 
-  // Trail
+  // Trail (manual PDR mode only)
   if (PDR.trail.length > 1) {
     ctx.beginPath();
     ctx.moveTo(X(PDR.trail[0].x), Y(PDR.trail[0].y));
@@ -719,18 +880,16 @@ function drawWalkOverlay() {
     ctx.setLineDash([]);
   }
 
-  // Free-moving dot (shown when NOT snapped to a node)
+  // Free-moving dot for manual PDR (not demo)
   const nearNode = findNearestNode(PDR.pos.x, PDR.pos.y, 35);
   if (!nearNode && PDR.active) {
     const drift = Math.min(PDR.stepsSinceCorrection / 30, 1);
-    // Confidence circle (grows with drift)
     ctx.beginPath();
     ctx.arc(X(PDR.pos.x), Y(PDR.pos.y), R(10 + drift*20), 0, Math.PI*2);
     ctx.strokeStyle = `rgba(239,68,68,${0.15 + drift*0.1})`;
     ctx.lineWidth = R(1);
     ctx.stroke();
 
-    // Main dot
     ctx.beginPath();
     ctx.arc(X(PDR.pos.x), Y(PDR.pos.y), R(10), 0, Math.PI*2);
     ctx.fillStyle = "#ef4444";
@@ -738,7 +897,6 @@ function drawWalkOverlay() {
     ctx.fill(); ctx.shadowBlur = 0;
     ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = R(1.5); ctx.stroke();
 
-    // "YOU" label
     ctx.font = `bold ${R(9)}px Inter`;
     ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText("YOU", X(PDR.pos.x), Y(PDR.pos.y));
@@ -773,15 +931,15 @@ function attachSensors() {
   PDR.sensorMode = true;
   window.addEventListener("devicemotion", onDeviceMotion, {passive:true});
   window.addEventListener("deviceorientation", onDeviceOrientation, {passive:true});
-  showToast("✅ Motion sensors active!");
-  document.getElementById("compassRing").style.display = "flex";
+  showToast("✅ Motion + Compass active!");
+  // compassRing is inside sensorPanel, which is already shown by toggleWalkMode
 }
 
 function fallbackManualMode() {
   PDR.sensorMode = false;
-  showToast("📱 No sensors — use arrow pad below");
-  document.getElementById("dirPad").style.display = "grid";
-  setWalkStatus("Use ↑↓←→ buttons to move on map");
+  // No arrow pad — in real emergency, user follows the on-screen route arrow
+  setWalkStatus("⚠️ Sensors not available on this device. Follow the on-screen arrow directions.");
+  showToast("⚠️ No motion sensors — use Navigate to Exit for directions");
 }
 
 function onDeviceMotion(event) {
@@ -801,8 +959,6 @@ function onDeviceMotion(event) {
 }
 
 function onDeviceOrientation(event) {
-  // webkitCompassHeading = iOS (degrees from magnetic north, clockwise)
-  // alpha = Android (degrees, counter-clockwise from arbitrary reference)
   let h = 0;
   if (event.webkitCompassHeading != null) {
     h = event.webkitCompassHeading;
@@ -814,6 +970,13 @@ function onDeviceOrientation(event) {
   // Rotate compass SVG
   const svg = document.getElementById("compassSvg");
   if (svg) svg.style.transform = `rotate(${-h}deg)`;
+
+  // Update live heading display in sidebar panel
+  const ht = document.getElementById("liveHeadingTxt");
+  if (ht) ht.textContent = `${compassLabel(h)} (${Math.round(h)}°)`;
+
+  // Update heading comparison in nav overlay if open
+  updateNavHeadingCompare();
 }
 
 // ── CALIBRATION ──────────────────────────────────
@@ -821,11 +984,14 @@ function onDeviceOrientation(event) {
 // Records the current compass heading as the offset
 
 function startCalibration() {
+  // Always show the instruction card first
+  const card = document.getElementById("calibCard");
+  if (card) card.classList.add("show");
+
   if (!PDR.sensorMode && PDR.active) {
     showToast("Calibration only needed for sensor mode");
     return;
   }
-  // Request sensors if not yet done
   if (!PDR.sensorMode) {
     requestSensors();
     setTimeout(() => {
@@ -867,13 +1033,15 @@ function manualStep(headingDeg) {
 }
 
 // ── TOGGLE WALK MODE ─────────────────────────────
+// In real use: phone motion+compass sensors track user.
+// Arrow pad is removed — it was misleading in emergency context.
 
 function toggleWalkMode() {
   PDR.active = !PDR.active;
   const btn = document.getElementById("walkBtn");
+  const panel = document.getElementById("sensorPanel");
 
   if (PDR.active) {
-    // Start: set position from current user node
     const startPos = NODE_POS[currentUser];
     if (!startPos) {
       showToast("⚠ Please select your location first");
@@ -887,31 +1055,32 @@ function toggleWalkMode() {
 
     btn.textContent = "⏹ Stop Walking Mode";
     btn.className = "walk-btn stop";
+    if (panel) panel.style.display = "block";
 
-    // Try real sensors first
+    // Try real sensors
     requestSensors();
-    showToast("🚶 Walking mode ON — move your phone!");
+    showToast("🚶 Walking mode ON — sensors activating...");
 
-    // Always show d-pad (useful as fallback)
+    // Update sensor status text after a short wait
     setTimeout(() => {
-      if (!PDR.sensorMode) {
-        document.getElementById("dirPad").style.display = "grid";
-      } else {
-        document.getElementById("dirPad").style.display = "grid"; // show both
-        document.getElementById("compassRing").style.display = "flex";
+      const st = document.getElementById("sensorStatusTxt");
+      if (PDR.sensorMode && st) {
+        st.textContent = "✅ Motion + Compass sensors active";
+      } else if (st) {
+        st.textContent = "⚠️ Sensors not available — demo mode only";
+        st.style.color = "#f59e0b";
+        document.getElementById("sensorStatusRow").style.borderColor = "#f59e0b";
       }
-    }, 800);
+    }, 1200);
 
   } else {
-    // Stop
     btn.textContent = "🚶 Start Walking Mode";
     btn.className = "walk-btn start";
+    if (panel) panel.style.display = "none";
     window.removeEventListener("devicemotion", onDeviceMotion);
     window.removeEventListener("deviceorientation", onDeviceOrientation);
     PDR.sensorMode = false;
     PDR.trail = [];
-    document.getElementById("dirPad").style.display = "none";
-    document.getElementById("compassRing").style.display = "none";
     setWalkStatus("Scan QR or pick location, then start walking");
     showToast("Walking mode OFF");
   }
@@ -962,9 +1131,53 @@ const _origBuildAdj = buildAdj;
         <div class="nav-dist" id="navDist"></div>
       </div>
     </div>
+    <!-- Compass direction badge -->
+    <div class="nav-compass-badge" id="navCompassBadge">
+      <span class="compass-icon">🧭</span> Computing direction...
+    </div>
     <div class="nav-next" id="navNextCard" style="display:none">
       <div class="nav-next-icon" id="navNextIcon">&#8593;</div>
       <div class="nav-next-txt">Then: <strong id="navNextTxt"></strong></div>
+    </div>
+  </div>
+
+  <!-- Tech Info Banner: explains demo vs real sensors -->
+  <div id="navTechBanner" style="
+    margin:0;padding:7px 18px;
+    background:linear-gradient(90deg,#0a1628,#0d1e38);
+    border-bottom:1px solid var(--border);
+    font-size:.65rem;color:var(--muted);
+    display:flex;align-items:center;gap:8px;flex-shrink:0;
+  ">
+    <span id="navTechIcon" style="font-size:1rem">📱</span>
+    <span id="navTechTxt">
+      <strong style="color:#38bdf8">How it works:</strong>
+      Your phone’s <strong style="color:#a78bfa">compass + step counter</strong> track your movement.
+      The system reads your heading to verify you’re going the right way.
+      This <strong style="color:#f59e0b">demo</strong> simulates the walk automatically.
+    </span>
+  </div>
+
+  <!-- Live heading comparator (visible when sensors active) -->
+  <div id="navHeadingCompare" style="
+    display:none;padding:6px 18px;
+    background:#07091a;border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  ">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="font-size:.65rem;color:var(--muted)">
+        <span>You’re facing:</span>
+        <strong id="navFacingDir" style="color:#38bdf8">--</strong>
+      </div>
+      <div style="font-size:.65rem;color:var(--muted)">
+        <span>Need to go:</span>
+        <strong id="navRequiredDir" style="color:#a855f7">--</strong>
+      </div>
+      <div id="navTurnAdvice" style="
+        font-size:.68rem;font-weight:800;
+        padding:3px 10px;border-radius:20px;
+        background:#1a0d2e;color:#a78bfa;border:1px solid var(--purple);
+      ">✔ On track</div>
     </div>
   </div>
 
@@ -978,7 +1191,20 @@ const _origBuildAdj = buildAdj;
   </div>
 
   <!-- Mini map canvas -->
-  <div class="nav-map-wrap"><canvas id="navCanvas"></canvas></div>
+  <div class="nav-map-wrap">
+    <canvas id="navCanvas"></canvas>
+    <!-- Map label overlay -->
+    <div style="position:absolute;top:6px;left:8px;font-size:.6rem;font-weight:700;
+      color:#38bdf8;background:rgba(8,9,26,.75);border:1px solid #0ea5e9;
+      border-radius:6px;padding:2px 7px;pointer-events:none">
+      🗺️ Floor Route Map
+    </div>
+    <div style="position:absolute;bottom:6px;right:8px;font-size:.58rem;
+      color:var(--muted);background:rgba(8,9,26,.7);border-radius:5px;padding:2px 6px;
+      pointer-events:none">
+      🔴 YOU &nbsp;●● Route &nbsp;⭐ Exit
+    </div>
+  </div>
 
   <!-- Step-by-step list -->
   <div class="nav-steps-wrap">
@@ -1011,9 +1237,27 @@ const NAV = {
 
 // Arrow emoji → heading text
 const ARROWS = {
-  "↑":"Go Straight", "→":"Turn Right", "←":"Turn Left",
-  "↗":"Bear Right",  "↖":"Bear Left",  "↓":"Turn Around",
+  "↑":"Walk Straight", "→":"Turn Right",  "←":"Turn Left",
+  "↗":"Bear Right",    "↖":"Bear Left",   "↓":"Turn Around",
   "🚨":"EMERGENCY EXIT", "🏁":"You have arrived"
+};
+
+// Compass direction names including ordinals
+function compassLabel(angle) {
+  // angle: 0=North, 90=East, 180=South, 270=West (map space)
+  const dirs = [
+    [22.5,"North"],[67.5,"North-East"],[112.5,"East"],[157.5,"South-East"],
+    [202.5,"South"],[247.5,"South-West"],[292.5,"West"],[337.5,"North-West"]
+  ];
+  const a = ((angle % 360) + 360) % 360;
+  for (const [max, name] of dirs) if (a < max) return name;
+  return "North";
+}
+
+const COMPASS_ICONS = {
+  "North":"🧭 N","South":"🧭 S","East":"🧭 E","West":"🧭 W",
+  "North-East":"🧭 NE","North-West":"🧭 NW",
+  "South-East":"🧭 SE","South-West":"🧭 SW"
 };
 
 // ── DIRECTION CALCULATION ─────────────────────────
@@ -1072,7 +1316,6 @@ function buildNavSteps(path) {
     let arrow = "↑";
 
     if (i === 0) {
-      // First step — cardinal direction
       const a = outAngle;
       if (a < 45 || a >= 315) arrow = "↑";
       else if (a < 135) arrow = "→";
@@ -1084,16 +1327,24 @@ function buildNavSteps(path) {
 
     const dist = getEdgeDist(u, v);
     const isExit = GRAPH.exit_nodes.includes(v);
+    const compassDir = compassLabel(outAngle); // e.g. "North", "East"
+    const isTurn = (i > 0 && arrow !== "↑");
+    // Human instruction: "Walk North" or "Turn East"
+    const moveVerb = (i === 0) ? "Walk" : (isTurn ? "Turn" : "Continue");
+    const physInstruction = `${moveVerb} ${compassDir}`;
 
     steps.push({
       arrow,
       action: i === 0 ? "Head " + cardinalName(outAngle) : ARROWS[arrow] || arrow,
+      compass: physInstruction,  // NEW: physical compass instruction
+      compassDir,
       target: getNodeLabel(v),
       dist,
       node: v,
       isExit,
       fromPos: pu,
       toPos: pv,
+      outAngle,
     });
 
     prevAngle = outAngle;
@@ -1103,6 +1354,7 @@ function buildNavSteps(path) {
   if (steps.length > 0) {
     steps[steps.length-1].arrow = "\uD83D\uDEA8";
     steps[steps.length-1].action = "EMERGENCY EXIT";
+    steps[steps.length-1].compass = "You have arrived!";
   }
 
   return steps;
@@ -1113,6 +1365,56 @@ function cardinalName(angle) {
   if (angle < 135) return "East";
   if (angle < 225) return "South";
   return "West";
+}
+
+// ── HEADING COMPARATOR ─────────────────────────────
+// Called every time the phone orientation updates.
+// Shows "Facing East | Need North → Turn Left" in the nav overlay.
+
+function updateNavHeadingCompare() {
+  const overlay = document.getElementById('navOverlay');
+  if (!overlay || !overlay.classList.contains('active')) return;
+  if (!PDR.sensorMode) return;
+
+  const row = document.getElementById('navHeadingCompare');
+  if (row) row.style.display = 'block';
+
+  const mapHeading = ((PDR.heading - PDR.northOffset) + 360) % 360;
+  const facingDir  = compassLabel(mapHeading);
+  document.getElementById('navFacingDir').textContent = facingDir;
+
+  const step = NAV.steps[NAV.currentStep];
+  const reqDir = step ? (step.compassDir || step.compass || '--') : 'Arrived';
+  document.getElementById('navRequiredDir').textContent = reqDir;
+
+  const advice = document.getElementById('navTurnAdvice');
+  if (step && step.outAngle !== undefined) {
+    let diff = mapHeading - step.outAngle;
+    while (diff > 180) diff -= 360;
+    while (diff < -180) diff += 360;
+    if (Math.abs(diff) < 30) {
+      advice.textContent = '✔ On track';
+      advice.style.background = '#052e16'; advice.style.color = '#4ade80';
+      advice.style.borderColor = '#16a34a';
+    } else if (diff > 0) {
+      advice.textContent = '← Turn Left';
+      advice.style.background = '#1a0d2e'; advice.style.color = '#a78bfa';
+      advice.style.borderColor = 'var(--purple)';
+    } else {
+      advice.textContent = 'Turn Right →';
+      advice.style.background = '#1a0d2e'; advice.style.color = '#a78bfa';
+      advice.style.borderColor = 'var(--purple)';
+    }
+  }
+
+  const icon = document.getElementById('navTechIcon');
+  const txt  = document.getElementById('navTechTxt');
+  if (icon) icon.textContent = '✅';
+  if (txt) txt.innerHTML =
+    '<strong style="color:#4ade80">Live sensors active!</strong>' +
+    ' Compass: <strong style="color:#38bdf8">' + Math.round(PDR.heading) + '°</strong>' +
+    ' &nbsp;|&nbsp; Steps: <strong style="color:#a78bfa">' + PDR.stepCount + '</strong>' +
+    ' &nbsp;|&nbsp; Map heading: <strong style="color:#f59e0b">' + Math.round(mapHeading) + '°</strong>';
 }
 
 // ── OPEN / CLOSE NAVIGATION ────────────────────────
@@ -1156,6 +1458,8 @@ function updateNavDisplay() {
     document.getElementById("navProgFill").style.width = "100%";
     document.getElementById("navProgLabel").textContent = "Arrived!";
     document.getElementById("navProgDist").textContent = "0m remaining";
+    const cb = document.getElementById("navCompassBadge");
+    if (cb) cb.textContent = "🏁 Destination reached";
     return;
   }
 
@@ -1164,8 +1468,11 @@ function updateNavDisplay() {
   document.getElementById("navTarget").textContent = "→ " + step.target;
   document.getElementById("navDist").textContent = "~" + step.dist + " meters";
 
+  // Compass badge
+  const cb = document.getElementById("navCompassBadge");
+  if (cb) cb.innerHTML = `<span class="compass-icon">🧭</span> ${step.compass || step.compassDir || ""}`;
+
   // Progress
-  const stepsLeft = NAV.steps.length - NAV.currentStep;
   const distLeft = NAV.steps.slice(NAV.currentStep).reduce((s,st)=>s+st.dist,0);
   document.getElementById("navProgLabel").textContent = `Step ${NAV.currentStep+1} of ${NAV.steps.length}`;
   document.getElementById("navProgDist").textContent = `~${distLeft}m remaining`;
@@ -1177,7 +1484,8 @@ function updateNavDisplay() {
   if (nextStep) {
     document.getElementById("navNextCard").style.display = "flex";
     document.getElementById("navNextIcon").textContent = nextStep.arrow;
-    document.getElementById("navNextTxt").textContent = nextStep.action + " → " + nextStep.target;
+    document.getElementById("navNextTxt").textContent =
+      (nextStep.compass || nextStep.action) + " → " + nextStep.target;
   } else {
     document.getElementById("navNextCard").style.display = "none";
   }
@@ -1200,7 +1508,10 @@ function renderNavStepList() {
       <div class="nav-step-arrow">${step.arrow}</div>
       <div class="nav-step-info">
         <div class="nav-step-action">${step.action}</div>
-        <div class="nav-step-sub">${step.target} &nbsp;&bull;&nbsp; ~${step.dist}m</div>
+        <div class="nav-step-sub">
+          ${step.compass ? `<span style="color:#38bdf8;font-weight:700">${step.compass}</span> &bull; ` : ""}
+          ${step.target} &nbsp;&bull;&nbsp; ~${step.dist}m
+        </div>
       </div>
       ${step.isExit ? '<span class="nav-step-badge">EXIT</span>' : ""}
     </div>
@@ -1345,8 +1656,9 @@ function walkDemoStep(stepIdx) {
     }
   }
 
-  // Smooth interpolation: move dot from fromPos to toPos over (dist * 40)ms
-  const duration = Math.max(1200, step.dist * 40); // ms
+  // Smooth interpolation: move dot from fromPos to toPos
+  // Duration scales with distance so speed feels consistent
+  const duration = Math.max(1500, step.dist * 50); // ms
   const startTime = performance.now();
 
   function animFrame(now) {
@@ -1354,29 +1666,32 @@ function walkDemoStep(stepIdx) {
     const t = Math.min((now - startTime) / duration, 1);
     const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out
 
-    // Update PDR position for overlay drawing
+    // Update smooth position — used by main render() for the YOU pin
     PDR.pos = {
       x: fromPos[0] + (toPos[0]-fromPos[0]) * ease,
       y: fromPos[1] + (toPos[1]-fromPos[1]) * ease,
     };
     PDR.active = true;
 
+    // Also update mini-map pointer in real time
+    drawDemoPointerOnMiniMap(PDR.pos);
+
     if (t < 1) {
       NAV.demoAnimFrame = requestAnimationFrame(animFrame);
     } else {
-      // Arrived at next node
+      // Arrived at next node — snap to exact position
       PDR.pos = {...toPos};
-      // Update currentUser to toNode
+      drawDemoPointerOnMiniMap(PDR.pos);
+
+      // Only update currentUser label (NOT for pathfinding, so the full
+      // path stays highlighted on the main map)
       const toNode = NAV._miniPath[stepIdx+1];
       if (toNode) {
-        currentUser = toNode;
-        const sel = document.getElementById("locSelect");
-        if (sel) sel.value = toNode;
         document.getElementById("userLbl").textContent = toNode.replace(/_/g," ");
         showToast("\uD83D\uDCCD Arrived: " + toNode.replace(/_/g," "));
       }
-      // Pause 800ms then next step
-      setTimeout(() => walkDemoStep(stepIdx+1), 800);
+      // Pause 600ms then advance to next step
+      setTimeout(() => walkDemoStep(stepIdx+1), 600);
     }
   }
 
@@ -1385,6 +1700,7 @@ function walkDemoStep(stepIdx) {
 
 function finishDemoWalk() {
   NAV.demoRunning = false;
+  PDR.active = false;
   NAV.currentStep = NAV.steps.length; // past end
   const btn = document.getElementById("navDemoBtn");
   btn.textContent = "\uD83C\uDFC1 Arrived! Walk Again";
@@ -1402,6 +1718,42 @@ function stopDemoWalk() {
   btn.textContent = "\u25B6 Auto Demo Walk";
   btn.className = "nav-demo-btn";
   btn.onclick = toggleDemoWalk;
+}
+
+// ── MINI-MAP LIVE POINTER ─────────────────────────
+// Redraws only the moving YOU pointer on the mini-map canvas during demo
+function drawDemoPointerOnMiniMap(pos) {
+  const nc = NAV._miniCanvas;
+  const nctx = NAV._miniCtx;
+  if (!nc || !nctx || !NAV._miniPath) return;
+
+  const path = NAV._miniPath;
+  const nsx = NAV._nsx, nsy = NAV._nsy;
+  const NX = x => x * nsx, NY = y => y * nsy, NR = r => r * Math.min(nsx, nsy);
+
+  // Redraw full mini-map (static parts) then pointer on top
+  renderNavMiniMap(path);
+
+  // Draw animated pointer
+  const x = NX(pos.x), y = NY(pos.y);
+  // Glow ring
+  nctx.beginPath();
+  nctx.arc(x, y, NR(14), 0, Math.PI * 2);
+  nctx.strokeStyle = "rgba(239,68,68,0.35)";
+  nctx.lineWidth = NR(2);
+  nctx.stroke();
+  // Filled dot
+  nctx.beginPath();
+  nctx.arc(x, y, NR(9), 0, Math.PI * 2);
+  nctx.fillStyle = "#ef4444";
+  nctx.shadowColor = "#ef4444"; nctx.shadowBlur = NR(12);
+  nctx.fill(); nctx.shadowBlur = 0;
+  nctx.strokeStyle = "rgba(255,255,255,0.4)"; nctx.lineWidth = NR(1.5);
+  nctx.stroke();
+  // YOU label
+  nctx.font = `bold ${NR(8)}px Inter`;
+  nctx.fillStyle = "#fff"; nctx.textAlign = "center"; nctx.textBaseline = "middle";
+  nctx.fillText("YOU", x, y);
 }
 
 // Refresh navigation instructions when crowd data changes (separate interval, no override)

@@ -1,0 +1,6 @@
+requested features:
+
+
+Animated pointer movement during walkthrough — pointer moves step by step along the path
+Correct crowd level display in admin (low/medium/high updates properly with count changes)
+Premium UI with all features

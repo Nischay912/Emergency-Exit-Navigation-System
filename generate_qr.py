@@ -59,9 +59,9 @@ for name in nodes:
     img.save(file)
 
     tag = " [EXIT]" if name in exits else ""
-    print(f"  ✅  {name}{tag}")
-    print(f"       → {url}")
-    print(f"       → saved: {file.name}\n")
+    print(f"  [OK]  {name}{tag}")
+    print(f"       -> {url}")
+    print(f"       -> saved: {file.name}\n")
 
 print(f"\n[QR Generator] Done! Print the PNGs from: {OUT}")
 print("[QR Generator] Place each QR code at the matching location on the floor.\n")
