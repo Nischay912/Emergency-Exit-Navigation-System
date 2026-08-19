@@ -76,9 +76,10 @@ canvas{display:block;width:100%;height:100%;}
   }
   .map-col{height:58%;order:1;flex:none;}
   .info-bar{height:34px;font-size:.75rem;padding:0 12px;}
-  /* collapse legend + walk mode on mobile (not needed for QR scan use-case) */
+  /* collapse legend on mobile */
   .sec.legend-sec{display:none;}
-  .sec.walk-sec{display:none;}
+  /* walk-sec IS shown on mobile — PDR is the core mobile feature */
+  .sec.walk-sec{display:block;}
   /* horizontal exits list */
   #exitList{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;}
   .exit-row{min-width:130px;flex:1;}
@@ -228,37 +229,44 @@ canvas{display:block;width:100%;height:100%;}
       <div class="sec-lbl">All Exits &mdash; Live Crowd</div>
       <div id="exitList"></div>
     </div>
-    <!-- WALK MODE -->
+    <!-- WALK MODE / PDR -->
     <div class="sec walk-sec">
-      <div class="sec-lbl">&#x1F6B6; Walking Mode (PDR)</div>
+      <div class="sec-lbl">&#x1F6B6; PDR Walking Mode</div>
       <div class="walk-card">
-        <button class="walk-btn calib" id="calibBtn" onclick="startCalibration()">&#127759; Calibrate North Direction</button>
-        <!-- Calibration instruction card -->
+        <!-- Step 1: Enable Sensors (iOS needs explicit tap) -->
+        <button class="walk-btn calib" id="enableSensorsBtn" onclick="enableSensors()"
+          style="background:linear-gradient(135deg,#0a2e1e,#0d3820);border:1px solid #16a34a;color:#4ade80">
+          &#128246; Step 1: Enable Phone Sensors
+        </button>
+        <div id="sensorStatusRow" style="
+          display:none;align-items:center;gap:8px;padding:7px 10px;
+          background:#0a1a10;border:1px solid #16a34a;border-radius:8px;
+          font-size:.68rem;color:#4ade80;margin-bottom:6px;margin-top:6px;
+        ">
+          <span style="font-size:1rem" id="sensorIcon">&#128246;</span>
+          <span id="sensorStatusTxt">Waiting for sensors...</span>
+        </div>
+        <!-- Step 2: Calibrate -->
+        <button class="walk-btn calib" id="calibBtn" onclick="startCalibration()" style="margin-top:6px">
+          &#127759; Step 2: Calibrate North
+        </button>
         <div class="calib-card" id="calibCard">
           <strong>How to calibrate:</strong><br>
-          1. Stand still at your current location.<br>
-          2. Face toward the <strong>Staircase North</strong> side of the building (top of floor map).<br>
-          3. Tap the button — your phone compass records that as Map-North.<br>
-          4. Walk and the map dot follows you via compass + step detection.
+          1. Stand at your location (QR scanned).<br>
+          2. Face the <strong>North wall</strong> of your building.<br>
+          3. Tap "Calibrate North" — your phone locks that direction as Map-North.<br>
+          4. Walk and your dot moves with you!
         </div>
-        <button class="walk-btn start" id="walkBtn" onclick="toggleWalkMode()">&#x1F6B6; Start Walking Mode</button>
-        <!-- Sensor status panel (replaces the confusing arrow pad) -->
+        <!-- Step 3: Start Walking -->
+        <button class="walk-btn start" id="walkBtn" onclick="toggleWalkMode()" style="margin-top:6px">&#x1F6B6; Step 3: Start Walking</button>
+        <!-- Live sensor panel -->
         <div id="sensorPanel" style="display:none;margin-top:6px">
-          <div id="sensorStatusRow" style="
-            display:flex;align-items:center;gap:8px;padding:7px 10px;
-            background:#0a1a10;border:1px solid #16a34a;border-radius:8px;
-            font-size:.68rem;color:#4ade80;margin-bottom:6px;
-          ">
-            <span style="font-size:1rem">&#128246;</span>
-            <span id="sensorStatusTxt">Waiting for sensors...</span>
-          </div>
-          <!-- Live compass heading -->
           <div id="liveHeadingRow" style="
             display:flex;align-items:center;justify-content:space-between;
             padding:6px 10px;background:#0a1020;border:1px solid var(--border);
-            border-radius:8px;font-size:.68rem;
+            border-radius:8px;font-size:.68rem;margin-bottom:5px;
           ">
-            <span style="color:var(--muted)">Phone facing:</span>
+            <span style="color:var(--muted)">Facing:</span>
             <span id="liveHeadingTxt" style="color:#38bdf8;font-weight:700">-- &#176;</span>
             <div class="compass-ring" id="compassRing">
               <svg class="compass-svg" id="compassSvg" width="42" height="42" viewBox="0 0 60 60">
@@ -271,12 +279,12 @@ canvas{display:block;width:100%;height:100%;}
               </svg>
             </div>
           </div>
-          <!-- Step count -->
-          <div style="text-align:center;margin-top:5px;font-size:.65rem;color:var(--muted)">
-            Steps detected: <strong id="stepCountTxt" style="color:var(--purple)">0</strong>
+          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);padding:0 2px">
+            <span>Steps: <strong id="stepCountTxt" style="color:var(--purple)">0</strong></span>
+            <span id="accelLive" style="color:#f59e0b">accel: --</span>
           </div>
         </div>
-        <div class="walk-status" id="walkStatus">Scan QR or pick location, then start walking</div>
+        <div class="walk-status" id="walkStatus">Select location &rarr; Enable Sensors &rarr; Calibrate &rarr; Walk</div>
       </div>
     </div>
     <div class="sec legend-sec">
@@ -600,19 +608,58 @@ function render(){
     }
   });
 
-  /* === USER PIN === */
+  /* === USER PIN + PDR TRAIL + DIRECTION ARROW === */
   {
+    // Use PDR position whenever walking is active
     let xr, yr;
-    if (typeof NAV !== 'undefined' && NAV.demoRunning && PDR.active) {
+    if (PDR.active) {
       xr = PDR.pos.x; yr = PDR.pos.y;
     } else {
       const upos = NODE_POS[currentUser]||GRAPH.nodes[currentUser];
       if (upos) { xr = upos[0]; yr = upos[1]; } else { xr = null; }
     }
+
+    // Draw PDR trail underneath the pin
+    if (PDR.active && PDR.trail.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(X(PDR.trail[0].x), Y(PDR.trail[0].y));
+      PDR.trail.forEach((p,i) => { if(i>0) ctx.lineTo(X(p.x), Y(p.y)); });
+      ctx.strokeStyle = "rgba(124,58,237,0.55)";
+      ctx.lineWidth = R(3.5);
+      ctx.setLineDash([R(4), R(5)]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
     if (xr !== null && xr !== undefined) {
       const x=X(xr),y=Y(yr);
       const p=0.5+0.5*Math.sin(Date.now()/500);
-      // Outer pulse
+
+      // Direction arrow (shown when PDR sensor active + walking)
+      if (PDR.active && PDR.sensorMode) {
+        const mapHeading = ((PDR.heading - PDR.northOffset) + 360) % 360;
+        const rad = (mapHeading * Math.PI) / 180;
+        const arrowLen = R(36);
+        const ax = x + arrowLen * Math.sin(rad);
+        const ay = y - arrowLen * Math.cos(rad);
+        // Arrow shaft
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ax, ay);
+        ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = R(3);
+        ctx.shadowColor = "#38bdf8"; ctx.shadowBlur = R(10);
+        ctx.stroke(); ctx.shadowBlur = 0;
+        // Arrow head
+        const hLen = R(10), hAng = 0.45;
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ax - hLen*Math.sin(rad-hAng), ay + hLen*Math.cos(rad-hAng));
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ax - hLen*Math.sin(rad+hAng), ay + hLen*Math.cos(rad+hAng));
+        ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = R(2.5);
+        ctx.shadowColor = "#38bdf8"; ctx.shadowBlur = R(8);
+        ctx.stroke(); ctx.shadowBlur = 0;
+      }
+
+      // Outer pulse ring
       ctx.beginPath();ctx.arc(x,y,R(14)+p*R(6),0,Math.PI*2);
       ctx.strokeStyle=`rgba(239,68,68,${0.4*p})`;ctx.lineWidth=R(3);ctx.stroke();
       // Inner fill
@@ -735,15 +782,17 @@ const PDR = {
   active: false,
   // Position in DESIGN coordinates (same space as NODE_POS)
   pos: {x: 0, y: 0},
-  // Step detection
+  // Step detection — lower threshold works better for real walking
   stepCount: 0,
   lastMag: 0,
   stepCooldown: false,
-  STEP_THRESH: 10,       // m/s² spike to count as step
-  STEP_LEN: 22,          // design units per step (~1m on floor)
+  STEP_THRESH: 1.8,      // m/s² delta above gravity — tuned for walking pace
+  STEP_LEN: 22,          // design units per step (~0.7m on floor plan)
+  lastAccelMag: 0,       // smoothed magnitude for peak detection
+  peakDetected: false,   // true while above threshold (detect rising edge only)
   // Compass
-  heading: 0,            // degrees, magnetic
-  northOffset: 0,        // calibration: magnetic north → map north
+  heading: 0,            // degrees, magnetic north
+  northOffset: 0,        // calibration: phone-north → map-north
   calibrated: false,
   // Drift tracking
   stepsSinceCorrection: 0,
@@ -751,7 +800,8 @@ const PDR = {
   trail: [],
   MAX_TRAIL: 40,
   // Sensor mode
-  sensorMode: false,     // true = real sensors, false = d-pad
+  sensorMode: false,     // true = real sensors active
+  sensorsEnabled: false, // true = permission granted
 };
 
 // ── UTILS ──────────────────────────────────────
@@ -907,55 +957,109 @@ function drawWalkOverlay() {
 const _origRender = window._renderPatchDone;
 
 // ── SENSOR SETUP ────────────────────────────────
+// Call this from the "Enable Sensors" button — must be a user gesture for iOS
+function enableSensors() {
+  const btn = document.getElementById('enableSensorsBtn');
+  const row = document.getElementById('sensorStatusRow');
+  if (row) row.style.display = 'flex';
+  const st = document.getElementById('sensorStatusTxt');
+  const ic = document.getElementById('sensorIcon');
+
+  if (typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission === 'function') {
+    // iOS 13+ — MUST be called from a user gesture (button tap)
+    DeviceMotionEvent.requestPermission().then(motionState => {
+      return DeviceOrientationEvent.requestPermission().then(orientState => {
+        if (motionState === 'granted' && orientState === 'granted') {
+          attachSensors();
+          if (btn) btn.textContent = '✅ Sensors Enabled';
+          if (btn) btn.style.borderColor = '#16a34a';
+          if (st) st.textContent = 'Motion + Compass ready!';
+          if (ic) ic.textContent = '✅';
+        } else {
+          if (st) st.textContent = 'Permission denied — sensors blocked';
+          if (ic) ic.textContent = '⚠️';
+          showToast('⚠️ Sensor permission denied');
+        }
+      });
+    }).catch(err => {
+      if (st) st.textContent = 'Permission error: ' + err.message;
+      showToast('Sensor error: ' + err.message);
+    });
+  } else if (typeof DeviceMotionEvent !== 'undefined') {
+    // Android / desktop — no permission needed
+    attachSensors();
+    if (btn) btn.textContent = '✅ Sensors Enabled';
+    if (btn) btn.style.borderColor = '#16a34a';
+    if (st) st.textContent = 'Motion + Compass active!';
+    if (ic) ic.textContent = '✅';
+    PDR.sensorsEnabled = true;
+  } else {
+    if (st) st.textContent = 'No motion sensors on this device';
+    if (ic) ic.textContent = '⚠️';
+    showToast('⚠️ No sensors — use Navigate to Exit for directions');
+  }
+}
 
 function requestSensors() {
-  // iOS 13+ requires explicit permission for DeviceMotion/Orientation
-  if (typeof DeviceMotionEvent !== "undefined" &&
-      typeof DeviceMotionEvent.requestPermission === "function") {
-    DeviceMotionEvent.requestPermission().then(state => {
-      if (state === "granted") {
-        attachSensors();
-      } else {
-        fallbackManualMode();
-      }
-    }).catch(() => fallbackManualMode());
-  } else if (typeof DeviceMotionEvent !== "undefined") {
-    // Android / other — no permission needed
+  // Called internally after walk start (sensors already enabled by button)
+  if (PDR.sensorsEnabled) return; // already attached
+  if (typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission !== 'function') {
+    // Android — attach directly
     attachSensors();
-  } else {
-    fallbackManualMode();
   }
 }
 
 function attachSensors() {
   PDR.sensorMode = true;
-  window.addEventListener("devicemotion", onDeviceMotion, {passive:true});
-  window.addEventListener("deviceorientation", onDeviceOrientation, {passive:true});
-  showToast("✅ Motion + Compass active!");
-  // compassRing is inside sensorPanel, which is already shown by toggleWalkMode
+  PDR.sensorsEnabled = true;
+  window.addEventListener('devicemotion', onDeviceMotion, {passive:true});
+  window.addEventListener('deviceorientation', onDeviceOrientation, {passive:true});
+  showToast('✅ Motion + Compass active!');
 }
 
 function fallbackManualMode() {
   PDR.sensorMode = false;
-  // No arrow pad — in real emergency, user follows the on-screen route arrow
-  setWalkStatus("⚠️ Sensors not available on this device. Follow the on-screen arrow directions.");
-  showToast("⚠️ No motion sensors — use Navigate to Exit for directions");
+  setWalkStatus('⚠️ No motion sensors. Use Navigate to Exit for directions.');
+  showToast('⚠️ No motion sensors detected');
 }
 
 function onDeviceMotion(event) {
-  if (!PDR.active) return;
-  const acc = event.acceleration || event.accelerationIncludingGravity;
+  // Always update accel display even if not in walk mode
+  const acc = event.accelerationIncludingGravity || event.acceleration;
   if (!acc) return;
-  const mag = Math.sqrt((acc.x||0)**2 + (acc.y||0)**2 + (acc.z||0)**2);
+  const rawMag = Math.sqrt((acc.x||0)**2 + (acc.y||0)**2 + (acc.z||0)**2);
 
-  // Step detection: look for rising edge crossing threshold
-  if (mag > PDR.STEP_THRESH && PDR.lastMag <= PDR.STEP_THRESH && !PDR.stepCooldown) {
+  // Show live accel on UI for debugging
+  const accelEl = document.getElementById('accelLive');
+  if (accelEl) accelEl.textContent = 'accel: ' + rawMag.toFixed(1);
+
+  if (!PDR.active) return;
+
+  // Smooth the magnitude with exponential moving average
+  const smooth = 0.6;
+  PDR.lastAccelMag = smooth * PDR.lastAccelMag + (1 - smooth) * rawMag;
+
+  // Step detection: rising-edge peak detection
+  // On a phone: gravity ≈ 9.8, walking adds ±1-3 m/s² — detect spikes above gravity baseline
+  const gravityEst = 9.8;
+  const delta = rawMag - gravityEst;
+
+  if (delta > PDR.STEP_THRESH && !PDR.peakDetected && !PDR.stepCooldown) {
+    PDR.peakDetected = true;
     PDR.stepCooldown = true;
     const mapHeading = ((PDR.heading - PDR.northOffset) + 360) % 360;
     applyStep(mapHeading);
-    setTimeout(() => { PDR.stepCooldown = false; }, 350);
+    // Update step count display
+    const sc = document.getElementById('stepCountTxt');
+    if (sc) sc.textContent = PDR.stepCount;
+    setTimeout(() => { PDR.stepCooldown = false; }, 400);
+  } else if (delta <= 0) {
+    PDR.peakDetected = false; // reset for next peak
   }
-  PDR.lastMag = mag;
+
+  PDR.lastMag = rawMag;
 }
 
 function onDeviceOrientation(event) {
@@ -1038,51 +1142,43 @@ function manualStep(headingDeg) {
 
 function toggleWalkMode() {
   PDR.active = !PDR.active;
-  const btn = document.getElementById("walkBtn");
-  const panel = document.getElementById("sensorPanel");
+  const btn = document.getElementById('walkBtn');
+  const panel = document.getElementById('sensorPanel');
 
   if (PDR.active) {
     const startPos = NODE_POS[currentUser];
     if (!startPos) {
-      showToast("⚠ Please select your location first");
+      showToast('⚠ Please select your location first');
       PDR.active = false;
       return;
     }
+    if (!PDR.sensorsEnabled) {
+      showToast('⚠ Tap "Enable Phone Sensors" first!');
+      PDR.active = false;
+      return;
+    }
+
     PDR.pos = {x: startPos[0], y: startPos[1]};
     PDR.stepCount = 0;
     PDR.stepsSinceCorrection = 0;
     PDR.trail = [];
+    PDR.lastAccelMag = 9.8;
+    PDR.peakDetected = false;
 
-    btn.textContent = "⏹ Stop Walking Mode";
-    btn.className = "walk-btn stop";
-    if (panel) panel.style.display = "block";
+    btn.textContent = '⏹ Stop Walking';
+    btn.className = 'walk-btn stop';
+    if (panel) panel.style.display = 'block';
 
-    // Try real sensors
-    requestSensors();
-    showToast("🚶 Walking mode ON — sensors activating...");
-
-    // Update sensor status text after a short wait
-    setTimeout(() => {
-      const st = document.getElementById("sensorStatusTxt");
-      if (PDR.sensorMode && st) {
-        st.textContent = "✅ Motion + Compass sensors active";
-      } else if (st) {
-        st.textContent = "⚠️ Sensors not available — demo mode only";
-        st.style.color = "#f59e0b";
-        document.getElementById("sensorStatusRow").style.borderColor = "#f59e0b";
-      }
-    }, 1200);
+    setWalkStatus('🚶 Walking... dot follows your steps');
+    showToast('🚶 Walking mode ON — start moving!');
 
   } else {
-    btn.textContent = "🚶 Start Walking Mode";
-    btn.className = "walk-btn start";
-    if (panel) panel.style.display = "none";
-    window.removeEventListener("devicemotion", onDeviceMotion);
-    window.removeEventListener("deviceorientation", onDeviceOrientation);
-    PDR.sensorMode = false;
+    btn.textContent = '🚶 Step 3: Start Walking';
+    btn.className = 'walk-btn start';
+    if (panel) panel.style.display = 'none';
     PDR.trail = [];
-    setWalkStatus("Scan QR or pick location, then start walking");
-    showToast("Walking mode OFF");
+    setWalkStatus('Select location → Enable Sensors → Calibrate → Walk');
+    showToast('Walking mode OFF');
   }
 }
 

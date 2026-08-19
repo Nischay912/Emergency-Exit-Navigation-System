@@ -1,0 +1,40 @@
+# ========================
+# Security - NEVER commit
+# ========================
+*.pem
+*.key
+*.crt
+*.p12
+
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.env
+venv/
+env/
+.venv/
+
+# ========================
+# Generated / Runtime files
+# ========================
+qr_codes/
+# Uncomment below if you want to exclude the runtime state JSONs:
+# data/crowd_state.json
+# data/room_state.json
+
+# ========================
+# Large model weights (optional - see note below)
+# ========================
+# yolov8n.pt
+
+# ========================
+# OS / Editor junk
+# ========================
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp

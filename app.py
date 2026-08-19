@@ -105,9 +105,24 @@ def api_status():
     })
 
 if __name__ == "__main__":
-    print("="*50)
-    print("  Emergency Exit System -- Running")
-    print("  Map   -> http://localhost:5000/")
-    print("  Admin -> http://localhost:5000/admin")
-    print("="*50)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        local_ip = "YOUR_PC_IP"
+
+    print("=" * 60)
+    print("  Emergency Exit System — Running")
+    print("=" * 60)
+    print(f"  Local PC    -> http://localhost:5000/")
+    print(f"  Local Phone -> http://{local_ip}:5000/")
+    print()
+    print("  For PHONE SENSORS (PDR), use ngrok:")
+    print("    ngrok http 5000")
+    print("  Then open the ngrok https:// URL on your phone.")
+    print("=" * 60)
+
+    app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)
