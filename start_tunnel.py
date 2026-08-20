@@ -8,9 +8,13 @@ Usage:
 """
 
 from pyngrok import ngrok, conf
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Your ngrok auth token
-AUTH_TOKEN = "3I9WmfJZn9IlA8C2Z4Ig3xixk06_46Chof1JwynYB4i4H26M6"
+AUTH_TOKEN = os.getenv("NGROK_AUTHTOKEN")
 
 conf.get_default().auth_token = AUTH_TOKEN
 
