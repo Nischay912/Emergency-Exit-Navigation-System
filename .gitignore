@@ -38,3 +38,9 @@ qr_codes/
 Thumbs.db
 .vscode/
 *.swp
+
+# ========================
+# Internal / Dev-only files
+# ========================
+see.txt
+web_demo/
