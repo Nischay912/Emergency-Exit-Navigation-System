@@ -37,9 +37,15 @@ def count_to_level(n):
 ALARM_ACTIVE = False
 
 # ── PAGES ──
+from flask import make_response
+
 @app.route("/")
 def index():
-    return render_template("index.html", user_node="Library")
+    resp = make_response(render_template("index.html", user_node="Library"))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 @app.route("/locate/<node_id>")
 def locate(node_id):

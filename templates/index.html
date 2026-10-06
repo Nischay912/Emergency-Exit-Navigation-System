@@ -356,7 +356,7 @@ canvas{display:block;width:100%;height:100%;}
 <script>
 const USER_NODE_INIT="{{user_node}}";
 const POLL_MS=4000;
-const CROWD_MULT={Low:1,Medium:2.5,High:6};
+const CROWD_MULT={Low:1,Medium:4,High:30};
 const LEVEL_THRESH={low:20,med:55};
 
 let GRAPH=null,crowdData={},roomData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
@@ -405,13 +405,13 @@ const X=x=>x*sx,Y=y=>y*sy,R=r=>r*Math.min(sx,sy);
 
 /* Room rectangles for floor-plan style drawing */
 const ROOM_RECTS={
-  Classroom_A:  {x: 140, y: 40, w: 120, h: 80, icon: "🎓"},
-  Classroom_B:  {x: 380, y: 40, w: 160, h: 80, icon: "📚"},
-  AI_Lab:       {x: 540, y: 120, w: 120, h: 80, icon: "💻"},
-  HOD_Cabin:    {x: 140, y: 440, w: 120, h: 80, icon: "🧑‍💼"},
-  Staff_Lounge: {x: 380, y: 240, w: 160, h: 80, icon: "☕"},
-  Server_Room:  {x: 660, y: 440, w: 160, h: 80, icon: "🖧"},
-  Library:      {x: 140, y: 240, w: 120, h: 80, icon: "📖"}
+  Classroom_A:  {x: 140, y: 40, w: 120, h: 80, icon: "\uD83C\uDF93"},
+  Classroom_B:  {x: 380, y: 40, w: 160, h: 80, icon: "\uD83D\uDCDA"},
+  AI_Lab:       {x: 540, y: 120, w: 120, h: 80, icon: "\uD83D\uDCBB"},
+  HOD_Cabin:    {x: 140, y: 440, w: 120, h: 80, icon: "\uD83D\uDCBC"},
+  Staff_Lounge: {x: 380, y: 240, w: 160, h: 80, icon: "\u2615"},
+  Server_Room:  {x: 660, y: 440, w: 160, h: 80, icon: "\uD83D\uDDA5"},
+  Library:      {x: 140, y: 240, w: 120, h: 80, icon: "\uD83D\uDCD6"}
 };
 const CORRIDORS=[
   {x: 80, y: 60, w: 40, h: 440}, // West V
@@ -1495,6 +1495,7 @@ const _origBuildAdj = buildAdj;
       ">
         <option value="en-IN">🇬🇧 EN</option>
         <option value="hi-IN">🇮🇳 HI</option>
+        <option value="kn-IN">🇮🇳 KN</option>
       </select>
     </div>
     <button class="nav-demo-btn" id="navDemoBtn" onclick="toggleDemoWalk()" style="width:100%">&#9654; Auto Demo Walk</button>
@@ -1537,6 +1538,26 @@ const HINDI_PHRASES = {
   "🚨": "आप आपातकालीन निकास पर पहुंच गए हैं। सुरक्षित बाहर निकलें!"
 };
 
+const KANNADA_PHRASES = {
+  "↑": "ನೇರವಾಗಿ ಹೋಗಿ",
+  "→": "ಬಲಕ್ಕೆ ತಿರುಗಿ",
+  "←": "ಎಡಕ್ಕೆ ತಿರುಗಿ",
+  "↗": "ಸ್ವಲ್ಪ ಬಲಕ್ಕೆ ಹೋಗಿ",
+  "↖": "ಸ್ವಲ್ಪ ಎಡಕ್ಕೆ ಹೋಗಿ",
+  "↓": "ಹಿಂದೆ ತಿರುಗಿ",
+  "🚨": "ನೀವು ತುರ್ತು ನಿರ್ಗಮನವನ್ನು ತಲುಪಿದ್ದೀರಿ. ಸುರಕ್ಷಿತವಾಗಿ ಹೊರಬನ್ನಿ!"
+};
+
+const KANNADA_PHRASES = {
+  "↑": "ನೇರವಾಗಿ ಹೋಗಿ",
+  "→": "ಬಲಕ್ಕೆ ತಿರುಗಿ",
+  "←": "ಎಡಕ್ಕೆ ತಿರುಗಿ",
+  "↗": "ಸ್ವಲ್ಪ ಬಲಕ್ಕೆ ಹೋಗಿ",
+  "↖": "ಸ್ವಲ್ಪ ಎಡಕ್ಕೆ ಹೋಗಿ",
+  "↓": "ಹಿಂದೆ ತಿರುಗಿ",
+  "🚨": "ನೀವು ತುರ್ತು ನಿರ್ಗಮನವನ್ನು ತಲುಪಿದ್ದೀರಿ. ಸುರಕ್ಷಿತವಾಗಿ ಹೊರಬನ್ನಿ!"
+};
+
 // Must be called on a direct user tap to unlock audio on iOS/Android
 function unlockAudio() {
   if (window.speechSynthesis) {
@@ -1553,7 +1574,7 @@ function speak(text) {
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = VOICE.lang;
-  utter.rate = VOICE.lang === 'hi-IN' ? 0.85 : 0.95; 
+  utter.rate = VOICE.lang === 'hi-IN' || VOICE.lang === 'kn-IN' ? 0.85 : 0.95; 
   utter.pitch = 1.0;
   utter.volume = 1.0;
   VOICE.speaking = true;
@@ -1567,19 +1588,25 @@ function speakStep(stepIdx) {
   const step = NAV.steps[stepIdx];
   
   if (!step) {
-    speak(VOICE.lang === 'hi-IN' ? HINDI_PHRASES["🚨"] : "You have reached the emergency exit. Please evacuate safely.");
+    const exitMsg = VOICE.lang === 'hi-IN' ? HINDI_PHRASES["🚨"] : VOICE.lang === 'kn-IN' ? KANNADA_PHRASES["🚨"] : "You have reached the emergency exit. Please evacuate safely.";
+    speak(exitMsg);
     return;
   }
   
   const arrow = step.arrow;
   let phrase = "";
-  let target = step.target.replace(/[🏫🚪]/g,"").trim();
+  let target = step.target.replace(/[🏫🚪🎓📚💻🧑‍💼☕🖧📖]/g,"").trim();
 
   if (VOICE.lang === 'hi-IN') {
     if (arrow === "🚨") phrase = HINDI_PHRASES["🚨"];
     else if (HINDI_PHRASES[arrow]) phrase = `${target} ${HINDI_PHRASES[arrow]}`;
     else phrase = `${target} की ओर जाएं`;
     if (step.dist && arrow !== "🚨") phrase += `, लगभग ${step.dist} मीटर।`;
+  } else if (VOICE.lang === 'kn-IN') {
+    if (arrow === "🚨") phrase = KANNADA_PHRASES["🚨"];
+    else if (KANNADA_PHRASES[arrow]) phrase = `${target} ಕಡೆಗೆ ${KANNADA_PHRASES[arrow]}`;
+    else phrase = `${target} ಕಡೆಗೆ ಹೋಗಿ`;
+    if (step.dist && arrow !== "🚨") phrase += `, ಸುಮಾರು ${step.dist} ಮೀಟರ್.`;
   } else {
     if (arrow === "↑")   phrase = `Go straight toward ${target}`;
     else if (arrow === "→")  phrase = `Turn right toward ${target}`;
@@ -1866,9 +1893,6 @@ function closeNavigation() {
 function updateNavDisplay() {
   const step = NAV.steps[NAV.currentStep];
 
-  // 🔊 Speak the current instruction
-  speakStep(NAV.currentStep);
-
   if (!step) {
     document.getElementById("navAction").textContent = "\uD83C\uDFC1 You have arrived!";
     document.getElementById("navArrow").textContent = "\uD83C\uDFC1";
@@ -2058,6 +2082,7 @@ function walkDemoStep(stepIdx) {
 
   NAV.currentStep = stepIdx;
   updateNavDisplay();
+  speakStep(stepIdx);
 
   const step = NAV.steps[stepIdx];
   const fromPos = step.fromPos;
@@ -2079,7 +2104,7 @@ function walkDemoStep(stepIdx) {
 
   // Smooth interpolation: move dot from fromPos to toPos
   // Duration scales with distance so speed feels consistent
-  const duration = Math.max(1500, step.dist * 50); // ms
+  const duration = Math.max(3000, step.dist * 150); // ms (Slower for voice to finish)
   const startTime = performance.now();
 
   function animFrame(now) {

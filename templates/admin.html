@@ -362,8 +362,8 @@ async function simStep(){
 function toggleSim(){
   simRunning=!simRunning;
   const b=document.getElementById("simBtn");
-  if(simRunning){b.textContent="&#9209; Stop Simulation";b.className="action-btn btn-stop";simStep();simInterval=setInterval(simStep,4000);}
-  else{b.textContent="&#127922; Start Auto-Simulate";b.className="action-btn btn-purple";clearInterval(simInterval);}
+  if(simRunning){b.innerHTML="&#9209; Stop Simulation";b.className="action-btn btn-stop";simStep();simInterval=setInterval(simStep,4000);}
+  else{b.innerHTML="&#127922; Start Auto-Simulate";b.className="action-btn btn-purple";clearInterval(simInterval);}
 }
 
 async function toggleGlobalAlarm(){
