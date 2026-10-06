@@ -33,10 +33,13 @@ def count_to_level(n):
     if n <= 55:  return "Medium"
     return "High"
 
+# Global alarm state in-memory
+ALARM_ACTIVE = False
+
 # ── PAGES ──
 @app.route("/")
 def index():
-    return render_template("index.html", user_node="Lobby")
+    return render_template("index.html", user_node="Library")
 
 @app.route("/locate/<node_id>")
 def locate(node_id):
@@ -47,9 +50,38 @@ def locate(node_id):
 
 @app.route("/admin")
 def admin():
+    # Simple password protection for demo purposes
+    # E.g. /admin?pwd=admin
+    pwd = request.args.get("pwd")
+    if pwd != "admin":
+        return """
+        <div style="font-family:sans-serif; text-align:center; margin-top:100px;">
+            <h2>Admin Panel Restricted</h2>
+            <form onsubmit="window.location.href='/admin?pwd=' + document.getElementById('pwd').value; return false;">
+                <input type="password" id="pwd" placeholder="Enter Password" style="padding:8px; font-size:16px;">
+                <button type="submit" style="padding:8px 16px; font-size:16px;">Login</button>
+            </form>
+            <p style="color:#666; font-size:12px;">(Hint: password is "admin")</p>
+        </div>
+        """
     return render_template("admin.html")
 
 # ── API ──
+@app.route("/api/alarm", methods=["GET"])
+def get_alarm():
+    global ALARM_ACTIVE
+    return jsonify({"active": ALARM_ACTIVE})
+
+@app.route("/api/alarm", methods=["POST"])
+def post_alarm():
+    global ALARM_ACTIVE
+    data = request.get_json(force=True) or {}
+    if "active" in data:
+        ALARM_ACTIVE = bool(data["active"])
+    else:
+        ALARM_ACTIVE = not ALARM_ACTIVE # toggle
+    return jsonify({"active": ALARM_ACTIVE})
+
 @app.route("/api/graph")
 def api_graph():
     return jsonify(load_json(GRAPH_FILE))
@@ -101,7 +133,8 @@ def api_status():
         "camera_exit": g.get("camera_exit", "Main_Entrance"),
         "crowd": {k: {"count": v, "level": count_to_level(v)} for k, v in crowd.items()},
         "rooms": rooms,
-        "total_people": total
+        "total_people": total,
+        "alarm_active": ALARM_ACTIVE
     })
 
 if __name__ == "__main__":

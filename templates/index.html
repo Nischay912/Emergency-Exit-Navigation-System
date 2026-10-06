@@ -67,34 +67,72 @@ canvas{display:block;width:100%;height:100%;}
 @media(max-width:768px){
   header{height:44px;}
   .app{flex-direction:column;height:calc(100vh - 44px);}
+
+  /* Map gets 65% — more space to see routes */
+  .map-col{height:65%;order:1;flex:none;}
+  .info-bar{
+    height:auto;min-height:32px;font-size:.72rem;
+    padding:5px 12px;flex-wrap:wrap;gap:4px;line-height:1.4;
+  }
+
+  /* Bottom panel — clean card style */
   .sidebar{
     width:100%;min-width:0;flex-direction:column;
-    height:42%;max-height:42%;
+    height:35%;max-height:35%;
     border-right:none;border-top:2px solid var(--red);
-    order:2;padding:8px 12px;overflow-y:auto;
-    flex-shrink:0;gap:8px;
+    order:2;padding:10px 12px 6px;overflow-y:auto;
+    flex-shrink:0;gap:10px;
+    background:linear-gradient(180deg,#0b1020,#080c1c);
   }
-  .map-col{height:58%;order:1;flex:none;}
-  .info-bar{height:34px;font-size:.75rem;padding:0 12px;}
-  /* collapse legend on mobile */
+
+  /* Hide legend, rec-card section label on mobile for space */
   .sec.legend-sec{display:none;}
-  /* walk-sec IS shown on mobile — PDR is the core mobile feature */
   .sec.walk-sec{display:block;}
-  /* horizontal exits list */
-  #exitList{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;}
-  .exit-row{min-width:130px;flex:1;}
-  /* compact location card */
+
+  /* Compact location selector */
+  .loc-card{padding:8px 10px;}
+  .loc-card .at{font-size:.6rem;}
+  .loc-card .name{font-size:.9rem;}
   .loc-card .hint{display:none;}
-  /* bigger nav overlay text on mobile */
+  .loc-select{padding:6px 8px;font-size:.8rem;margin-top:4px;}
+
+  /* Exits row — horizontal chips */
+  #exitList{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;}
+  .exit-row{min-width:120px;flex:1;padding:5px 8px;}
+  .exit-row-name{font-size:.7rem;}
+  .cpill{font-size:.58rem;}
+
+  /* Nav overlay bigger text */
   .nav-action{font-size:1.3rem;}
   .nav-arrow{font-size:3rem;}
   .nav-compass-badge{font-size:.82rem!important;padding:6px 14px!important;}
 }
+
 @media(max-width:480px){
   .badge-cam{display:none;}
   .logo p{display:none;}
-  .sidebar{height:40%;max-height:40%;}
-  .map-col{height:60%;}
+  .map-col{height:62%;}
+  .sidebar{height:38%;max-height:38%;}
+}
+
+/* MOBILE PDR BUTTONS — bigger, cleaner, finger-friendly */
+@media(max-width:768px){
+  .walk-card{padding:8px 10px;border-radius:12px;}
+  .walk-btn{
+    padding:12px 10px;font-size:.85rem;border-radius:10px;
+    margin-bottom:8px;letter-spacing:.2px;
+  }
+  .walk-btn.calib{padding:11px 10px;}
+  .walk-status{font-size:.68rem;margin-top:6px;}
+
+  /* Sensor status row — cleaner */
+  #sensorStatusRow{
+    border-radius:10px!important;padding:8px 12px!important;
+    font-size:.72rem!important;margin:6px 0!important;
+  }
+  /* Sensor panel stats */
+  #sensorPanel{margin-top:8px!important;}
+  #liveHeadingRow{border-radius:10px!important;padding:8px 12px!important;}
 }
 
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -188,10 +226,22 @@ canvas{display:block;width:100%;height:100%;}
 }
 .calib-card.show{display:block;}
 .calib-card strong{color:#86efac;font-weight:700;}
+/* ALARM FLASH CSS */
+@keyframes flash {
+  0%, 100% { background: rgba(239, 68, 68, 0); }
+  50% { background: rgba(239, 68, 68, 0.4); }
+}
+.alarm-overlay {
+  position: fixed; inset: 0; pointer-events: none;
+  z-index: 9999; display: none; animation: flash 0.6s infinite;
+}
+
 @media(max-width:768px){.nav-action{font-size:1.2rem;}.nav-arrow{font-size:2.8rem;}}
 </style>
 </head>
 <body>
+<div id="emergencyFlash" class="alarm-overlay"></div>
+
 <header>
   <div class="logo">
     <div class="logo-icon">&#128680;</div>
@@ -281,6 +331,7 @@ canvas{display:block;width:100%;height:100%;}
           </div>
           <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);padding:0 2px">
             <span>Steps: <strong id="stepCountTxt" style="color:var(--purple)">0</strong></span>
+            <span>Speed: <strong id="speedTxt" style="color:#10b981">0.0 km/h</strong></span>
             <span id="accelLive" style="color:#f59e0b">accel: --</span>
           </div>
         </div>
@@ -354,41 +405,41 @@ const X=x=>x*sx,Y=y=>y*sy,R=r=>r*Math.min(sx,sy);
 
 /* Room rectangles for floor-plan style drawing */
 const ROOM_RECTS={
-  HOD_Cabin:   {x:20, y:140,w:115,h:85, icon:"\uD83D\uDC54",fill:"#0d1e3c",label:"HOD Cabin"},
-  Server_Room: {x:20, y:245,w:115,h:75, icon:"\uD83D\uDDA5",fill:"#0d1e3c",label:"Server Room"},
-  Lobby:       {x:20, y:335,w:115,h:80, icon:"\uD83C\uDFE2",fill:"#0d2230",label:"Lobby"},
-  Staff_Room:  {x:185,y:20, w:150,h:100,icon:"\uD83D\uDC65",fill:"#0d1e3c",label:"Staff Room"},
-  Lab_1:       {x:385,y:20, w:145,h:100,icon:"\uD83D\uDD2C",fill:"#0d1a3c",label:"Lab 1"},
-  Lab_2:       {x:580,y:20, w:145,h:115,icon:"\uD83D\uDD2C",fill:"#0d1a3c",label:"Lab 2"},
-  Classroom_1: {x:385,y:175,w:145,h:100,icon:"\uD83D\uDCDA",fill:"#0d1e3c",label:"Classroom 1"},
-  Classroom_2: {x:580,y:175,w:145,h:115,icon:"\uD83D\uDCDA",fill:"#0d1e3c",label:"Classroom 2"},
-  Classroom_3: {x:385,y:440,w:145,h:100,icon:"\uD83D\uDCDA",fill:"#0d1e3c",label:"Classroom 3"},
+  Classroom_A:  {x: 140, y: 40, w: 120, h: 80, icon: "🎓"},
+  Classroom_B:  {x: 380, y: 40, w: 160, h: 80, icon: "📚"},
+  AI_Lab:       {x: 540, y: 120, w: 120, h: 80, icon: "💻"},
+  HOD_Cabin:    {x: 140, y: 440, w: 120, h: 80, icon: "🧑‍💼"},
+  Staff_Lounge: {x: 380, y: 240, w: 160, h: 80, icon: "☕"},
+  Server_Room:  {x: 660, y: 440, w: 160, h: 80, icon: "🖧"},
+  Library:      {x: 140, y: 240, w: 120, h: 80, icon: "📖"}
 };
 const CORRIDORS=[
-  {x:135,y:330,w:695,h:50,fill:"#0c1525"},
-  {x:135,y:120,w:50, h:215,fill:"#0c1525"},
-  {x:530,y:120,w:50, h:320,fill:"#0c1525"},
+  {x: 80, y: 60, w: 40, h: 440}, // West V
+  {x: 80, y: 260, w: 740, h: 40}, // Main H
+  {x: 300, y: 60, w: 40, h: 240}, // Mid1 V (North to Mid1)
+  {x: 580, y: 260, w: 40, h: 240}, // Mid2 V (Mid2 to South)
+  {x: 580, y: 140, w: 40, h: 120} // Connect AI lab
 ];
 /* Node centers mapped onto floor plan */
 const NODE_POS={
-  HOD_Cabin:     [77,  183],
-  Server_Room:   [77,  283],
-  Lobby:         [77,  375],
-  Staff_Room:    [260, 70 ],
-  Lab_1:         [457, 70 ],
-  Lab_2:         [652, 77 ],
-  Classroom_1:   [457, 225],
-  Classroom_2:   [652, 232],
-  Classroom_3:   [457, 490],
-  CorridorMain:  [390, 355],
-  CorridorNorth: [160, 230],
-  CorridorSouth: [390, 490],
-  CorridorEast:  [555, 355],
-  Main_Entrance: [77,  540],
-  Staircase_North:[160,20 ],
-  Exit_East:     [830, 355],
-  Exit_South:    [390, 555],
-  Exit_West:     [20,  355],
+  Intersection_West: [100, 280],
+  Intersection_Mid1: [320, 280],
+  Intersection_Mid2: [600, 280],
+  Corridor_North: [320, 80],
+  Corridor_South: [600, 480],
+  Corridor_West_N: [100, 80],
+  Corridor_West_S: [100, 480],
+  Corridor_East: [780, 280],
+  Classroom_A: [200, 80],
+  Classroom_B: [460, 80],
+  AI_Lab: [600, 160],
+  HOD_Cabin: [200, 480],
+  Staff_Lounge: [460, 280],
+  Server_Room: [740, 480],
+  Library: [200, 280],
+  Main_Staircase: [100, 30],
+  East_Fire_Exit: [850, 280],
+  South_Emergency_Stairs: [600, 540]
 };
 
 function resizeCanvas(){
@@ -419,14 +470,16 @@ function render(){
 
   /* === BACKGROUND === */
   const bg=ctx.createLinearGradient(0,0,0,ch);
-  bg.addColorStop(0,"#060818");bg.addColorStop(1,"#07091e");
+  bg.addColorStop(0,"#02040a");bg.addColorStop(1,"#040816");
   ctx.fillStyle=bg;ctx.fillRect(0,0,cw,ch);
 
-  /* subtle dot-grid (much lighter than before) */
-  ctx.fillStyle="rgba(30,47,85,0.25)";
-  for(let gx=0;gx<cw;gx+=R(40))for(let gy=0;gy<ch;gy+=R(40)){
-    ctx.beginPath();ctx.arc(gx,gy,R(0.8),0,Math.PI*2);ctx.fill();
-  }
+  /* Cyberpunk Grid (Neon lines instead of dots) */
+  ctx.lineWidth=R(0.5);
+  ctx.strokeStyle="rgba(14, 165, 233, 0.08)";
+  ctx.beginPath();
+  for(let gx=0;gx<cw;gx+=R(40)){ ctx.moveTo(gx,0); ctx.lineTo(gx,ch); }
+  for(let gy=0;gy<ch;gy+=R(40)){ ctx.moveTo(0,gy); ctx.lineTo(cw,gy); }
+  ctx.stroke();
 
   /* === DIJKSTRA === */
   const adj=buildAdj();
@@ -440,16 +493,27 @@ function render(){
 
   /* === BUILDING OUTLINE === */
   ctx.save();
-  ctx.shadowColor="#1e3a5f";ctx.shadowBlur=R(20);
-  drawRoundRect(X(15),Y(15),X(850),Y(550),R(14),null,"rgba(56,100,160,0.5)",R(2));
+  ctx.shadowColor="#0ea5e9";ctx.shadowBlur=R(15);
+  drawRoundRect(X(15),Y(15),X(850),Y(550),R(12),null,"rgba(14, 165, 233, 0.35)",R(2));
   ctx.restore();
 
-  /* === CORRIDORS (slightly lighter fill for contrast) === */
+  /* === CORRIDORS (sleeker look) === */
   CORRIDORS.forEach(c=>{
-    drawRoundRect(X(c.x),Y(c.y),X(c.w),Y(c.h),R(3),"#101c32","rgba(56,100,160,0.3)",R(0.5));
+    drawRoundRect(X(c.x),Y(c.y),X(c.w),Y(c.h),R(4),"rgba(8, 20, 45, 0.6)","rgba(14, 165, 233, 0.2)",R(1));
   });
 
-  /* === EDGES === */
+  /* === EDGES (Paths) === */
+  let walkedUpToIdx = 0;
+  if (PDR.active && path.length > 0) {
+    let minD = Infinity;
+    path.forEach((name, i) => {
+      const pos = NODE_POS[name] || GRAPH.nodes[name];
+      if (!pos) return;
+      const d = Math.hypot(PDR.pos.x - pos[0], PDR.pos.y - pos[1]);
+      if (d < minD) { minD = d; walkedUpToIdx = i; }
+    });
+  }
+
   GRAPH.edges.forEach(([u,v,d])=>{
     const pu=NODE_POS[u]||GRAPH.nodes[u];
     const pv=NODE_POS[v]||GRAPH.nodes[v];
@@ -457,55 +521,55 @@ function render(){
     const onP=pathSet.has(u+"|"+v);
     ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
     if(onP){
-      ctx.strokeStyle="#f59e0b";ctx.lineWidth=R(6);
-      ctx.setLineDash([]);ctx.shadowColor="#f59e0b";ctx.shadowBlur=R(12);
+      const uIdx = path.indexOf(u), vIdx = path.indexOf(v);
+      const segIdx = Math.min(uIdx, vIdx);
+      const isWalked = PDR.active && segIdx < walkedUpToIdx;
+      if (isWalked) {
+        ctx.strokeStyle="rgba(100, 116, 139, 0.4)";ctx.lineWidth=R(5);
+        ctx.setLineDash([]);ctx.shadowBlur=0;
+      } else {
+        ctx.strokeStyle="#38bdf8";ctx.lineWidth=R(7);
+        ctx.setLineDash([]);ctx.shadowColor="#0ea5e9";ctx.shadowBlur=R(18);
+      }
     }else{
-      ctx.strokeStyle="rgba(56,100,160,0.35)";ctx.lineWidth=R(1.5);
-      ctx.setLineDash([R(4),R(6)]);ctx.shadowBlur=0;
+      ctx.strokeStyle="rgba(14, 165, 233, 0.15)";ctx.lineWidth=R(1);
+      ctx.setLineDash([R(3),R(5)]);ctx.shadowBlur=0;
     }
     ctx.stroke();ctx.setLineDash([]);ctx.shadowBlur=0;
   });
 
-  /* animated flow on safe path */
+  /* white animated flow dots */
   if(path.length>=2){
     animT=(animT+1)%60;
-    for(let i=0;i<path.length-1;i++){
+    for(let i=walkedUpToIdx;i<path.length-1;i++){
       const pu=NODE_POS[path[i]],pv=NODE_POS[path[i+1]];
       if(!pu||!pv)continue;
       ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
-      ctx.strokeStyle="rgba(255,255,255,0.25)";ctx.lineWidth=R(6);
-      ctx.setLineDash([R(10),R(15)]);ctx.lineDashOffset=-animT*1.5;ctx.stroke();ctx.setLineDash([]);
+      ctx.strokeStyle="rgba(255,255,255,0.4)";ctx.lineWidth=R(7);
+      ctx.setLineDash([R(12),R(16)]);ctx.lineDashOffset=-animT*1.8;ctx.stroke();ctx.setLineDash([]);
     }
   }
 
-  /* === ROOM RECTANGLES (premium card style) === */
+  /* === ROOM RECTANGLES === */
   Object.entries(ROOM_RECTS).forEach(([name,r])=>{
     const onPath=path.includes(name);
     const isUser=name===currentUser;
 
-    // Fill: richer colors with more contrast
-    let fill, borderClr, borderW;
-    if(isUser){
-      fill="#1a0a0a"; borderClr="#ef4444"; borderW=R(2.5);
-    } else if(onPath){
-      fill="#1a1200"; borderClr="#f59e0b"; borderW=R(2);
-    } else {
-      fill="#0d1630"; borderClr="rgba(56,100,160,0.5)"; borderW=R(1);
-    }
+    let borderClr, borderW;
+    if(isUser){ borderClr="#ef4444"; borderW=R(3); }
+    else if(onPath){ borderClr="#f59e0b"; borderW=R(2.5); }
+    else { borderClr="rgba(14, 165, 233, 0.4)"; borderW=R(1); }
 
-    // Draw room card with inner gradient
     ctx.save();
     ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(X(r.x),Y(r.y),X(r.w),Y(r.h),R(8));
+    if(ctx.roundRect) ctx.roundRect(X(r.x),Y(r.y),X(r.w),Y(r.h),R(6));
     else ctx.rect(X(r.x),Y(r.y),X(r.w),Y(r.h));
+    
+    // Glassmorphism gradient
     const roomGrad = ctx.createLinearGradient(X(r.x),Y(r.y),X(r.x),Y(r.y+r.h));
-    if(isUser){
-      roomGrad.addColorStop(0,"#1f0a0a");roomGrad.addColorStop(1,"#150505");
-    } else if(onPath){
-      roomGrad.addColorStop(0,"#1a1400");roomGrad.addColorStop(1,"#110e00");
-    } else {
-      roomGrad.addColorStop(0,"#0f1a38");roomGrad.addColorStop(1,"#080e20");
-    }
+    if(isUser){ roomGrad.addColorStop(0,"rgba(239, 68, 68, 0.2)");roomGrad.addColorStop(1,"rgba(239, 68, 68, 0.05)"); }
+    else if(onPath){ roomGrad.addColorStop(0,"rgba(245, 158, 11, 0.2)");roomGrad.addColorStop(1,"rgba(245, 158, 11, 0.05)"); }
+    else { roomGrad.addColorStop(0,"rgba(14, 165, 233, 0.08)");roomGrad.addColorStop(1,"rgba(14, 165, 233, 0.02)"); }
     ctx.fillStyle=roomGrad;ctx.fill();
     ctx.strokeStyle=borderClr;ctx.lineWidth=borderW;ctx.stroke();
     ctx.restore();
@@ -520,7 +584,8 @@ function render(){
     // Label with background pill for readability
     const labelSize=Math.max(R(9),10); // minimum 10px
     ctx.font=`700 ${labelSize}px Inter`;
-    const labelW=ctx.measureText(r.label).width+R(8);
+    const labelTxt = r.label || name.replace(/_/g," ");
+    const labelW=ctx.measureText(labelTxt).width+R(8);
     const labelH=labelSize+R(5);
     const lx=cx-labelW/2, ly=cy+Math.max(R(5),4);
     // pill bg
@@ -531,7 +596,7 @@ function render(){
     // text
     ctx.fillStyle=isUser?"#fca5a5":onPath?"#fde68a":"#93c5fd";
     ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(r.label,cx,ly+labelH/2);
+    ctx.fillText(labelTxt,cx,ly+labelH/2);
   });
 
   /* === EXIT NODES === */
@@ -545,68 +610,97 @@ function render(){
     const lvl=crowdData[name]?.level||"Low";
     const clr={Low:"#10b981",Medium:"#f59e0b",High:"#ef4444"}[lvl];
     const bestClr="#a855f7";
-    const r=R(isBest?22:17);
+    const r=R(isBest?20:15);
+
+    // Smart label offset — based on exit position to avoid overlap
+    // Left-edge exits: labels go RIGHT; Right-edge: LEFT; Top: BELOW; Bottom: ABOVE
+    const isLeft  = xr < 100;
+    const isRight = xr > 700;
+    const isTop   = yr < 80;
+    const isBottom= yr > 500;
+    // labelSide: 1=above, -1=below, 2=right, -2=left
+    const labelSide = isLeft ? 2 : isRight ? -2 : isTop ? -1 : 1;
 
     // Pulsing outer ring for best exit
     if(isBest){
       const pulse=0.4+0.6*Math.sin(Date.now()/350);
-      ctx.beginPath();ctx.arc(x,y,r+R(12),0,Math.PI*2);
-      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.6})`;ctx.lineWidth=R(3);ctx.stroke();
-      ctx.beginPath();ctx.arc(x,y,r+R(6),0,Math.PI*2);
-      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.3})`;ctx.lineWidth=R(8);ctx.stroke();
+      ctx.beginPath();ctx.arc(x,y,r+R(10),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.6})`;ctx.lineWidth=R(2.5);ctx.stroke();
+      ctx.beginPath();ctx.arc(x,y,r+R(5),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.3})`;ctx.lineWidth=R(7);ctx.stroke();
     }
 
     // Main circle
     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
     ctx.fillStyle=isBest?bestClr:clr;
-    ctx.shadowColor=isBest?bestClr:clr;ctx.shadowBlur=R(16);
+    ctx.shadowColor=isBest?bestClr:clr;ctx.shadowBlur=R(14);
     ctx.fill();ctx.shadowBlur=0;
     ctx.strokeStyle="rgba(255,255,255,0.4)";ctx.lineWidth=R(2);ctx.stroke();
 
-    // Crowd level badge above node
-    const badgeSize=Math.max(R(8.5),9);
-    ctx.font=`700 ${badgeSize}px Inter`;
-    const bw=ctx.measureText(lvl).width+R(12),bh=badgeSize+R(6);
-    const bx=x-bw/2,by=y-r-R(4)-bh;
-    ctx.fillStyle=clr+"33";
-    if(ctx.roundRect) ctx.roundRect(bx,by,bw,bh,R(5));else ctx.rect(bx,by,bw,bh);
-    ctx.fill();
-    ctx.strokeStyle=clr;ctx.lineWidth=R(1.2);ctx.stroke();
-    ctx.fillStyle=clr;ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(lvl,x,by+bh/2);
+    // Exit icon inside circle
+    const iconSz=Math.max(R(9),9);
+    ctx.font=`800 ${iconSz}px Inter`;
+    ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(isBest?"★":"↑",x,y);
 
-    // Exit name label
-    const nameSize=Math.max(R(8.5),9);
+    // --- Crowd level badge ---
+    const badgeSize=Math.max(R(8),8.5);
+    ctx.font=`700 ${badgeSize}px Inter`;
+    const bw=ctx.measureText(lvl).width+R(10),bh=badgeSize+R(5);
+    let bx,by;
+    if(labelSide===2){bx=x+r+R(5);by=y-bh/2;}           // right
+    else if(labelSide===-2){bx=x-r-R(5)-bw;by=y-bh/2;}  // left
+    else if(labelSide===1){bx=x-bw/2;by=y-r-R(3)-bh;}   // above
+    else{bx=x-bw/2;by=y+r+R(3);}                         // below
+    ctx.fillStyle=clr+"33";
+    if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,R(4));else ctx.rect(bx,by,bw,bh);
+    ctx.fill();
+    ctx.strokeStyle=clr;ctx.lineWidth=R(1);ctx.stroke();
+    ctx.fillStyle=clr;ctx.textAlign="left";ctx.textBaseline="middle";
+    ctx.fillText(lvl,bx+R(5),by+bh/2);
+
+    // --- Exit name label ---
+    const nameSize=Math.max(R(8),8.5);
     ctx.font=`700 ${nameSize}px Inter`;
     const label=name.replace(/_/g," ");
-    const nw=ctx.measureText(label).width+R(10),nh=nameSize+R(6);
-    const nx=x-nw/2,ny=y+r+R(5);
-    ctx.fillStyle=isBest?"rgba(168,85,247,0.25)":"rgba(10,15,30,0.75)";
-    if(ctx.roundRect) ctx.roundRect(nx,ny,nw,nh,R(4));else ctx.rect(nx,ny,nw,nh);
+    const nw=ctx.measureText(label).width+R(10),nh=nameSize+R(5);
+    let nx,ny;
+    if(labelSide===2){nx=x+r+R(5);ny=y+bh/2+R(3);}
+    else if(labelSide===-2){nx=x-r-R(5)-nw;ny=y+bh/2+R(3);}
+    else if(labelSide===1){nx=x-nw/2;ny=y-r-R(3)-bh-R(2)-nh;}
+    else{nx=x-nw/2;ny=y+r+R(3)+bh+R(2);}
+    ctx.fillStyle=isBest?"rgba(168,85,247,0.25)":"rgba(10,15,30,0.8)";
+    if(ctx.roundRect)ctx.roundRect(nx,ny,nw,nh,R(4));else ctx.rect(nx,ny,nw,nh);
     ctx.fill();
     ctx.fillStyle=isBest?"#e9d5ff":"#cbd5e1";
-    ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(label,x,ny+nh/2);
+    ctx.textAlign="left";ctx.textBaseline="middle";
+    ctx.fillText(label,nx+R(5),ny+nh/2);
 
     // SAFEST tag
     if(isBest){
-      const tagSize=Math.max(R(7.5),8);
+      const tagSize=Math.max(R(7),7.5);
       ctx.font=`800 ${tagSize}px Inter`;
-      const tw=ctx.measureText("★ SAFEST").width+R(10),th=tagSize+R(5);
-      const tx=x-tw/2,ty=ny+nh+R(3);
+      const tw=ctx.measureText("★ SAFEST").width+R(10),th=tagSize+R(4);
+      let tx,ty;
+      if(labelSide===2){tx=nx;ty=ny+nh+R(2);}
+      else if(labelSide===-2){tx=nx;ty=ny+nh+R(2);}
+      else if(labelSide===1){tx=x-tw/2;ty=ny-th-R(2);}
+      else{tx=x-tw/2;ty=ny+nh+R(2);}
       ctx.fillStyle="rgba(168,85,247,0.35)";
-      if(ctx.roundRect) ctx.roundRect(tx,ty,tw,th,R(4));else ctx.rect(tx,ty,tw,th);
+      if(ctx.roundRect)ctx.roundRect(tx,ty,tw,th,R(4));else ctx.rect(tx,ty,tw,th);
       ctx.fill();
-      ctx.strokeStyle="#a855f7";ctx.lineWidth=R(1);ctx.stroke();
-      ctx.fillStyle="#e9d5ff";ctx.textAlign="center";ctx.textBaseline="middle";
-      ctx.fillText("★ SAFEST",x,ty+th/2);
+      ctx.strokeStyle="#a855f7";ctx.lineWidth=R(0.8);ctx.stroke();
+      ctx.fillStyle="#e9d5ff";ctx.textAlign="left";ctx.textBaseline="middle";
+      ctx.fillText("★ SAFEST",tx+R(5),ty+th/2);
     }
 
     // Camera icon
     if(name===GRAPH.camera_exit){
-      ctx.font=`${Math.max(R(11),10)}px serif`;ctx.fillText("📷",x+r+R(4),y-r);
+      ctx.font=`${Math.max(R(10),10)}px serif`;ctx.textAlign="center";
+      ctx.fillText("📷",x,y-r-R(14));
     }
   });
+
 
   /* === USER PIN + PDR TRAIL + DIRECTION ARROW === */
   {
@@ -659,18 +753,27 @@ function render(){
         ctx.stroke(); ctx.shadowBlur = 0;
       }
 
-      // Outer pulse ring
-      ctx.beginPath();ctx.arc(x,y,R(14)+p*R(6),0,Math.PI*2);
-      ctx.strokeStyle=`rgba(239,68,68,${0.4*p})`;ctx.lineWidth=R(3);ctx.stroke();
-      // Inner fill
+      // Big red glow ring
+      const pulse=0.4+0.4*Math.sin(Date.now()/250);
+      ctx.beginPath();ctx.arc(x,y,R(14)+R(8),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(239,68,68,${pulse})`;ctx.lineWidth=R(5);ctx.stroke();
+
+      // Core dot
       ctx.beginPath();ctx.arc(x,y,R(14),0,Math.PI*2);
-      ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=R(20);ctx.fill();ctx.shadowBlur=0;
-      ctx.strokeStyle="rgba(255,255,255,0.5)";ctx.lineWidth=R(2);ctx.stroke();
+      ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=R(20);
+      ctx.fill();ctx.shadowBlur=0;
+      ctx.strokeStyle="#fca5a5";ctx.lineWidth=R(2.5);ctx.stroke();
+
       // YOU label
-      const youSize=Math.max(R(10),10);
-      ctx.font=`800 ${youSize}px Inter`;ctx.fillStyle="#fff";
-      ctx.textAlign="center";ctx.textBaseline="middle";
-      ctx.fillText("YOU",x,y);
+      ctx.font=`800 ${Math.max(R(8.5),9)}px Inter`;
+      const label="YOU", tw=ctx.measureText(label).width+R(10), th=Math.max(R(10),12);
+      const tx=x-tw/2, ty=y+R(14)+R(4);
+      ctx.fillStyle="#b91c1c";
+      if(ctx.roundRect)ctx.roundRect(tx,ty,tw,th,R(4));else ctx.rect(tx,ty,tw,th);
+      ctx.fill();
+      ctx.strokeStyle="#ef4444";ctx.lineWidth=R(1);ctx.stroke();
+      ctx.fillStyle="#fca5a5";ctx.textAlign="center";ctx.textBaseline="middle";
+      ctx.fillText(label,x,ty+th/2);
     }
   }
 
@@ -756,12 +859,17 @@ async function init(){
 
 async function pollCrowd(){
   try{
-    const [cr,rr]=await Promise.all([fetch("/api/crowd"),fetch("/api/rooms")]);
-    crowdData=await cr.json();
-    // roomData: raw counts from /api/rooms
-    const raw=await rr.json();
-    // Normalize — rooms API returns plain numbers, store as-is for getNodeCount()
-    roomData=raw;
+    const [cr, rr, ar] = await Promise.all([fetch("/api/crowd"), fetch("/api/rooms"), fetch("/api/status")]);
+    crowdData = await cr.json();
+    roomData = await rr.json();
+    const st = await ar.json();
+    
+    // Sync global alarm state
+    if (st.alarm_active && !alarmInterval) {
+      toggleEmergency(true);
+    } else if (!st.alarm_active && alarmInterval) {
+      toggleEmergency(false);
+    }
   }catch(_){}
 }
 
@@ -811,6 +919,48 @@ function showToast(msg, dur=2500) {
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), dur);
+}
+
+// Emergency Alarm Audio & Visuals
+let alarmCtx = null;
+let alarmInterval = null;
+function toggleEmergency(forceState) {
+  const flash = document.getElementById('emergencyFlash');
+  const turnOn = forceState !== undefined ? forceState : !alarmInterval;
+
+  if (!turnOn) {
+    if (alarmInterval) {
+      clearInterval(alarmInterval); alarmInterval = null;
+      if (alarmCtx) { alarmCtx.close().catch(()=>{}); alarmCtx = null; }
+      flash.style.display = 'none';
+      showToast("Alarm Deactivated", 2000);
+    }
+  } else {
+    if (!alarmInterval) {
+      flash.style.display = 'block';
+      showToast("EMERGENCY ALARM ACTIVATED", 3000);
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      alarmCtx = new AC();
+      // Unlock audio context on iOS just in case
+      if (alarmCtx.state === 'suspended') alarmCtx.resume();
+      
+      alarmInterval = setInterval(() => {
+        if (!alarmCtx) return;
+        const osc = alarmCtx.createOscillator();
+        const gain = alarmCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(400, alarmCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, alarmCtx.currentTime + 0.5);
+        osc.connect(gain);
+        gain.connect(alarmCtx.destination);
+        osc.start();
+        gain.gain.setValueAtTime(1.0, alarmCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, alarmCtx.currentTime + 0.5);
+        osc.stop(alarmCtx.currentTime + 0.5);
+      }, 500);
+    }
+  }
 }
 
 function setWalkStatus(html) {
@@ -888,7 +1038,27 @@ function applyStep(headingDeg) {
     showToast("📍 Arrived: " + near.replace(/_/g," "));
     PDR.stepsSinceCorrection = 0;
     PDR.trail = [];
+
+    // --- LIVE VOICE NAVIGATION TRIGGER ---
+    if (document.getElementById("navOverlay") && document.getElementById("navOverlay").classList.contains("active")) {
+      // If nav UI is open, recalculate path from new node (like a GPS) and speak
+      openNavigation();
+    } else {
+      // If nav UI is closed, still guide them if Voice is enabled
+      announceLiveNavigationStep();
+    }
   }
+  // Speed calculation
+  const now = Date.now();
+  if (PDR.lastStepTime) {
+    const dt = (now - PDR.lastStepTime) / 1000; // seconds
+    if (dt > 0.2 && dt < 2.0) {
+      PDR.speed = (0.7 / dt) * 3.6;
+      document.getElementById("speedTxt").textContent = PDR.speed.toFixed(1) + " km/h";
+    }
+  }
+  PDR.lastStepTime = now;
+  document.getElementById("stepCountTxt").textContent = PDR.stepCount;
 
   updateWalkStatus();
 }
@@ -1171,6 +1341,8 @@ function toggleWalkMode() {
 
     setWalkStatus('🚶 Walking... dot follows your steps');
     showToast('🚶 Walking mode ON — start moving!');
+    
+    unlockAudio(); // iOS audio fix
 
   } else {
     btn.textContent = '🚶 Step 3: Start Walking';
@@ -1309,9 +1481,23 @@ const _origBuildAdj = buildAdj;
   </div>
 
   <!-- Bottom buttons -->
-  <div class="nav-bottom">
-    <button class="nav-close-btn" onclick="closeNavigation()">&#10005; Close</button>
-    <button class="nav-demo-btn" id="navDemoBtn" onclick="toggleDemoWalk()">&#9654; Auto Demo Walk</button>
+  <div class="nav-bottom" style="flex-wrap:wrap;">
+    <div style="display:flex; gap:10px; width:100%;">
+      <button class="nav-close-btn" onclick="closeNavigation()">&#10005; Close</button>
+      <button id="voiceToggleBtn" onclick="toggleVoice()" style="
+        flex:1;padding:11px;border:1px solid #16a34a;border-radius:10px;
+        font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;
+        background:#0e4429;color:#4ade80;transition:all .2s;
+      ">&#128266; Voice ON</button>
+      <select onchange="changeLanguage(this.value)" style="
+        background:#0c1e3c;color:var(--text);border:1px solid var(--border);
+        border-radius:10px;padding:0 8px;font-size:.8rem;cursor:pointer;
+      ">
+        <option value="en-IN">🇬🇧 EN</option>
+        <option value="hi-IN">🇮🇳 HI</option>
+      </select>
+    </div>
+    <button class="nav-demo-btn" id="navDemoBtn" onclick="toggleDemoWalk()" style="width:100%">&#9654; Auto Demo Walk</button>
   </div>
 </div>
 
@@ -1330,6 +1516,138 @@ const NAV = {
   demoSegT: 0,        // interpolation 0→1 along current segment
   demoAnimFrame: null,
 };
+
+// ── VOICE NAVIGATION ──────────────────────────────
+// Uses Web Speech API — built into all modern browsers
+
+const VOICE = {
+  enabled: true,         // can be toggled by user
+  speaking: false,
+  lastSpoken: -1,        // last step index spoken
+  lang: 'en-IN'          // 'en-IN' or 'hi-IN'
+};
+
+const HINDI_PHRASES = {
+  "↑": "की ओर सीधे जाएं",
+  "→": "की ओर दाहिने मुड़ें",
+  "←": "की ओर बाएं मुड़ें",
+  "↗": "की ओर हल्का दाहिने मुड़ें",
+  "↖": "की ओर हल्का बाएं मुड़ें",
+  "↓": "पीछे मुड़ें",
+  "🚨": "आप आपातकालीन निकास पर पहुंच गए हैं। सुरक्षित बाहर निकलें!"
+};
+
+// Must be called on a direct user tap to unlock audio on iOS/Android
+function unlockAudio() {
+  if (window.speechSynthesis) {
+    let msg = new SpeechSynthesisUtterance(" ");
+    msg.volume = 0;
+    msg.rate = 10;
+    window.speechSynthesis.speak(msg);
+  }
+}
+
+function speak(text) {
+  if (!VOICE.enabled) return;
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = VOICE.lang;
+  utter.rate = VOICE.lang === 'hi-IN' ? 0.85 : 0.95; 
+  utter.pitch = 1.0;
+  utter.volume = 1.0;
+  VOICE.speaking = true;
+  utter.onend = () => { VOICE.speaking = false; };
+  window.speechSynthesis.speak(utter);
+}
+
+function speakStep(stepIdx) {
+  if (VOICE.lastSpoken === stepIdx) return;
+  VOICE.lastSpoken = stepIdx;
+  const step = NAV.steps[stepIdx];
+  
+  if (!step) {
+    speak(VOICE.lang === 'hi-IN' ? HINDI_PHRASES["🚨"] : "You have reached the emergency exit. Please evacuate safely.");
+    return;
+  }
+  
+  const arrow = step.arrow;
+  let phrase = "";
+  let target = step.target.replace(/[🏫🚪]/g,"").trim();
+
+  if (VOICE.lang === 'hi-IN') {
+    if (arrow === "🚨") phrase = HINDI_PHRASES["🚨"];
+    else if (HINDI_PHRASES[arrow]) phrase = `${target} ${HINDI_PHRASES[arrow]}`;
+    else phrase = `${target} की ओर जाएं`;
+    if (step.dist && arrow !== "🚨") phrase += `, लगभग ${step.dist} मीटर।`;
+  } else {
+    if (arrow === "↑")   phrase = `Go straight toward ${target}`;
+    else if (arrow === "→")  phrase = `Turn right toward ${target}`;
+    else if (arrow === "←")  phrase = `Turn left toward ${target}`;
+    else if (arrow === "↗")  phrase = `Bear right toward ${target}`;
+    else if (arrow === "↖")  phrase = `Bear left toward ${target}`;
+    else if (arrow === "↓")  phrase = `Turn around`;
+    else if (arrow === "🚨") phrase = `You have reached the emergency exit. Evacuate now!`;
+    else phrase = step.action + " toward " + target;
+    if (step.dist && arrow !== "🚨") phrase += `, about ${step.dist} meters.`;
+  }
+  
+  speak(phrase);
+}
+
+function announceLiveNavigationStep() {
+  if (!VOICE.enabled) return;
+  const adj = buildAdj();
+  const {dist, prev} = dijkstra(currentUser, adj);
+  let bExit = null, bCost = Infinity;
+  GRAPH.exit_nodes.forEach(e => { if(dist[e]<bCost){bCost=dist[e];bExit=e;} });
+  const path = bExit ? getPath(prev, currentUser, bExit) : [];
+  const steps = buildNavSteps(path);
+
+  if (steps.length === 0) return;
+  
+  if (path.length === 1 && GRAPH.exit_nodes.includes(currentUser)) {
+    speak(VOICE.lang === 'hi-IN' ? HINDI_PHRASES["🚨"] : "You have arrived at the emergency exit. Please evacuate safely.");
+    return;
+  }
+
+  const currentNavStep = steps[0];
+  let phrase = "";
+  let target = currentNavStep.target.replace(/[🏫🚪🎓📚💻🧑‍💼☕🖧📖]/g,"").trim();
+  let arrow = currentNavStep.arrow;
+
+  if (VOICE.lang === 'hi-IN') {
+    if (HINDI_PHRASES[arrow]) phrase = `${target} ${HINDI_PHRASES[arrow]}`;
+    else phrase = `${target} की ओर जाएं`;
+    if (currentNavStep.dist) phrase += `, लगभग ${currentNavStep.dist} मीटर।`;
+  } else {
+    phrase = `${currentNavStep.action} toward ${target}`;
+    if (currentNavStep.dist) phrase += `, about ${currentNavStep.dist} meters.`;
+  }
+  
+  speak(phrase);
+}
+
+function toggleVoice() {
+  unlockAudio();
+  VOICE.enabled = !VOICE.enabled;
+  const btn = document.getElementById("voiceToggleBtn");
+  if (btn) {
+    btn.innerHTML = VOICE.enabled ? "&#128266; Voice ON" : "&#128263; Voice OFF";
+    btn.style.background = VOICE.enabled ? "#0e4429" : "#1f1f2e";
+    btn.style.borderColor = VOICE.enabled ? "#16a34a" : "#4b5563";
+    btn.style.color = VOICE.enabled ? "#4ade80" : "#9ca3af";
+  }
+  if (!VOICE.enabled) window.speechSynthesis.cancel();
+  else showToast("Voice navigation ON");
+}
+
+function changeLanguage(lang) {
+  VOICE.lang = lang;
+  VOICE.lastSpoken = -1; // reset so it re-speaks current step
+  if (NAV.steps.length > 0) speakStep(NAV.currentStep);
+  showToast(lang === 'hi-IN' ? "हिंदी भाषा का चयन किया गया" : "English Selected");
+}
 
 // Arrow emoji → heading text
 const ARROWS = {
@@ -1519,6 +1837,8 @@ function openNavigation() {
   const overlay = document.getElementById("navOverlay");
   overlay.classList.add("active");
 
+  unlockAudio(); // Important for iOS/mobile to start the voice engine on click
+
   // Build steps from current best path
   const adj = buildAdj();
   const {dist, prev} = dijkstra(currentUser, adj);
@@ -1545,6 +1865,10 @@ function closeNavigation() {
 
 function updateNavDisplay() {
   const step = NAV.steps[NAV.currentStep];
+
+  // 🔊 Speak the current instruction
+  speakStep(NAV.currentStep);
+
   if (!step) {
     document.getElementById("navAction").textContent = "\uD83C\uDFC1 You have arrived!";
     document.getElementById("navArrow").textContent = "\uD83C\uDFC1";
@@ -1706,6 +2030,7 @@ function renderNavMiniMap(path) {
 // ── AUTO DEMO WALK ─────────────────────────────────
 
 function toggleDemoWalk() {
+  unlockAudio();
   if (NAV.demoRunning) {
     stopDemoWalk();
   } else {

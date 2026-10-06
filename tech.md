@@ -360,4 +360,40 @@ If near a room node → currentUser updates → Dijkstra recalculates
 
 ---
 
-*Last updated: August 2026 | Add new tech sections above this line*
+---
+
+### 12. Web Speech API — Voice Navigation *(Added Oct 2026)*
+**What it is:** A browser built-in API that converts text to speech — no library, no download, completely free.
+
+**What it does in this project:**
+- When navigation opens → phone speaks: *"Go straight toward Corridor Main, about 30 meters"*
+- On every turn → speaks: *"Turn right toward HOD Cabin"*
+- On arrival → speaks: *"You have reached the emergency exit. Evacuate now!"*
+
+**How it works:**
+```javascript
+const utter = new SpeechSynthesisUtterance("Turn right toward Exit");
+utter.lang = 'en-IN';   // Indian English
+window.speechSynthesis.speak(utter);
+```
+
+**User control:** 🔊 Voice ON / 🔇 Voice OFF button in navigation overlay. Voice resets each time navigation opens.
+
+**Why important for research:** Existing indoor evacuation apps are visual-only. Voice instructions are critical for low-light emergencies or for users who can't look at screen while running.
+
+---
+
+### 13. Google Maps Style Reducing Path *(Added Oct 2026)*
+**What it is:** As the user walks along the route, completed segments fade to grey — only the remaining path stays bright blue.
+
+**How it works:**
+1. Every render frame: find which path node the user is closest to → `walkedUpToIdx`
+2. Path segments before that index → drawn in faded grey (`rgba(150,150,170,0.45)`)
+3. Path segments from that index onward → drawn in Google Maps blue (`#4285f4`)
+4. White animated flow dots only on remaining path (not on completed sections)
+
+**Why it matters:** Visually confirms to the user that they are making progress — exactly like Google Maps navigation. Makes the project look production-ready.
+
+---
+
+*Last updated: October 2026 | Add new tech sections above this line*

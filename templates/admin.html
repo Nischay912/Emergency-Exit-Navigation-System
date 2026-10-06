@@ -148,9 +148,11 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
     </div>
     <div class="panel">
       <h2>Actions</h2>
-      <button class="action-btn btn-purple" id="simBtn" onclick="toggleSim()">&#127922; Start Auto-Simulate</button>
-      <button class="action-btn btn-red" id="emergBtn" onclick="toggleEmergency()">&#128308; Trigger Emergency Mode</button>
-      <button class="action-btn btn-green" onclick="resetAll()">&#10003; Reset All to Low</button>
+      <button class="action-btn btn-red" id="alarmBtn" onclick="toggleGlobalAlarm()" style="animation:blink 1.4s infinite;">
+        &#128308; TRIGGER GLOBAL ALARM
+      </button>
+      <button class="action-btn btn-purple" id="simBtn" onclick="toggleSim()">&#127922; Start Crowd Simulation</button>
+      <button class="action-btn btn-green" onclick="resetAll()">&#10003; Reset All to Zero</button>
       <a href="/"><button class="action-btn btn-link">&#128065; View Floor Map</button></a>
     </div>
     <div class="panel">
@@ -161,7 +163,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
 </div>
 
 <script>
-let GRAPH=null,crowdData={},roomData={},simRunning=false,simInterval=null,emergency=false;
+let GRAPH=null,crowdData={},roomData={},simRunning=false,simInterval=null;
 
 const THRESH={low:20,med:55};
 function toLevel(n){return n<=THRESH.low?"Low":n<=THRESH.med?"Medium":"High";}
@@ -364,21 +366,60 @@ function toggleSim(){
   else{b.textContent="&#127922; Start Auto-Simulate";b.className="action-btn btn-purple";clearInterval(simInterval);}
 }
 
-async function toggleEmergency(){
-  emergency=!emergency;
-  const b=document.getElementById("emergBtn");
+async function toggleGlobalAlarm(){
+  const b=document.getElementById("alarmBtn");
   const alert=document.getElementById("alertBanner");
-  if(emergency){
-    b.textContent="&#10003; Cancel Emergency";b.className="action-btn btn-green";alert.classList.add("show");
-    const u={};(GRAPH.exit_nodes||[]).forEach((n,i)=>{u[n]=i===0?80:5;});
-    await fetch("/api/crowd",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(u)});
-    Object.entries(u).forEach(([n,v])=>{crowdData[n]={count:v,level:toLevel(v)};});
-    updateExitGrid();updateLiveStatus();updateStats();addLog("EMERGENCY MODE TRIGGERED");
+  
+  // Fetch current global state from backend first
+  const ar = await fetch("/api/alarm");
+  const state = await ar.json();
+  const newActive = !state.active;
+
+  // Toggle it globally
+  const r = await fetch("/api/alarm", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({active: newActive})
+  });
+  const data = await r.json();
+  
+  if(data.active){
+    b.innerHTML="&#9209; CANCEL ALARM";
+    b.className="action-btn btn-stop";
+    b.style.animation="none";
+    alert.classList.add("show");
+    addLog("🚨 GLOBAL ALARM TRIGGERED");
   }else{
-    b.textContent="&#128308; Trigger Emergency Mode";b.className="action-btn btn-red";alert.classList.remove("show");
-    await resetAll();
+    b.innerHTML="&#128308; TRIGGER GLOBAL ALARM";
+    b.className="action-btn btn-red";
+    b.style.animation="blink 1.4s infinite";
+    alert.classList.remove("show");
+    addLog("✅ Global Alarm Deactivated");
   }
 }
+
+// Check alarm state periodically
+setInterval(async () => {
+  const r = await fetch("/api/alarm");
+  const data = await r.json();
+  const b=document.getElementById("alarmBtn");
+  const alert=document.getElementById("alertBanner");
+  if(data.active){
+    if (b.className !== "action-btn btn-stop") {
+      b.innerHTML="&#9209; CANCEL ALARM";
+      b.className="action-btn btn-stop";
+      b.style.animation="none";
+      alert.classList.add("show");
+    }
+  } else {
+    if (b.className !== "action-btn btn-red") {
+      b.innerHTML="&#128308; TRIGGER GLOBAL ALARM";
+      b.className="action-btn btn-red";
+      b.style.animation="blink 1.4s infinite";
+      alert.classList.remove("show");
+    }
+  }
+}, 3000);
 
 async function resetAll(){
   const u={};(GRAPH.exit_nodes||[]).forEach(n=>{u[n]=0;});
