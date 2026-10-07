@@ -1,0 +1,40 @@
+{
+  "width": 880,
+  "height": 580,
+  "rooms": {
+    "Classroom_A":  {"x": 140, "y": 40, "w": 120, "h": 80, "icon": "\ud83c\udf93", "label": "Classroom A"},
+    "Classroom_B":  {"x": 380, "y": 40, "w": 160, "h": 80, "icon": "\ud83d\udcda", "label": "Classroom B"},
+    "AI_Lab":       {"x": 540, "y": 120, "w": 120, "h": 80, "icon": "\ud83d\udcbb", "label": "AI Lab"},
+    "HOD_Cabin":    {"x": 140, "y": 440, "w": 120, "h": 80, "icon": "\ud83d\udcbc", "label": "HOD Cabin"},
+    "Staff_Lounge": {"x": 380, "y": 240, "w": 160, "h": 80, "icon": "\u2615", "label": "Staff Lounge"},
+    "Server_Room":  {"x": 660, "y": 440, "w": 160, "h": 80, "icon": "\ud83d\udda5", "label": "Server Room"},
+    "Library":      {"x": 140, "y": 240, "w": 120, "h": 80, "icon": "\ud83d\udcd6", "label": "Library"}
+  },
+  "corridors": [
+    {"x": 80, "y": 60, "w": 40, "h": 440},
+    {"x": 80, "y": 260, "w": 740, "h": 40},
+    {"x": 300, "y": 60, "w": 40, "h": 240},
+    {"x": 580, "y": 260, "w": 40, "h": 240},
+    {"x": 580, "y": 140, "w": 40, "h": 120}
+  ],
+  "nodes": {
+    "Intersection_West": [100, 280],
+    "Intersection_Mid1": [320, 280],
+    "Intersection_Mid2": [600, 280],
+    "Corridor_North": [320, 80],
+    "Corridor_South": [600, 480],
+    "Corridor_West_N": [100, 80],
+    "Corridor_West_S": [100, 480],
+    "Corridor_East": [780, 280],
+    "Classroom_A": [200, 80],
+    "Classroom_B": [460, 80],
+    "AI_Lab": [600, 160],
+    "HOD_Cabin": [200, 480],
+    "Staff_Lounge": [460, 280],
+    "Server_Room": [740, 480],
+    "Library": [200, 280],
+    "Main_Staircase": [100, 30],
+    "East_Fire_Exit": [850, 280],
+    "South_Emergency_Stairs": [600, 540]
+  }
+}

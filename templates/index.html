@@ -5,239 +5,92 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>Emergency Exit Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#08091a;--card:#0f1629;--panel:#111e38;--border:#1e2f55;
-  --red:#e94560;--purple:#7c3aed;--green:#10b981;--amber:#f59e0b;
-  --blue:#3b82f6;--text:#e2e8f0;--muted:#64748b;
-  --low:#10b981;--med:#f59e0b;--high:#ef4444;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+:root {
+  --bg: #F8F9FA; --panel: #FFFFFF; --border: #DADCE0; --text: #202124; --muted: #5F6368;
+  --red: #EA4335; --green: #34A853; --amber: #FBBC04; --blue: #1A73E8; --route-bg: #E8F0FE;
 }
-html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* HEADER */
-header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--panel);border-bottom:2px solid var(--red);flex-shrink:0;z-index:20;}
-.logo{display:flex;align-items:center;gap:8px;}
-.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--red),#900);border-radius:7px;display:grid;place-items:center;font-size:15px;}
-.logo h1{font-size:.85rem;font-weight:800;color:var(--red);}
-.logo p{font-size:.6rem;color:var(--muted);}
-.hdr-right{display:flex;gap:8px;align-items:center;}
-.badge{display:flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:.65rem;font-weight:700;}
-.badge-cam{background:#1a0d2e;border:1px solid var(--purple);color:#a78bfa;}
-.badge-live{background:#0d1f12;border:1px solid var(--green);color:var(--green);}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+header { background: var(--panel); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,0.1); z-index: 100; }
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon { font-size: 24px; }
+.logo h1 { margin: 0; font-size: 18px; color: var(--text); font-weight: 500; }
+.logo p { margin: 0; font-size: 12px; color: var(--muted); }
+.hdr-right { display: flex; gap: 8px; }
+.badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; background: #F1F3F4; color: var(--muted); }
+.badge-cam { background: #E8F0FE; color: #174EA6; }
+.badge-live { background: #E6F4EA; color: #137333; display: flex; align-items: center; gap: 4px; }
+.live-dot { width: 6px; height: 6px; background: #137333; border-radius: 50%; }
 
-/* LAYOUT */
-.app{display:flex;height:calc(100vh - 52px);}
+.app { display: flex; flex: 1; height: calc(100vh - 60px); position: relative; }
+.sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); box-shadow: 2px 0 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow-y: auto; z-index: 50; padding: 20px; gap: 20px; }
+@media(max-width: 768px) { .sidebar { width: 100%; border-right: none; border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); } .app { flex-direction: column-reverse; } }
 
-/* DESKTOP SIDEBAR */
-.sidebar{width:260px;min-width:240px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:14px 12px;gap:12px;flex-shrink:0;}
-.map-col{flex:1;display:flex;flex-direction:column;min-width:0;}
-canvas{display:block;width:100%;height:100%;}
-.canvas-wrap{flex:1;overflow:hidden;position:relative;}
-.info-bar{height:36px;display:flex;align-items:center;padding:0 16px;gap:8px;font-size:.78rem;font-weight:600;color:var(--green);background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;}
-.info-bar.warn{color:var(--high);}
+.map-col { display: flex; flex-direction: column; flex: 1; position: relative; overflow: hidden; background: #E8EAED; }
+.canvas-wrap { flex: 1; position: relative; width: 100%; height: 100%; }
+.canvas-wrap canvas { display: block; width: 100%; height: 100%; }
+.info-bar { display: none; }
 
-/* SIDEBAR WIDGETS */
-.sec{margin-bottom:4px;}
-.sec-lbl{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-.loc-card{background:#0c1e3c;border:1px solid var(--blue);border-radius:10px;padding:10px 12px;}
-.loc-card .at{font-size:.62rem;color:var(--muted);}
-.loc-card .name{font-size:1rem;font-weight:800;color:var(--blue);margin:2px 0;}
-.loc-card .hint{font-size:.6rem;color:var(--muted);}
-.loc-select{width:100%;background:#0c1e3c;color:var(--text);border:1px solid var(--blue);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:.78rem;margin-top:6px;cursor:pointer;}
-.loc-select:focus{outline:none;border-color:var(--purple);}
-.rec-card{background:linear-gradient(135deg,#150d2e,#1a1040);border:1px solid var(--purple);border-radius:10px;padding:10px 12px;}
-.rec-card .rl{font-size:.62rem;color:var(--muted);}
-.rec-card .re{font-size:1.05rem;font-weight:800;color:#a855f7;}
-.rec-card .rp{font-size:.65rem;color:#94a3b8;margin-top:3px;word-break:break-all;line-height:1.5;}
-.exit-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:5px;transition:border-color .3s;}
-.exit-row.best{border-color:#a855f7;}
-.exit-row-name{font-size:.75rem;font-weight:600;}
-.cpill{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;}
-.cpill.Low{background:#052e16;color:var(--low);border:1px solid var(--low);}
-.cpill.Medium{background:#1c1200;color:var(--med);border:1px solid var(--med);}
-.cpill.High{background:#200;color:var(--high);border:1px solid var(--high);}
-.leg-row{display:flex;align-items:center;gap:7px;font-size:.65rem;color:var(--muted);margin-bottom:4px;}
-.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.leg-sq{width:10px;height:5px;border-radius:2px;flex-shrink:0;}
+.sec-lbl { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
+.loc-card { background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.at { font-size: 13px; color: var(--muted); }
+.name { font-size: 18px; font-weight: 700; margin-top: 4px; color: var(--text); }
+.hint { font-size: 11px; color: var(--muted); margin-top: 12px; margin-bottom: 4px; }
+.loc-select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; background: #F8F9FA; }
+.rec-card { background: var(--route-bg); border: 1px solid #c2e7ff; border-radius: 12px; padding: 16px; color: #174ea6; }
+.rl { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--blue); }
+.re { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #001d35; }
+.rp { font-size: 13px; color: #185abc; line-height: 1.4; }
 
-/* MOBILE: bottom sheet layout */
-@media(max-width:768px){
-  header{height:44px;}
-  .app{flex-direction:column;height:calc(100vh - 44px);}
+.nav-trigger { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 24px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(26,115,232,0.3); transition: 0.2s; }
+.nav-trigger:hover { background: #174ea6; box-shadow: 0 4px 10px rgba(26,115,232,0.4); }
+.walk-btn { width: 100%; padding: 12px; background: white; border: 1px solid var(--border); color: var(--blue); border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
+.walk-btn:hover { background: #F8F9FA; }
+.walk-btn.start { background: var(--green); color: white; border: none; }
+.walk-btn.start:hover { background: #0D652D; }
 
-  /* Map gets 65% — more space to see routes */
-  .map-col{height:65%;order:1;flex:none;}
-  .info-bar{
-    height:auto;min-height:32px;font-size:.72rem;
-    padding:5px 12px;flex-wrap:wrap;gap:4px;line-height:1.4;
-  }
+/* Exit List styling based on exiting HTML classes */
+.exit-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.exit-row.best { background: #E8F0FE; border-radius: 8px; padding-left: 8px; padding-right: 8px; border-bottom: none; }
+.exit-row-name { font-weight: 500; }
+.cpill { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: #F1F3F4; color: var(--muted); }
+.cpill.Low { background: #E6F4EA; color: #137333; }
+.cpill.Medium { background: #FEF7E0; color: #B06000; }
+.cpill.High { background: #FCE8E6; color: #C5221F; }
 
-  /* Bottom panel — clean card style */
-  .sidebar{
-    width:100%;min-width:0;flex-direction:column;
-    height:35%;max-height:35%;
-    border-right:none;border-top:2px solid var(--red);
-    order:2;padding:10px 12px 6px;overflow-y:auto;
-    flex-shrink:0;gap:10px;
-    background:linear-gradient(180deg,#0b1020,#080c1c);
-  }
+/* Nav Overlay */
+.nav-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.nav-overlay.active { transform: translateY(0); }
+.nav-top { background: var(--green); color: white; padding: 24px; padding-top: max(24px, env(safe-area-inset-top)); display: flex; gap: 16px; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+.nav-arrow { font-size: 40px; font-weight: bold; width: 48px; text-align: center; }
+.nav-action { font-size: 24px; font-weight: 700; }
+.nav-target { font-size: 16px; opacity: 0.9; margin-top: 4px; }
+.nav-steps-wrap { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.nav-step-item { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 16px; align-items: center; }
+.nav-step-arrow { font-size: 24px; color: var(--blue); width: 32px; text-align: center; }
+.nav-step-action { font-size: 16px; font-weight: 500; color: var(--text); }
+.nav-step-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.nav-bottom { padding: 16px; background: white; border-top: 1px solid var(--border); display: flex; gap: 12px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.nav-close-btn { flex: 1; background: #F1F3F4; color: var(--text); border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; }
+.nav-demo-btn { flex: 2; background: var(--blue); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; }
+.nav-demo-btn.stop { background: var(--red); }
 
-  /* Hide legend, rec-card section label on mobile for space */
-  .sec.legend-sec{display:none;}
-  .sec.walk-sec{display:block;}
+@keyframes flash { 0%, 100% { background: rgba(234, 67, 53, 0); } 50% { background: rgba(234, 67, 53, 0.3); } }
+.alarm-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; display: none; animation: flash 0.6s infinite; }
 
-  /* Compact location selector */
-  .loc-card{padding:8px 10px;}
-  .loc-card .at{font-size:.6rem;}
-  .loc-card .name{font-size:.9rem;}
-  .loc-card .hint{display:none;}
-  .loc-select{padding:6px 8px;font-size:.8rem;margin-top:4px;}
-
-  /* Exits row — horizontal chips */
-  #exitList{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;}
-  .exit-row{min-width:120px;flex:1;padding:5px 8px;}
-  .exit-row-name{font-size:.7rem;}
-  .cpill{font-size:.58rem;}
-
-  /* Nav overlay bigger text */
-  .nav-action{font-size:1.3rem;}
-  .nav-arrow{font-size:3rem;}
-  .nav-compass-badge{font-size:.82rem!important;padding:6px 14px!important;}
-}
-
-@media(max-width:480px){
-  .badge-cam{display:none;}
-  .logo p{display:none;}
-  .map-col{height:62%;}
-  .sidebar{height:38%;max-height:38%;}
-}
-
-/* MOBILE PDR BUTTONS — bigger, cleaner, finger-friendly */
-@media(max-width:768px){
-  .walk-card{padding:8px 10px;border-radius:12px;}
-  .walk-btn{
-    padding:12px 10px;font-size:.85rem;border-radius:10px;
-    margin-bottom:8px;letter-spacing:.2px;
-  }
-  .walk-btn.calib{padding:11px 10px;}
-  .walk-status{font-size:.68rem;margin-top:6px;}
-
-  /* Sensor status row — cleaner */
-  #sensorStatusRow{
-    border-radius:10px!important;padding:8px 12px!important;
-    font-size:.72rem!important;margin:6px 0!important;
-  }
-  /* Sensor panel stats */
-  #sensorPanel{margin-top:8px!important;}
-  #liveHeadingRow{border-radius:10px!important;padding:8px 12px!important;}
-}
-
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-
-/* WALK MODE */
-.walk-card{background:linear-gradient(135deg,#0d1e3c,#0a1628);border:1px solid var(--purple);border-radius:10px;padding:10px 12px;}
-.walk-btn{width:100%;padding:9px;border:none;border-radius:8px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:6px;}
-.walk-btn:last-child{margin:0;}
-.walk-btn.start{background:var(--purple);color:#fff;}
-.walk-btn.stop{background:#991b1b;color:#fff;}
-.walk-btn.calib{background:#0e4429;border:1px solid var(--green);color:var(--green);}
-.walk-btn:hover{opacity:.88;transform:translateY(-1px);}
-.walk-status{font-size:.65rem;color:var(--muted);text-align:center;margin-top:4px;line-height:1.5;}
-.walk-status .steps{color:var(--purple);font-weight:700;}
-.walk-status .heading{color:var(--amber);font-weight:700;}
-.walk-status .drift{color:var(--high);font-weight:700;}
-.walk-status.active{color:var(--green);}
-.dir-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:6px 0;}
-.dir-btn{padding:8px;border:1px solid var(--border);border-radius:6px;background:#0a1020;color:var(--text);font-size:1rem;cursor:pointer;transition:all .15s;}
-.dir-btn:hover{background:var(--purple);border-color:var(--purple);}
-.dir-btn:active{transform:scale(.93);}
-.compass-ring{display:flex;align-items:center;justify-content:center;margin:6px 0;}
-.compass-svg{transition:transform .3s;}
-/* overlay toast */
-.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a0d2e;border:1px solid var(--purple);border-radius:10px;padding:10px 18px;font-size:.78rem;font-weight:600;color:#a78bfa;opacity:0;transition:all .4s;z-index:100;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* NAV OVERLAY — full-screen navigation mode */
-.nav-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;}
-.nav-overlay.active{display:flex;}
-/* Top instruction card */
-.nav-top{background:linear-gradient(160deg,#0d1e3c,#0a1020);padding:20px 18px 14px;border-bottom:2px solid var(--red);flex-shrink:0;}
-.nav-street{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-.nav-arrow-row{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
-.nav-arrow{font-size:3.5rem;line-height:1;transition:all .4s;filter:drop-shadow(0 0 12px #7c3aed88);}
-.nav-instruction{flex:1;}
-.nav-action{font-size:1.5rem;font-weight:900;color:var(--text);line-height:1.1;}
-.nav-target{font-size:.85rem;color:var(--purple);font-weight:600;margin-top:4px;}
-.nav-dist{font-size:.72rem;color:var(--muted);margin-top:2px;}
-/* Next step */
-.nav-next{background:#0a1020;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:.75rem;}
-.nav-next-icon{font-size:1.2rem;opacity:.7;}
-.nav-next-txt{color:var(--muted);}
-.nav-next-txt strong{color:var(--text);}
-/* Progress bar */
-.nav-progress-wrap{padding:10px 18px 6px;flex-shrink:0;}
-.nav-prog-label{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:5px;}
-.nav-prog-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-.nav-prog-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--green));border-radius:3px;transition:width .6s ease;}
-/* Step list */
-.nav-steps-wrap{padding:0 18px;flex:1;overflow-y:auto;}
-.nav-step-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
-.nav-step-item:last-child{border:none;}
-.nav-step-arrow{font-size:1.4rem;width:30px;text-align:center;flex-shrink:0;}
-.nav-step-info{flex:1;}
-.nav-step-action{font-size:.82rem;font-weight:700;}
-.nav-step-sub{font-size:.65rem;color:var(--muted);margin-top:1px;}
-.nav-step-badge{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:10px;background:#052e16;color:var(--green);border:1px solid var(--green);}
-.nav-step-item.current .nav-step-action{color:var(--amber);}
-.nav-step-item.current .nav-step-arrow{filter:drop-shadow(0 0 6px var(--amber));}
-.nav-step-item.done .nav-step-action{color:var(--muted);text-decoration:line-through;}
-/* Map section inside nav */
-.nav-map-wrap{height:200px;min-height:140px;flex-shrink:0;position:relative;}
-.nav-map-wrap canvas{width:100%;height:100%;display:block;}
-/* Bottom nav bar */
-.nav-bottom{display:flex;gap:10px;padding:10px 16px 14px;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;}
-.nav-close-btn{flex:1;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;background:var(--border);color:var(--text);}
-.nav-demo-btn{flex:2;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--purple),#4f46e5);color:#fff;transition:all .2s;}
-.nav-demo-btn:hover{opacity:.88;transform:translateY(-1px);}
-.nav-demo-btn.stop{background:#991b1b;}
-/* Nav trigger button in sidebar */
-.nav-trigger{width:100%;padding:11px;border:none;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--red),#b91c1c);color:#fff;letter-spacing:.3px;transition:all .2s;box-shadow:0 4px 20px #e9456044;}
-.nav-trigger:hover{transform:translateY(-2px);box-shadow:0 6px 24px #e9456066;}
-.nav-trigger:active{transform:translateY(0);}
-/* Compass direction badge in nav overlay */
-.nav-compass-badge{
-  display:inline-flex;align-items:center;gap:7px;
-  background:linear-gradient(135deg,#0d2e3c,#0a1e2e);
-  border:1.5px solid #0ea5e9;border-radius:20px;
-  padding:5px 14px;font-size:.78rem;font-weight:800;
-  color:#38bdf8;letter-spacing:.5px;margin-top:6px;
-  box-shadow:0 0 10px #0ea5e922;
-}
-.nav-compass-badge .compass-icon{font-size:1rem;}
-/* Calibration instruction card */
-.calib-card{
-  background:linear-gradient(135deg,#0a1e10,#0d2818);
-  border:1px solid #16a34a;border-radius:8px;
-  padding:9px 12px;margin-top:6px;font-size:.67rem;
-  color:#4ade80;line-height:1.6;display:none;
-}
-.calib-card.show{display:block;}
-.calib-card strong{color:#86efac;font-weight:700;}
-/* ALARM FLASH CSS */
-@keyframes flash {
-  0%, 100% { background: rgba(239, 68, 68, 0); }
-  50% { background: rgba(239, 68, 68, 0.4); }
-}
-.alarm-overlay {
-  position: fixed; inset: 0; pointer-events: none;
-  z-index: 9999; display: none; animation: flash 0.6s infinite;
-}
-
-@media(max-width:768px){.nav-action{font-size:1.2rem;}.nav-arrow{font-size:2.8rem;}}
+/* Modal and Theme Buttons */
+.floating-btn { position: fixed; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; font-size: 20px; transition: 0.2s; }
+.floating-btn:hover { background: var(--bg); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-card { background: var(--panel); border-radius: 12px; padding: 24px; width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 </style>
+
 </head>
 <body>
 <div id="emergencyFlash" class="alarm-overlay"></div>
@@ -252,6 +105,35 @@ canvas{display:block;width:100%;height:100%;}
     <div class="badge badge-live"><span class="live-dot"></span>LIVE</div>
   </div>
 </header>
+
+
+<button id="themeToggle" class="floating-btn" onclick="toggleTheme()">
+  <span id="themeIcon">&#127769;</span>
+</button>
+<button id="audioToggle" class="floating-btn" onclick="openAudioSettings()" style="top: 80px;">
+  <span id="audioIcon">&#128266;</span>
+</button>
+
+<div id="audioModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 style="margin-top:0; color:var(--text);">Audio Settings</h3>
+    <div style="margin-bottom: 12px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Language</label>
+      <select id="langSelect" class="loc-select" onchange="changeLanguage(this.value)">
+        <option value="en-US">English</option>
+        <option value="hi-IN">Hindi (हिंदी)</option>
+        <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
+      </select>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Voice</label>
+      <button id="muteBtn" class="walk-btn start" onclick="toggleMute()" style="width:100%;">
+        &#128266; Mute
+      </button>
+    </div>
+    <button class="nav-trigger" onclick="closeAudioSettings()">Done</button>
+  </div>
+</div>
 
 <div class="app">
   <div class="sidebar">
@@ -399,7 +281,7 @@ function getPath(prev,s,t){const p=[];let n=t;while(n){p.push(n);n=prev[n];}p.re
 /* CANVAS */
 const canvas=document.getElementById("floorMap");
 const ctx=canvas.getContext("2d");
-const DW=880,DH=580;
+let DW=880,DH=580;
 let sx=1,sy=1;
 const X=x=>x*sx,Y=y=>y*sy,R=r=>r*Math.min(sx,sy);
 
@@ -461,48 +343,63 @@ function drawRoundRect(x,y,w,h,r,fill,stroke,lw){
   if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw||1;ctx.stroke();}
 }
 
-function render(){
-  if(!GRAPH)return;
-  // Use CSS dimensions for drawing (ctx is already scaled by DPR via setTransform)
+function render() {
+  if(!ctx) return;
   const cw = canvas.width  / (window.devicePixelRatio||1);
   const ch = canvas.height / (window.devicePixelRatio||1);
   ctx.clearRect(0,0,cw,ch);
-
-  /* === BACKGROUND === */
-  const bg=ctx.createLinearGradient(0,0,0,ch);
-  bg.addColorStop(0,"#02040a");bg.addColorStop(1,"#040816");
-  ctx.fillStyle=bg;ctx.fillRect(0,0,cw,ch);
-
-  /* Cyberpunk Grid (Neon lines instead of dots) */
-  ctx.lineWidth=R(0.5);
-  ctx.strokeStyle="rgba(14, 165, 233, 0.08)";
-  ctx.beginPath();
-  for(let gx=0;gx<cw;gx+=R(40)){ ctx.moveTo(gx,0); ctx.lineTo(gx,ch); }
-  for(let gy=0;gy<ch;gy+=R(40)){ ctx.moveTo(0,gy); ctx.lineTo(cw,gy); }
-  ctx.stroke();
+  
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  ctx.fillStyle = isDark ? "#1A1A1A" : "#E8EAED";
+  ctx.fillRect(0,0,cw,ch);
+  
+  if(!GRAPH) return;
 
   /* === DIJKSTRA === */
-  const adj=buildAdj();
-  const{dist,prev}=dijkstra(currentUser,adj);
-  let bExit=null,bCost=Infinity;
-  GRAPH.exit_nodes.forEach(e=>{if(dist[e]<bCost){bCost=dist[e];bExit=e;}});
-  bestExit=bExit;
-  const path=bExit?getPath(prev,currentUser,bExit):[];
-  const pathSet=new Set();
-  for(let i=0;i<path.length-1;i++){pathSet.add(path[i]+"|"+path[i+1]);pathSet.add(path[i+1]+"|"+path[i]);}
+  const adj = buildAdj();
+  const {dist, prev} = dijkstra(currentUser, adj);
+  let bExit = null, bCost = Infinity;
+  GRAPH.exit_nodes.forEach(e => { if(dist[e]<bCost){bCost=dist[e];bExit=e;} });
+  bestExit = bExit;
+  const path = bExit ? getPath(prev, currentUser, bExit) : [];
 
-  /* === BUILDING OUTLINE === */
-  ctx.save();
-  ctx.shadowColor="#0ea5e9";ctx.shadowBlur=R(15);
-  drawRoundRect(X(15),Y(15),X(850),Y(550),R(12),null,"rgba(14, 165, 233, 0.35)",R(2));
-  ctx.restore();
-
-  /* === CORRIDORS (sleeker look) === */
-  CORRIDORS.forEach(c=>{
-    drawRoundRect(X(c.x),Y(c.y),X(c.w),Y(c.h),R(4),"rgba(8, 20, 45, 0.6)","rgba(14, 165, 233, 0.2)",R(1));
+  /* === CORRIDORS === */
+  ctx.fillStyle = isDark ? "#2D2D2D" : "#FFFFFF";
+  CORRIDORS.forEach(c => {
+    ctx.fillRect(X(c.x), Y(c.y), X(c.w), Y(c.h));
   });
 
-  /* === EDGES (Paths) === */
+  /* === ROOMS === */
+  Object.entries(ROOM_RECTS).forEach(([name, r]) => {
+    const onPath = path.includes(name);
+    const isUser = name === currentUser;
+    
+    ctx.beginPath();
+    ctx.rect(X(r.x), Y(r.y), X(r.w), Y(r.h));
+    
+    ctx.fillStyle = isUser ? (isDark?"#3b1414":"#FCE8E6") : onPath ? (isDark?"#122a4f":"#E8F0FE") : (isDark?"#242424":"#F1F3F4");
+    ctx.fill();
+    ctx.strokeStyle = isUser ? (isDark?"#F28B82":"#EA4335") : onPath ? (isDark?"#8AB4F8":"#1A73E8") : (isDark?"#333333":"#DADCE0");
+    ctx.lineWidth = R(2);
+    ctx.stroke();
+    
+    const cx = X(r.x + r.w/2), cy = Y(r.y + r.h/2);
+    ctx.font = `500 ${Math.max(R(12), 10)}px 'Roboto', sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillStyle = isUser ? (isDark?"#F28B82":"#C5221F") : onPath ? (isDark?"#8AB4F8":"#174EA6") : (isDark?"#9AA0A6":"#5F6368");
+    
+    const labelTxt = r.label || name.replace(/_/g," ");
+    if(r.icon) {
+      ctx.font = `${Math.max(R(16), 14)}px sans-serif`;
+      ctx.fillText(r.icon, cx, cy - Math.max(R(8), 6));
+      ctx.font = `500 ${Math.max(R(11), 9)}px 'Roboto', sans-serif`;
+      ctx.fillText(labelTxt, cx, cy + Math.max(R(8), 6));
+    } else {
+      ctx.fillText(labelTxt, cx, cy);
+    }
+  });
+
+  /* === PATHS === */
   let walkedUpToIdx = 0;
   if (PDR.active && path.length > 0) {
     let minD = Infinity;
@@ -514,277 +411,79 @@ function render(){
     });
   }
 
-  GRAPH.edges.forEach(([u,v,d])=>{
-    const pu=NODE_POS[u]||GRAPH.nodes[u];
-    const pv=NODE_POS[v]||GRAPH.nodes[v];
-    if(!pu||!pv)return;
-    const onP=pathSet.has(u+"|"+v);
-    ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
-    if(onP){
-      const uIdx = path.indexOf(u), vIdx = path.indexOf(v);
-      const segIdx = Math.min(uIdx, vIdx);
-      const isWalked = PDR.active && segIdx < walkedUpToIdx;
-      if (isWalked) {
-        ctx.strokeStyle="rgba(100, 116, 139, 0.4)";ctx.lineWidth=R(5);
-        ctx.setLineDash([]);ctx.shadowBlur=0;
-      } else {
-        ctx.strokeStyle="#38bdf8";ctx.lineWidth=R(7);
-        ctx.setLineDash([]);ctx.shadowColor="#0ea5e9";ctx.shadowBlur=R(18);
+  if(path.length > 1) {
+    ctx.beginPath();
+    for(let i=walkedUpToIdx; i<path.length; i++){
+      const p = NODE_POS[path[i]] || GRAPH.nodes[path[i]];
+      if(!p) continue;
+      if(i === walkedUpToIdx) {
+        const startX = PDR.active ? PDR.pos.x : p[0];
+        const startY = PDR.active ? PDR.pos.y : p[1];
+        ctx.moveTo(X(startX), Y(startY));
       }
-    }else{
-      ctx.strokeStyle="rgba(14, 165, 233, 0.15)";ctx.lineWidth=R(1);
-      ctx.setLineDash([R(3),R(5)]);ctx.shadowBlur=0;
+      else ctx.lineTo(X(p[0]), Y(p[1]));
     }
-    ctx.stroke();ctx.setLineDash([]);ctx.shadowBlur=0;
-  });
+    ctx.strokeStyle = (isDark?"#8AB4F8":"#1A73E8");
+    ctx.lineWidth = R(8);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.stroke();
 
-  /* white animated flow dots */
-  if(path.length>=2){
-    animT=(animT+1)%60;
-    for(let i=walkedUpToIdx;i<path.length-1;i++){
-      const pu=NODE_POS[path[i]],pv=NODE_POS[path[i+1]];
-      if(!pu||!pv)continue;
-      ctx.beginPath();ctx.moveTo(X(pu[0]),Y(pu[1]));ctx.lineTo(X(pv[0]),Y(pv[1]));
-      ctx.strokeStyle="rgba(255,255,255,0.4)";ctx.lineWidth=R(7);
-      ctx.setLineDash([R(12),R(16)]);ctx.lineDashOffset=-animT*1.8;ctx.stroke();ctx.setLineDash([]);
+    if(walkedUpToIdx > 0) {
+      ctx.beginPath();
+      for(let i=0; i<=walkedUpToIdx; i++){
+        const p = NODE_POS[path[i]] || GRAPH.nodes[path[i]];
+        if(!p) continue;
+        if(i === 0) ctx.moveTo(X(p[0]), Y(p[1]));
+        else ctx.lineTo(X(p[0]), Y(p[1]));
+      }
+      if(PDR.active) ctx.lineTo(X(PDR.pos.x), Y(PDR.pos.y));
+      ctx.strokeStyle = "#BDC1C6";
+      ctx.lineWidth = R(8);
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.stroke();
     }
   }
-
-  /* === ROOM RECTANGLES === */
-  Object.entries(ROOM_RECTS).forEach(([name,r])=>{
-    const onPath=path.includes(name);
-    const isUser=name===currentUser;
-
-    let borderClr, borderW;
-    if(isUser){ borderClr="#ef4444"; borderW=R(3); }
-    else if(onPath){ borderClr="#f59e0b"; borderW=R(2.5); }
-    else { borderClr="rgba(14, 165, 233, 0.4)"; borderW=R(1); }
-
-    ctx.save();
-    ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(X(r.x),Y(r.y),X(r.w),Y(r.h),R(6));
-    else ctx.rect(X(r.x),Y(r.y),X(r.w),Y(r.h));
-    
-    // Glassmorphism gradient
-    const roomGrad = ctx.createLinearGradient(X(r.x),Y(r.y),X(r.x),Y(r.y+r.h));
-    if(isUser){ roomGrad.addColorStop(0,"rgba(239, 68, 68, 0.2)");roomGrad.addColorStop(1,"rgba(239, 68, 68, 0.05)"); }
-    else if(onPath){ roomGrad.addColorStop(0,"rgba(245, 158, 11, 0.2)");roomGrad.addColorStop(1,"rgba(245, 158, 11, 0.05)"); }
-    else { roomGrad.addColorStop(0,"rgba(14, 165, 233, 0.08)");roomGrad.addColorStop(1,"rgba(14, 165, 233, 0.02)"); }
-    ctx.fillStyle=roomGrad;ctx.fill();
-    ctx.strokeStyle=borderClr;ctx.lineWidth=borderW;ctx.stroke();
-    ctx.restore();
-
-    // Icon
-    const cx=X(r.x+r.w/2), cy=Y(r.y+r.h/2);
-    const iconSize=Math.max(R(15),11);
-    ctx.font=`${iconSize}px serif`;
-    ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(r.icon,cx,cy-Math.max(R(7),5));
-
-    // Label with background pill for readability
-    const labelSize=Math.max(R(9),10); // minimum 10px
-    ctx.font=`700 ${labelSize}px Inter`;
-    const labelTxt = r.label || name.replace(/_/g," ");
-    const labelW=ctx.measureText(labelTxt).width+R(8);
-    const labelH=labelSize+R(5);
-    const lx=cx-labelW/2, ly=cy+Math.max(R(5),4);
-    // pill bg
-    ctx.fillStyle=isUser?"rgba(239,68,68,0.25)":onPath?"rgba(245,158,11,0.2)":"rgba(15,22,45,0.8)";
-    if(ctx.roundRect) ctx.roundRect(lx,ly,labelW,labelH,R(4));
-    else ctx.rect(lx,ly,labelW,labelH);
-    ctx.fill();
-    // text
-    ctx.fillStyle=isUser?"#fca5a5":onPath?"#fde68a":"#93c5fd";
-    ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(labelTxt,cx,ly+labelH/2);
-  });
 
   /* === EXIT NODES === */
-  const exits=GRAPH.exit_nodes;
-  exits.forEach(name=>{
-    const pos=NODE_POS[name]||GRAPH.nodes[name];
-    if(!pos)return;
-    const[xr,yr]=pos;
-    const x=X(xr),y=Y(yr);
-    const isBest=name===bExit;
-    const lvl=crowdData[name]?.level||"Low";
-    const clr={Low:"#10b981",Medium:"#f59e0b",High:"#ef4444"}[lvl];
-    const bestClr="#a855f7";
-    const r=R(isBest?20:15);
-
-    // Smart label offset — based on exit position to avoid overlap
-    // Left-edge exits: labels go RIGHT; Right-edge: LEFT; Top: BELOW; Bottom: ABOVE
-    const isLeft  = xr < 100;
-    const isRight = xr > 700;
-    const isTop   = yr < 80;
-    const isBottom= yr > 500;
-    // labelSide: 1=above, -1=below, 2=right, -2=left
-    const labelSide = isLeft ? 2 : isRight ? -2 : isTop ? -1 : 1;
-
-    // Pulsing outer ring for best exit
-    if(isBest){
-      const pulse=0.4+0.6*Math.sin(Date.now()/350);
-      ctx.beginPath();ctx.arc(x,y,r+R(10),0,Math.PI*2);
-      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.6})`;ctx.lineWidth=R(2.5);ctx.stroke();
-      ctx.beginPath();ctx.arc(x,y,r+R(5),0,Math.PI*2);
-      ctx.strokeStyle=`rgba(168,85,247,${pulse*0.3})`;ctx.lineWidth=R(7);ctx.stroke();
-    }
-
-    // Main circle
-    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.fillStyle=isBest?bestClr:clr;
-    ctx.shadowColor=isBest?bestClr:clr;ctx.shadowBlur=R(14);
-    ctx.fill();ctx.shadowBlur=0;
-    ctx.strokeStyle="rgba(255,255,255,0.4)";ctx.lineWidth=R(2);ctx.stroke();
-
-    // Exit icon inside circle
-    const iconSz=Math.max(R(9),9);
-    ctx.font=`800 ${iconSz}px Inter`;
-    ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(isBest?"★":"↑",x,y);
-
-    // --- Crowd level badge ---
-    const badgeSize=Math.max(R(8),8.5);
-    ctx.font=`700 ${badgeSize}px Inter`;
-    const bw=ctx.measureText(lvl).width+R(10),bh=badgeSize+R(5);
-    let bx,by;
-    if(labelSide===2){bx=x+r+R(5);by=y-bh/2;}           // right
-    else if(labelSide===-2){bx=x-r-R(5)-bw;by=y-bh/2;}  // left
-    else if(labelSide===1){bx=x-bw/2;by=y-r-R(3)-bh;}   // above
-    else{bx=x-bw/2;by=y+r+R(3);}                         // below
-    ctx.fillStyle=clr+"33";
-    if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,R(4));else ctx.rect(bx,by,bw,bh);
-    ctx.fill();
-    ctx.strokeStyle=clr;ctx.lineWidth=R(1);ctx.stroke();
-    ctx.fillStyle=clr;ctx.textAlign="left";ctx.textBaseline="middle";
-    ctx.fillText(lvl,bx+R(5),by+bh/2);
-
-    // --- Exit name label ---
-    const nameSize=Math.max(R(8),8.5);
-    ctx.font=`700 ${nameSize}px Inter`;
-    const label=name.replace(/_/g," ");
-    const nw=ctx.measureText(label).width+R(10),nh=nameSize+R(5);
-    let nx,ny;
-    if(labelSide===2){nx=x+r+R(5);ny=y+bh/2+R(3);}
-    else if(labelSide===-2){nx=x-r-R(5)-nw;ny=y+bh/2+R(3);}
-    else if(labelSide===1){nx=x-nw/2;ny=y-r-R(3)-bh-R(2)-nh;}
-    else{nx=x-nw/2;ny=y+r+R(3)+bh+R(2);}
-    ctx.fillStyle=isBest?"rgba(168,85,247,0.25)":"rgba(10,15,30,0.8)";
-    if(ctx.roundRect)ctx.roundRect(nx,ny,nw,nh,R(4));else ctx.rect(nx,ny,nw,nh);
-    ctx.fill();
-    ctx.fillStyle=isBest?"#e9d5ff":"#cbd5e1";
-    ctx.textAlign="left";ctx.textBaseline="middle";
-    ctx.fillText(label,nx+R(5),ny+nh/2);
-
-    // SAFEST tag
-    if(isBest){
-      const tagSize=Math.max(R(7),7.5);
-      ctx.font=`800 ${tagSize}px Inter`;
-      const tw=ctx.measureText("★ SAFEST").width+R(10),th=tagSize+R(4);
-      let tx,ty;
-      if(labelSide===2){tx=nx;ty=ny+nh+R(2);}
-      else if(labelSide===-2){tx=nx;ty=ny+nh+R(2);}
-      else if(labelSide===1){tx=x-tw/2;ty=ny-th-R(2);}
-      else{tx=x-tw/2;ty=ny+nh+R(2);}
-      ctx.fillStyle="rgba(168,85,247,0.35)";
-      if(ctx.roundRect)ctx.roundRect(tx,ty,tw,th,R(4));else ctx.rect(tx,ty,tw,th);
-      ctx.fill();
-      ctx.strokeStyle="#a855f7";ctx.lineWidth=R(0.8);ctx.stroke();
-      ctx.fillStyle="#e9d5ff";ctx.textAlign="left";ctx.textBaseline="middle";
-      ctx.fillText("★ SAFEST",tx+R(5),ty+th/2);
-    }
-
-    // Camera icon
-    if(name===GRAPH.camera_exit){
-      ctx.font=`${Math.max(R(10),10)}px serif`;ctx.textAlign="center";
-      ctx.fillText("📷",x,y-r-R(14));
+  GRAPH.exit_nodes.forEach(name => {
+    const pos = NODE_POS[name] || GRAPH.nodes[name];
+    if(!pos) return;
+    const isBest = name === bestExit;
+    const clr = isBest ? (isDark?"#81C995":"#1E8E3E") : (isDark?"#F28B82":"#EA4335");
+    ctx.beginPath();
+    ctx.arc(X(pos[0]), Y(pos[1]), R(isBest?12:10), 0, Math.PI*2);
+    ctx.fillStyle = clr; ctx.fill();
+    ctx.strokeStyle = isDark?"#121212":"#FFFFFF"; ctx.lineWidth = R(3); ctx.stroke();
+    if(isBest) {
+      ctx.font = `bold ${Math.max(R(12), 10)}px sans-serif`;
+      ctx.fillStyle = isDark?"#121212":"#FFFFFF"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("★", X(pos[0]), Y(pos[1]));
     }
   });
 
-
-  /* === USER PIN + PDR TRAIL + DIRECTION ARROW === */
-  {
-    // Use PDR position whenever walking is active
-    let xr, yr;
-    if (PDR.active) {
-      xr = PDR.pos.x; yr = PDR.pos.y;
-    } else {
-      const upos = NODE_POS[currentUser]||GRAPH.nodes[currentUser];
-      if (upos) { xr = upos[0]; yr = upos[1]; } else { xr = null; }
-    }
-
-    // Draw PDR trail underneath the pin
-    if (PDR.active && PDR.trail.length > 1) {
-      ctx.beginPath();
-      ctx.moveTo(X(PDR.trail[0].x), Y(PDR.trail[0].y));
-      PDR.trail.forEach((p,i) => { if(i>0) ctx.lineTo(X(p.x), Y(p.y)); });
-      ctx.strokeStyle = "rgba(124,58,237,0.55)";
-      ctx.lineWidth = R(3.5);
-      ctx.setLineDash([R(4), R(5)]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    if (xr !== null && xr !== undefined) {
-      const x=X(xr),y=Y(yr);
-      const p=0.5+0.5*Math.sin(Date.now()/500);
-
-      // Direction arrow (shown when PDR sensor active + walking)
-      if (PDR.active && PDR.sensorMode) {
-        const mapHeading = ((PDR.heading - PDR.northOffset) + 360) % 360;
-        const rad = (mapHeading * Math.PI) / 180;
-        const arrowLen = R(36);
-        const ax = x + arrowLen * Math.sin(rad);
-        const ay = y - arrowLen * Math.cos(rad);
-        // Arrow shaft
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ax, ay);
-        ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = R(3);
-        ctx.shadowColor = "#38bdf8"; ctx.shadowBlur = R(10);
-        ctx.stroke(); ctx.shadowBlur = 0;
-        // Arrow head
-        const hLen = R(10), hAng = 0.45;
-        ctx.beginPath();
-        ctx.moveTo(ax, ay);
-        ctx.lineTo(ax - hLen*Math.sin(rad-hAng), ay + hLen*Math.cos(rad-hAng));
-        ctx.moveTo(ax, ay);
-        ctx.lineTo(ax - hLen*Math.sin(rad+hAng), ay + hLen*Math.cos(rad+hAng));
-        ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = R(2.5);
-        ctx.shadowColor = "#38bdf8"; ctx.shadowBlur = R(8);
-        ctx.stroke(); ctx.shadowBlur = 0;
-      }
-
-      // Big red glow ring
-      const pulse=0.4+0.4*Math.sin(Date.now()/250);
-      ctx.beginPath();ctx.arc(x,y,R(14)+R(8),0,Math.PI*2);
-      ctx.strokeStyle=`rgba(239,68,68,${pulse})`;ctx.lineWidth=R(5);ctx.stroke();
-
-      // Core dot
-      ctx.beginPath();ctx.arc(x,y,R(14),0,Math.PI*2);
-      ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=R(20);
-      ctx.fill();ctx.shadowBlur=0;
-      ctx.strokeStyle="#fca5a5";ctx.lineWidth=R(2.5);ctx.stroke();
-
-      // YOU label
-      ctx.font=`800 ${Math.max(R(8.5),9)}px Inter`;
-      const label="YOU", tw=ctx.measureText(label).width+R(10), th=Math.max(R(10),12);
-      const tx=x-tw/2, ty=y+R(14)+R(4);
-      ctx.fillStyle="#b91c1c";
-      if(ctx.roundRect)ctx.roundRect(tx,ty,tw,th,R(4));else ctx.rect(tx,ty,tw,th);
-      ctx.fill();
-      ctx.strokeStyle="#ef4444";ctx.lineWidth=R(1);ctx.stroke();
-      ctx.fillStyle="#fca5a5";ctx.textAlign="center";ctx.textBaseline="middle";
-      ctx.fillText(label,x,ty+th/2);
-    }
+  /* === USER PIN === */
+  let xr, yr;
+  if (PDR.active) { xr = PDR.pos.x; yr = PDR.pos.y; }
+  else {
+    const upos = NODE_POS[currentUser] || GRAPH.nodes[currentUser];
+    if (upos) { xr = upos[0]; yr = upos[1]; } else { xr = null; }
+  }
+  if(xr !== null && xr !== undefined) {
+    const ux = X(xr), uy = Y(yr);
+    const pulse = 1 + 0.4 * Math.sin(Date.now()/300);
+    ctx.beginPath();
+    ctx.arc(ux, uy, R(14) * pulse, 0, Math.PI*2);
+    ctx.fillStyle = (isDark?"rgba(138,180,248,0.3)":"rgba(66, 133, 244, 0.3)");
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(ux, uy, R(8), 0, Math.PI*2);
+    ctx.fillStyle = (isDark?"#8AB4F8":"#4285F4"); ctx.fill();
+    ctx.strokeStyle = isDark?"#121212":"#FFFFFF"; ctx.lineWidth = R(3); ctx.stroke();
   }
 
-  /* === WATERMARK === */
-  ctx.fillStyle="rgba(56,100,160,0.5)";
-  ctx.font=`italic ${Math.max(R(8.5),9)}px Inter`;
-  ctx.textAlign="center";ctx.textBaseline="top";
-  ctx.fillText("ISE Dept — 3rd Floor | Emergency Exit System",X(440),Y(8));
-
-  updateSidebar(bExit,bCost,path);
-  requestAnimationFrame(render);
+  updateSidebar(bestExit, bCost, path);
+  if(window.requestAnimationFrame) requestAnimationFrame(render);
 }
 
 function updateSidebar(best,cost,path){
@@ -1528,7 +1227,7 @@ const VOICE = {
   lang: 'en-IN'          // 'en-IN' or 'hi-IN'
 };
 
-const HINDI_PHRASES = {
+var HINDI_PHRASES = {
   "↑": "की ओर सीधे जाएं",
   "→": "की ओर दाहिने मुड़ें",
   "←": "की ओर बाएं मुड़ें",
@@ -1538,7 +1237,7 @@ const HINDI_PHRASES = {
   "🚨": "आप आपातकालीन निकास पर पहुंच गए हैं। सुरक्षित बाहर निकलें!"
 };
 
-const KANNADA_PHRASES = {
+var KANNADA_PHRASES = {
   "↑": "ನೇರವಾಗಿ ಹೋಗಿ",
   "→": "ಬಲಕ್ಕೆ ತಿರುಗಿ",
   "←": "ಎಡಕ್ಕೆ ತಿರುಗಿ",
@@ -1548,7 +1247,7 @@ const KANNADA_PHRASES = {
   "🚨": "ನೀವು ತುರ್ತು ನಿರ್ಗಮನವನ್ನು ತಲುಪಿದ್ದೀರಿ. ಸುರಕ್ಷಿತವಾಗಿ ಹೊರಬನ್ನಿ!"
 };
 
-const KANNADA_PHRASES = {
+var KANNADA_PHRASES = {
   "↑": "ನೇರವಾಗಿ ಹೋಗಿ",
   "→": "ಬಲಕ್ಕೆ ತಿರುಗಿ",
   "←": "ಎಡಕ್ಕೆ ತಿರುಗಿ",
@@ -2104,7 +1803,7 @@ function walkDemoStep(stepIdx) {
 
   // Smooth interpolation: move dot from fromPos to toPos
   // Duration scales with distance so speed feels consistent
-  const duration = Math.max(3000, step.dist * 150); // ms (Slower for voice to finish)
+  const duration = Math.max(6000, step.dist * 450); // ms (Slower for voice to finish)
   const startTime = performance.now();
 
   function animFrame(now) {
@@ -2212,6 +1911,47 @@ setInterval(async () => {
 }, 5000);
 
 </script>
+
+<script>
+// --- Added UI Functions ---
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeIcon').innerHTML = next === 'dark' ? '&#9728;' : '&#127769;';
+}
+
+function openAudioSettings() { document.getElementById('audioModal').classList.add('active'); }
+function closeAudioSettings() { document.getElementById('audioModal').classList.remove('active'); }
+function toggleMute() {
+  VOICE.enabled = !VOICE.enabled;
+  const btn = document.getElementById('muteBtn');
+  const icon = document.getElementById('audioIcon');
+  if(VOICE.enabled) {
+    btn.innerHTML = '&#128266; Mute';
+    btn.className = 'walk-btn start';
+    icon.innerHTML = '&#128266;';
+  } else {
+    btn.innerHTML = '&#128263; Unmute';
+    btn.className = 'walk-btn';
+    icon.innerHTML = '&#128263;';
+  }
+}
+
+window.audioPromptedFlag = false;
+const origToggleWalkMode = window.toggleWalkMode;
+window.toggleWalkMode = function() {
+  if(!window.audioPromptedFlag) { window.audioPromptedFlag = true; openAudioSettings(); }
+  if (origToggleWalkMode) origToggleWalkMode();
+};
+
+const origToggleDemoWalk = window.toggleDemoWalk;
+window.toggleDemoWalk = function() {
+  if(!window.audioPromptedFlag) { window.audioPromptedFlag = true; openAudioSettings(); }
+  if (origToggleDemoWalk) origToggleDemoWalk();
+};
+</script>
+
 </body>
 </html>
 
