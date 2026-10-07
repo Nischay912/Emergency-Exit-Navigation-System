@@ -826,8 +826,23 @@ function applyStep(headingDeg) {
       
       if (isExit) {
           showToast("🚨 Emergency Exit Reached.");
+
+          let exitSpokenMsg = "Emergency Exit Reached. Evacuate Now!";
+          let exitHtmlMsg = "🚨 EMERGENCY EXIT REACHED 🚨<br><br>EVACUATE NOW!";
+          if (typeof VOICE !== 'undefined') {
+              if (VOICE.lang === 'hi-IN') {
+                  exitSpokenMsg = "आपातकालीन निकास पर पहुंच गए हैं। कृपया तुरंत बाहर निकलें।";
+                  exitHtmlMsg = "🚨 आपातकालीन निकास 🚨<br><br>तुरंत बाहर निकलें!";
+              } else if (VOICE.lang === 'kn-IN') {
+                  exitSpokenMsg = "ತುರ್ತು ನಿರ್ಗಮನ ತಲುಪಿದ್ದೀರಿ. ದಯವಿಟ್ಟು ತಕ್ಷಣ ಹೊರಹೋಗಿ.";
+                  exitHtmlMsg = "🚨 ತುರ್ತು ನಿರ್ಗಮನ 🚨<br><br>ತಕ್ಷಣ ಹೊರಹೋಗಿ!";
+              }
+          }
+          const overlayTxt = document.getElementById('exitReachedText');
+          if (overlayTxt) overlayTxt.innerHTML = exitHtmlMsg;
           document.getElementById('exitReachedOverlay').classList.add('active');
-          if (typeof speak === 'function') speak("Emergency Exit Reached. Evacuate Now!");
+          if (typeof speak === 'function') speak(exitSpokenMsg);
+
           if (PDR.active && typeof toggleWalkMode === 'function') toggleWalkMode();
       }
     }
@@ -1981,8 +1996,23 @@ function walkDemoStep(stepIdx) {
 
 function finishDemoWalk() {
     if (typeof speakStep === 'function') speakStep(NAV.steps.length);
-    document.getElementById('exitReachedOverlay').classList.add('active');
-    if (typeof speak === 'function') speak("Emergency Exit Reached. Evacuate Now!");
+
+          let exitSpokenMsg = "Emergency Exit Reached. Evacuate Now!";
+          let exitHtmlMsg = "🚨 EMERGENCY EXIT REACHED 🚨<br><br>EVACUATE NOW!";
+          if (typeof VOICE !== 'undefined') {
+              if (VOICE.lang === 'hi-IN') {
+                  exitSpokenMsg = "आपातकालीन निकास पर पहुंच गए हैं। कृपया तुरंत बाहर निकलें।";
+                  exitHtmlMsg = "🚨 आपातकालीन निकास 🚨<br><br>तुरंत बाहर निकलें!";
+              } else if (VOICE.lang === 'kn-IN') {
+                  exitSpokenMsg = "ತುರ್ತು ನಿರ್ಗಮನ ತಲುಪಿದ್ದೀರಿ. ದಯವಿಟ್ಟು ತಕ್ಷಣ ಹೊರಹೋಗಿ.";
+                  exitHtmlMsg = "🚨 ತುರ್ತು ನಿರ್ಗಮನ 🚨<br><br>ತಕ್ಷಣ ಹೊರಹೋಗಿ!";
+              }
+          }
+          const overlayTxt = document.getElementById('exitReachedText');
+          if (overlayTxt) overlayTxt.innerHTML = exitHtmlMsg;
+          document.getElementById('exitReachedOverlay').classList.add('active');
+          if (typeof speak === 'function') speak(exitSpokenMsg);
+
     
   NAV.demoRunning = false;
   PDR.active = false;
@@ -2003,7 +2033,7 @@ function stopDemoWalk() {
   btn.textContent = "\u25B6 Auto Demo Walk";
   btn.className = "nav-demo-btn";
   btn.onclick = toggleDemoWalk;
-}
+if (window.preDemoUserLocation) { currentUser = window.preDemoUserLocation; window.preDemoUserLocation = null; } }
 
 // ── MINI-MAP LIVE POINTER ─────────────────────────
 // Redraws only the moving YOU pointer on the mini-map canvas during demo
@@ -2086,7 +2116,7 @@ window.toggleDemoWalk = function() {
 
 
 <div class="exit-reached-overlay" id="exitReachedOverlay">
-  <div class="exit-reached-title">🚨 EMERGENCY EXIT REACHED 🚨<br><br>EVACUATE NOW!</div>
+  <div class="exit-reached-title" id="exitReachedText">🚨 EMERGENCY EXIT REACHED 🚨<br><br>EVACUATE NOW!</div>
   <button class="exit-reached-btn" onclick="document.getElementById('exitReachedOverlay').classList.remove('active')">Dismiss</button>
 </div>
 
