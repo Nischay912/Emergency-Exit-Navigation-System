@@ -45,3 +45,7 @@ Thumbs.db
 see.txt
 web_demo/
 features-list.md
+# Documentation and Patch Scripts
+project_notes/
+patch_history/
+scratch/

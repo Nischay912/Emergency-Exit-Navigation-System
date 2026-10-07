@@ -1,67 +1,50 @@
-"""
-generate_qr.py  —  Generate QR codes for every floor node
-Each QR encodes a URL: http://<YOUR_IP>:5000/locate/<NodeName>
-Scan the QR at that location → opens the map with you placed there.
-
-Run once:  python generate_qr.py
-Output:    qr_codes/ folder with one PNG per node
-"""
-
 import qrcode
-import socket
 import json
+import sys
 from pathlib import Path
-
-# ── detect your LAN IP automatically ──
-def get_local_ip():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        return "localhost"
 
 BASE = Path(__file__).parent
 OUT  = BASE / "qr_codes"
 OUT.mkdir(exist_ok=True)
 
-IP   = get_local_ip()
-PORT = 5000
+# Require the user to pass the ngrok URL so the QR codes actually work with sensors!
+if len(sys.argv) < 2:
+    print("\n[ERROR] You must provide your secure HTTPS URL from start_tunnel.py!")
+    print("Usage: python generate_qr.py <https_url>")
+    print("Example: python generate_qr.py https://1a2b-3c4d.ngrok-free.app\n")
+    sys.exit(1)
 
-with open(BASE / "data" / "floor_graph.json") as f:
-    graph = json.load(f)
+base_url = sys.argv[1].rstrip('/')
 
-nodes = graph["nodes"]
-exits = set(graph["exit_nodes"])
+try:
+    with open(BASE / "data" / "floor_graph.json") as f:
+        graph = json.load(f)
+except FileNotFoundError:
+    print("[ERROR] floor_graph.json not found in data/ folder!")
+    sys.exit(1)
 
-print(f"\n[QR Generator] Your LAN IP: {IP}")
+nodes = graph.get("nodes", {})
+exits = set(graph.get("exit_nodes", []))
+
+print(f"\n[QR Generator] Base URL: {base_url}")
 print(f"[QR Generator] Generating {len(nodes)} QR codes...\n")
 
 for name in nodes:
-    url = f"http://{IP}:{PORT}/locate/{name}"
-    qr  = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=10,
-        border=4,
-    )
+    # URL that automatically places the user in the scanned room!
+    url = f"{base_url}/locate/{name}"
+    
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(url)
     qr.make(fit=True)
 
-    # colour: red border for exits, blue for rooms/corridors
-    fill_color  = "black"
-    back_color  = "white"
-
-    img  = qr.make_image(fill_color=fill_color, back_color=back_color)
-    file = OUT / f"{name}.png"
-    img.save(file)
+    img = qr.make_image(fill_color="black", back_color="white")
+    file_path = OUT / f"{name}.png"
+    img.save(file_path)
 
     tag = " [EXIT]" if name in exits else ""
     print(f"  [OK]  {name}{tag}")
-    print(f"       -> {url}")
-    print(f"       -> saved: {file.name}\n")
+    print(f"       -> saved: {file_path.name}")
 
-print(f"\n[QR Generator] Done! Print the PNGs from: {OUT}")
-print("[QR Generator] Place each QR code at the matching location on the floor.\n")
+print(f"\n[SUCCESS] Generated {len(nodes)} QR codes in the 'qr_codes' folder.")
+print("Print these out and stick them to the walls. When a user scans one,")
+print("the app will open and automatically set their starting location!")

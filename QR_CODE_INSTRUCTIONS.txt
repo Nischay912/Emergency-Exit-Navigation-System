@@ -1,0 +1,27 @@
+HOW TO GENERATE AND USE QR CODES FOR THE LIVE DEMO
+==================================================
+
+The concept of the project is that users don't need GPS. Instead, they scan a QR code printed on the wall of the room they are in, which automatically sets their location in the app!
+
+STEP 1: GET YOUR HTTPS LINK
+---------------------------
+First, you need the secure HTTPS link for your phone (so motion sensors work).
+Run this in a terminal:
+> python start_tunnel.py
+
+(Let's pretend the link it gives you is: https://1a2b-3c4d.ngrok.app)
+
+
+STEP 2: GENERATE THE QR CODES
+-----------------------------
+Open a NEW terminal, and run the generator script using the link you just got:
+> python generate_qr.py https://1a2b-3c4d.ngrok.app
+
+(Make sure to replace the link with your actual ngrok link from Step 1).
+
+
+WHAT THIS DOES:
+---------------
+It will instantly create a folder called "qr_codes" and generate a separate QR image for every single room/node in the map (e.g., Library.png, Canteen.png).
+
+You can print these images or just show them on your laptop screen. When you point the phone camera at the "Library" QR code, it will securely open the web app and automatically set their starting location to the Library! You won't even have to use the dropdown menu.
