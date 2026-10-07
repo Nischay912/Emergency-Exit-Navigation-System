@@ -33,7 +33,17 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 
 .app { display: flex; flex: 1; height: calc(100vh - 60px); position: relative; }
 .sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); box-shadow: 2px 0 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow-y: auto; z-index: 50; padding: 20px; gap: 20px; }
-@media(max-width: 768px) { .sidebar { width: 100%; height: 45vh; border-right: none; border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); } .app { flex-direction: column-reverse; } }
+@media(max-width: 768px) { 
+  .sidebar { width: 100%; height: 55vh; border-right: none; border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(0,0,0,0.15); border-top-left-radius: 24px; border-top-right-radius: 24px; padding-top: 24px; padding-bottom: 60px; position: relative; }
+  .legend-sec { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+  .leg-row { width: 45%; margin-bottom: 0; } 
+  .sidebar::before { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 40px; height: 5px; background: var(--muted); border-radius: 3px; opacity: 0.5; }
+  .app { flex-direction: column-reverse; }
+  .nav-top { flex-direction: column; align-items: flex-start; padding: 16px; gap: 12px; }
+  .nav-arrow-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+  .nav-arrow { font-size: 32px; width: 32px; text-align: left; }
+  .nav-action { font-size: 20px; }
+}
 
 .map-col { display: flex; flex-direction: column; flex: 1; position: relative; overflow: hidden; background: var(--map-bg); }
 .canvas-wrap { flex: 1; position: relative; width: 100%; height: 100%; }
@@ -493,6 +503,7 @@ function render() {
     ctx.arc(ux, uy, R(14) * pulse, 0, Math.PI*2);
     ctx.fillStyle = (isDark?"rgba(138,180,248,0.3)":"rgba(66, 133, 244, 0.3)");
     ctx.fill();
+      if (typeof drawHeadingArrow === "function") drawHeadingArrow(ctx, ux, uy, R, false);
     
     ctx.beginPath();
     ctx.arc(ux, uy, R(8), 0, Math.PI*2);
@@ -591,6 +602,8 @@ async function pollCrowd(){
 }
 
 init();
+
+
 </script>
 
 <!-- Toast notification -->
@@ -611,8 +624,8 @@ const PDR = {
   stepCount: 0,
   lastMag: 0,
   stepCooldown: false,
-  STEP_THRESH: 1.8,      // m/s² delta above gravity — tuned for walking pace
-  STEP_LEN: 22,          // design units per step (~0.7m on floor plan)
+  STEP_THRESH: 1.5,      // m/s² delta above gravity — tuned for walking pace
+  STEP_LEN: 25,          // design units per step (~0.7m on floor plan)
   lastAccelMag: 0,       // smoothed magnitude for peak detection
   peakDetected: false,   // true while above threshold (detect rising edge only)
   // Compass
@@ -832,6 +845,7 @@ function drawWalkOverlay() {
     ctx.fillStyle = "#ef4444";
     ctx.shadowColor = "#ef4444"; ctx.shadowBlur = R(14);
     ctx.fill(); ctx.shadowBlur = 0;
+      if (typeof drawHeadingArrow === "function") drawHeadingArrow(ctx, X(PDR.pos.x), Y(PDR.pos.y), R, false);
     ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = R(1.5); ctx.stroke();
 
     ctx.font = `bold ${R(9)}px Inter`;
@@ -1101,6 +1115,8 @@ const _baseRender = render; // save original
 // Also update currentUser position in Dijkstra when PDR moves it
 // Override the position used for Dijkstra to be PDR.pos when in walk mode
 const _origBuildAdj = buildAdj;
+
+
 </script>
 
 <!-- NAVIGATION OVERLAY -->
@@ -1951,6 +1967,7 @@ function drawDemoPointerOnMiniMap(pos) {
   nctx.arc(x, y, Math.max(NR(12), 12), 0, Math.PI*2);
   nctx.fillStyle = "#ef4444";
   nctx.fill();
+  if (typeof drawHeadingArrow === 'function') drawHeadingArrow(nctx, x, y, NR, true);
   
   nctx.fillStyle = "#fff"; nctx.textAlign = "center"; nctx.textBaseline = "middle";
   nctx.font = `bold ${Math.max(NR(10), 10)}px Inter`;
@@ -1965,6 +1982,8 @@ setInterval(async () => {
     openNavigation();
   }
 }, 5000);
+
+
 
 </script>
 
@@ -2006,6 +2025,8 @@ window.toggleDemoWalk = function() {
   if(!window.audioPromptedFlag) { window.audioPromptedFlag = true; openAudioSettings(); }
   if (origToggleDemoWalk) origToggleDemoWalk();
 };
+
+
 </script>
 
 </body>
