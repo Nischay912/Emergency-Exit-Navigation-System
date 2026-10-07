@@ -1,0 +1,181 @@
+{
+  "width": 1200,
+  "height": 700,
+  "nodes": {
+    "Lobby": [
+      150,
+      350
+    ],
+    "Elevator_Bank": [
+      400,
+      350
+    ],
+    "ICU_Wing": [
+      400,
+      150
+    ],
+    "Maternity_Wing": [
+      650,
+      500
+    ],
+    "Surgery_Ward": [
+      400,
+      550
+    ],
+    "Pharmacy": [
+      650,
+      200
+    ],
+    "Main_Entrance": [
+      50,
+      350
+    ],
+    "Emergency_Exit_West": [
+      400,
+      50
+    ],
+    "Emergency_Exit_North": [
+      850,
+      350
+    ]
+  },
+  "edges": [
+    [
+      "Main_Entrance",
+      "Lobby",
+      100
+    ],
+    [
+      "Lobby",
+      "Elevator_Bank",
+      250
+    ],
+    [
+      "Elevator_Bank",
+      "ICU_Wing",
+      200
+    ],
+    [
+      "Elevator_Bank",
+      "Surgery_Ward",
+      200
+    ],
+    [
+      "Elevator_Bank",
+      "Emergency_Exit_North",
+      450
+    ],
+    [
+      "ICU_Wing",
+      "Pharmacy",
+      250
+    ],
+    [
+      "ICU_Wing",
+      "Emergency_Exit_West",
+      100
+    ],
+    [
+      "Surgery_Ward",
+      "Maternity_Wing",
+      250
+    ]
+  ],
+  "exit_nodes": [
+    "Main_Entrance",
+    "Emergency_Exit_West",
+    "Emergency_Exit_North"
+  ],
+  "corridors": [
+    {
+      "x": 100,
+      "y": 330,
+      "w": 750,
+      "h": 40
+    },
+    {
+      "x": 380,
+      "y": 150,
+      "w": 40,
+      "h": 400
+    },
+    {
+      "x": 400,
+      "y": 200,
+      "w": 250,
+      "h": 40
+    },
+    {
+      "x": 400,
+      "y": 500,
+      "w": 250,
+      "h": 40
+    }
+  ],
+  "rooms": {
+    "Lobby": {
+      "x": 100,
+      "y": 300,
+      "w": 100,
+      "h": 100,
+      "label": "Lobby",
+      "icon": "\ud83c\udfe5"
+    },
+    "ICU_Wing": {
+      "x": 320,
+      "y": 150,
+      "w": 160,
+      "h": 100,
+      "label": "ICU",
+      "icon": "\u2764\ufe0f"
+    },
+    "Pharmacy": {
+      "x": 600,
+      "y": 150,
+      "w": 140,
+      "h": 100,
+      "label": "Pharmacy",
+      "icon": "\ud83d\udc8a"
+    },
+    "Maternity_Wing": {
+      "x": 550,
+      "y": 420,
+      "w": 140,
+      "h": 140,
+      "label": "Maternity",
+      "icon": "\ud83d\udc76"
+    },
+    "Surgery_Ward": {
+      "x": 320,
+      "y": 550,
+      "w": 160,
+      "h": 140,
+      "label": "Surgery",
+      "icon": "\ud83d\udd2a"
+    },
+    "Main_Entrance": {
+      "x": 10,
+      "y": 330,
+      "w": 40,
+      "h": 40,
+      "label": "Entrance",
+      "icon": "\ud83d\udeaa"
+    },
+    "Emergency_Exit_West": {
+      "x": 380,
+      "y": 10,
+      "w": 40,
+      "h": 40,
+      "label": "West Exit",
+      "icon": "\ud83d\udea8"
+    },
+    "Emergency_Exit_North": {
+      "x": 850,
+      "y": 330,
+      "w": 40,
+      "h": 40,
+      "label": "North Exit",
+      "icon": "\ud83d\udea8"
+    }
+  }
+}

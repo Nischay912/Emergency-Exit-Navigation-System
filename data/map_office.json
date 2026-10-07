@@ -1,0 +1,193 @@
+{
+  "width": 1000,
+  "height": 600,
+  "nodes": {
+    "Reception": [
+      100,
+      300
+    ],
+    "Hallway_West": [
+      300,
+      300
+    ],
+    "Hallway_Center": [
+      500,
+      300
+    ],
+    "Hallway_East": [
+      700,
+      300
+    ],
+    "Meeting_Room": [
+      300,
+      150
+    ],
+    "Cafeteria": [
+      500,
+      150
+    ],
+    "Cubicles_A": [
+      300,
+      450
+    ],
+    "Cubicles_B": [
+      500,
+      450
+    ],
+    "Front_Door_Exit": [
+      50,
+      300
+    ],
+    "Fire_Escape_North": [
+      500,
+      50
+    ],
+    "Fire_Escape_East": [
+      900,
+      300
+    ]
+  },
+  "edges": [
+    [
+      "Reception",
+      "Front_Door_Exit",
+      50
+    ],
+    [
+      "Reception",
+      "Hallway_West",
+      200
+    ],
+    [
+      "Hallway_West",
+      "Hallway_Center",
+      200
+    ],
+    [
+      "Hallway_Center",
+      "Hallway_East",
+      200
+    ],
+    [
+      "Hallway_West",
+      "Meeting_Room",
+      150
+    ],
+    [
+      "Hallway_West",
+      "Cubicles_A",
+      150
+    ],
+    [
+      "Hallway_Center",
+      "Cafeteria",
+      150
+    ],
+    [
+      "Hallway_Center",
+      "Cubicles_B",
+      150
+    ],
+    [
+      "Cafeteria",
+      "Fire_Escape_North",
+      100
+    ],
+    [
+      "Hallway_East",
+      "Fire_Escape_East",
+      200
+    ]
+  ],
+  "exit_nodes": [
+    "Front_Door_Exit",
+    "Fire_Escape_North",
+    "Fire_Escape_East"
+  ],
+  "corridors": [
+    {
+      "x": 100,
+      "y": 280,
+      "w": 640,
+      "h": 40
+    },
+    {
+      "x": 280,
+      "y": 150,
+      "w": 40,
+      "h": 300
+    },
+    {
+      "x": 480,
+      "y": 150,
+      "w": 40,
+      "h": 300
+    }
+  ],
+  "rooms": {
+    "Reception": {
+      "x": 50,
+      "y": 250,
+      "w": 100,
+      "h": 100,
+      "label": "Reception",
+      "icon": "\ud83c\udfe2"
+    },
+    "Meeting_Room": {
+      "x": 220,
+      "y": 50,
+      "w": 160,
+      "h": 100,
+      "label": "Meeting Room",
+      "icon": "\ud83d\udc65"
+    },
+    "Cafeteria": {
+      "x": 420,
+      "y": 50,
+      "w": 160,
+      "h": 100,
+      "label": "Cafeteria",
+      "icon": "\u2615"
+    },
+    "Cubicles_A": {
+      "x": 220,
+      "y": 450,
+      "w": 160,
+      "h": 120,
+      "label": "Dev Team",
+      "icon": "\ud83d\udcbb"
+    },
+    "Cubicles_B": {
+      "x": 420,
+      "y": 450,
+      "w": 160,
+      "h": 120,
+      "label": "Sales Team",
+      "icon": "\ud83d\udcde"
+    },
+    "Front_Door_Exit": {
+      "x": 10,
+      "y": 280,
+      "w": 40,
+      "h": 40,
+      "label": "Main Exit",
+      "icon": "\ud83d\udeaa"
+    },
+    "Fire_Escape_North": {
+      "x": 480,
+      "y": 10,
+      "w": 40,
+      "h": 40,
+      "label": "Fire Escape",
+      "icon": "\ud83d\udea8"
+    },
+    "Fire_Escape_East": {
+      "x": 740,
+      "y": 280,
+      "w": 40,
+      "h": 40,
+      "label": "East Exit",
+      "icon": "\ud83d\udea8"
+    }
+  }
+}

@@ -11,7 +11,11 @@
 
 :root {
   --bg: #F8F9FA; --panel: #FFFFFF; --border: #DADCE0; --text: #202124; --muted: #5F6368;
-  --red: #EA4335; --green: #34A853; --amber: #FBBC04; --blue: #1A73E8; --route-bg: #E8F0FE;
+  --red: #EA4335; --green: #34A853; --amber: #FBBC04; --blue: #1A73E8; --route-bg: #E8F0FE; --map-bg: #E8EAED;
+}
+:root[data-theme="dark"] {
+  --bg: #121212; --panel: #1E1E1E; --border: #333333; --text: #E8EAED; --muted: #9AA0A6;
+  --route-bg: #174EA6; --blue: #8AB4F8; --map-bg: #1A1A1A;
 }
 * { box-sizing: border-box; }
 body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -29,34 +33,34 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 
 .app { display: flex; flex: 1; height: calc(100vh - 60px); position: relative; }
 .sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); box-shadow: 2px 0 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow-y: auto; z-index: 50; padding: 20px; gap: 20px; }
-@media(max-width: 768px) { .sidebar { width: 100%; border-right: none; border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); } .app { flex-direction: column-reverse; } }
+@media(max-width: 768px) { .sidebar { width: 100%; height: 45vh; border-right: none; border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); } .app { flex-direction: column-reverse; } }
 
-.map-col { display: flex; flex-direction: column; flex: 1; position: relative; overflow: hidden; background: #E8EAED; }
+.map-col { display: flex; flex-direction: column; flex: 1; position: relative; overflow: hidden; background: var(--map-bg); }
 .canvas-wrap { flex: 1; position: relative; width: 100%; height: 100%; }
 .canvas-wrap canvas { display: block; width: 100%; height: 100%; }
 .info-bar { display: none; }
 
 .sec-lbl { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
-.loc-card { background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.loc-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 .at { font-size: 13px; color: var(--muted); }
 .name { font-size: 18px; font-weight: 700; margin-top: 4px; color: var(--text); }
 .hint { font-size: 11px; color: var(--muted); margin-top: 12px; margin-bottom: 4px; }
-.loc-select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; background: #F8F9FA; }
-.rec-card { background: var(--route-bg); border: 1px solid #c2e7ff; border-radius: 12px; padding: 16px; color: #174ea6; }
+.loc-select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; background: var(--bg); color: var(--text); }
+.rec-card { background: var(--route-bg); border: 1px solid var(--blue); border-radius: 12px; padding: 16px; color: var(--text); }
 .rl { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--blue); }
 .re { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #001d35; }
 .rp { font-size: 13px; color: #185abc; line-height: 1.4; }
 
-.nav-trigger { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 24px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(26,115,232,0.3); transition: 0.2s; }
+.nav-trigger { width: 100%; padding: 14px; background: var(--blue); color: var(--bg); border: none; border-radius: 24px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(26,115,232,0.3); transition: 0.2s; }
 .nav-trigger:hover { background: #174ea6; box-shadow: 0 4px 10px rgba(26,115,232,0.4); }
-.walk-btn { width: 100%; padding: 12px; background: white; border: 1px solid var(--border); color: var(--blue); border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
+.walk-btn { width: 100%; padding: 12px; background: var(--panel); border: 1px solid var(--border); color: var(--blue); border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
 .walk-btn:hover { background: #F8F9FA; }
 .walk-btn.start { background: var(--green); color: white; border: none; }
 .walk-btn.start:hover { background: #0D652D; }
 
 /* Exit List styling based on exiting HTML classes */
 .exit-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-.exit-row.best { background: #E8F0FE; border-radius: 8px; padding-left: 8px; padding-right: 8px; border-bottom: none; }
+.exit-row.best { background: var(--route-bg); border-radius: 8px; padding-left: 8px; padding-right: 8px; border-bottom: none; }
 .exit-row-name { font-weight: 500; }
 .cpill { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: #F1F3F4; color: var(--muted); }
 .cpill.Low { background: #E6F4EA; color: #137333; }
@@ -71,12 +75,12 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 .nav-action { font-size: 24px; font-weight: 700; }
 .nav-target { font-size: 16px; opacity: 0.9; margin-top: 4px; }
 .nav-steps-wrap { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-.nav-step-item { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 16px; align-items: center; }
+.nav-step-item { background: var(--panel); padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 16px; align-items: center; }
 .nav-step-arrow { font-size: 24px; color: var(--blue); width: 32px; text-align: center; }
 .nav-step-action { font-size: 16px; font-weight: 500; color: var(--text); }
 .nav-step-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
-.nav-bottom { padding: 16px; background: white; border-top: 1px solid var(--border); display: flex; gap: 12px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
-.nav-close-btn { flex: 1; background: #F1F3F4; color: var(--text); border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; }
+.nav-bottom { padding: 16px; background: var(--panel); border-top: 1px solid var(--border); display: flex; gap: 12px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.nav-close-btn { flex: 1; background: var(--panel); color: var(--text); border: 2px solid var(--border); padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; }
 .nav-demo-btn { flex: 2; background: var(--blue); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; }
 .nav-demo-btn.stop { background: var(--red); }
 
@@ -89,6 +93,20 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
 .modal-card { background: var(--panel); border-radius: 12px; padding: 24px; width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  #navCanvas { width: 100%; height: 150px; flex: none; }
+  
+.leg-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); margin-bottom: 8px; font-weight: 500; }
+.leg-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.leg-sq { width: 14px; height: 4px; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.legend-sec { background: var(--panel); padding: 16px; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
+
+:root[data-theme="dark"] .re { color: #FFFFFF; }
+:root[data-theme="dark"] .rp { color: #E8EAED; }
+:root[data-theme="dark"] .rl { color: #8AB4F8; }
+:root[data-theme="dark"] .nav-trigger { background: #174EA6; color: #FFFFFF; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+:root[data-theme="dark"] .nav-trigger:hover { background: #1967D2; }
+
 </style>
 
 </head>
@@ -108,7 +126,7 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 
 
 <button id="themeToggle" class="floating-btn" onclick="toggleTheme()">
-  <span id="themeIcon">&#127769;</span>
+  <span id="themeIcon">🌙</span>
 </button>
 <button id="audioToggle" class="floating-btn" onclick="openAudioSettings()" style="top: 80px;">
   <span id="audioIcon">&#128266;</span>
@@ -1189,13 +1207,13 @@ const _origBuildAdj = buildAdj;
         background:#0e4429;color:#4ade80;transition:all .2s;
       ">&#128266; Voice ON</button>
       <select onchange="changeLanguage(this.value)" style="
-        background:#0c1e3c;color:var(--text);border:1px solid var(--border);
-        border-radius:10px;padding:0 8px;font-size:.8rem;cursor:pointer;
-      ">
-        <option value="en-IN">🇬🇧 EN</option>
-        <option value="hi-IN">🇮🇳 HI</option>
-        <option value="kn-IN">🇮🇳 KN</option>
-      </select>
+          background: var(--panel); color: var(--text); border: 2px solid var(--border);
+          border-radius: 10px; padding: 0 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+        ">
+          <option value="en-IN">🇬🇧 EN</option>
+          <option value="hi-IN">🇮🇳 HI</option>
+          <option value="kn-IN">🇮🇳 KN</option>
+        </select>
     </div>
     <button class="nav-demo-btn" id="navDemoBtn" onclick="toggleDemoWalk()" style="width:100%">&#9654; Auto Demo Walk</button>
   </div>
@@ -1670,84 +1688,133 @@ function renderNavMiniMap(path) {
   nc.height = nwrap.clientHeight;
   const nctx = nc.getContext("2d");
 
-  const nDW = 880, nDH = 580;
-  const nsx = nc.width/nDW, nsy = nc.height/nDH;
-  const NX = x => x*nsx, NY = y => y*nsy, NR = r => r*Math.min(nsx,nsy);
+  const DW = 880, DH = 580;
+
+  // Auto-Zoom: Calculate Bounding Box of Path
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  if (path && path.length > 0) {
+    path.forEach(n => {
+      const p = NODE_POS[n] || (GRAPH ? GRAPH.nodes[n] : null);
+      if (p) {
+        if (p[0] < minX) minX = p[0];
+        if (p[0] > maxX) maxX = p[0];
+        if (p[1] < minY) minY = p[1];
+        if (p[1] > maxY) maxY = p[1];
+      }
+    });
+  }
+  
+  if (minX === Infinity) {
+    minX = 0; maxX = DW; minY = 0; maxY = DH;
+  }
+
+  // Calculate padding based on path dimensions
+  let pW = maxX - minX;
+  let pH = maxY - minY;
+  if (pW < 200) pW = 200; // Minimum view width
+  if (pH < 200) pH = 200; // Minimum view height
+  
+  const pad = Math.max(pW, pH) * 0.3; // 30% padding
+  minX -= pad; maxX += pad;
+  minY -= pad; maxY += pad;
+  
+  const viewW = maxX - minX;
+  const viewH = maxY - minY;
+  
+  // Fit bounding box to canvas
+  const scale = Math.min(nc.width / viewW, nc.height / viewH);
+  const cx = (nc.width - viewW * scale) / 2;
+  const cy = (nc.height - viewH * scale) / 2;
+  
+  const NX = x => cx + (x - minX) * scale;
+  const NY = y => cy + (y - minY) * scale;
+  const NR = r => r * scale;
 
   // Background
-  nctx.fillStyle = "#080c1e";
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  nctx.fillStyle = isDark ? "#0A0F1D" : "#E8EAED"; // Slightly darker blue/gray for minimap bg
   nctx.fillRect(0,0,nc.width,nc.height);
+
+  /* === CORRIDORS === */
+  nctx.fillStyle = isDark ? "#1E293B" : "#FFFFFF"; // Dark corridors
+  if (typeof CORRIDORS !== 'undefined') {
+    CORRIDORS.forEach(c => {
+      nctx.fillRect(NX(c.x), NY(c.y), c.w * scale, c.h * scale);
+    });
+  }
+
+  /* === ROOMS === */
+  if (typeof ROOMS !== 'undefined') {
+    ROOMS.forEach(r => {
+      const isStart = path && path.length > 0 && r.id === path[0];
+      const isEnd = path && path.length > 0 && r.id === path[path.length-1];
+      const onPath = path && path.includes(r.id);
+      
+      nctx.beginPath();
+      nctx.rect(NX(r.x), NY(r.y), r.w * scale, r.h * scale);
+      
+      nctx.fillStyle = isStart ? (isDark?"#3b1414":"#FCE8E6") : onPath ? (isDark?"#0f2240":"#E8F0FE") : (isDark?"#151C2A":"#F1F3F4");
+      nctx.fill();
+      nctx.strokeStyle = isStart ? (isDark?"#F28B82":"#EA4335") : onPath ? (isDark?"#8AB4F8":"#1A73E8") : (isDark?"#334155":"#DADCE0");
+      nctx.lineWidth = NR(2);
+      nctx.stroke();
+    });
+  }
 
   // Path segments highlighted
   const pathSet = new Set();
-  for(let i=0;i<path.length-1;i++){
-    pathSet.add(path[i]+"|"+path[i+1]);
-    pathSet.add(path[i+1]+"|"+path[i]);
+  if (path) {
+    for(let i=0;i<path.length-1;i++){
+      pathSet.add(path[i]+"|"+path[i+1]);
+      pathSet.add(path[i+1]+"|"+path[i]);
+    }
   }
 
-  GRAPH.edges.forEach(([u,v,d]) => {
-    const pu = NODE_POS[u]||GRAPH.nodes[u];
-    const pv = NODE_POS[v]||GRAPH.nodes[v];
-    if(!pu||!pv) return;
-    const onP = pathSet.has(u+"|"+v);
-    nctx.beginPath();
-    nctx.moveTo(NX(pu[0]),NY(pu[1]));
-    nctx.lineTo(NX(pv[0]),NY(pv[1]));
-    nctx.strokeStyle = onP ? "#f59e0b" : "#1e3a5f";
-    nctx.lineWidth = onP ? NR(4) : NR(1);
-    nctx.setLineDash(onP?[]:[NR(3),NR(4)]);
-    nctx.shadowColor = onP?"#f59e0b":"transparent";
-    nctx.shadowBlur = onP?NR(6):0;
-    nctx.stroke();
-    nctx.setLineDash([]);
-    nctx.shadowBlur=0;
-  });
-
-  // Directional arrows on path
-  for(let i=0;i<path.length-1;i++){
-    const pu = NODE_POS[path[i]]||GRAPH.nodes[path[i]];
-    const pv = NODE_POS[path[i+1]]||GRAPH.nodes[path[i+1]];
-    if(!pu||!pv) continue;
-    const mx = NX((pu[0]+pv[0])/2), my = NY((pu[1]+pv[1])/2);
-    const angle = Math.atan2(pv[1]-pu[1], pv[0]-pu[0]);
-    nctx.save();
-    nctx.translate(mx,my);
-    nctx.rotate(angle);
-    nctx.fillStyle="#f59e0b";
-    nctx.beginPath();
-    nctx.moveTo(NR(6),0);
-    nctx.lineTo(-NR(4),-NR(3));
-    nctx.lineTo(-NR(4),NR(3));
-    nctx.closePath();
-    nctx.fill();
-    nctx.restore();
+  if (GRAPH) {
+    GRAPH.edges.forEach(([u,v,d]) => {
+      const pu = NODE_POS[u]||GRAPH.nodes[u];
+      const pv = NODE_POS[v]||GRAPH.nodes[v];
+      if(!pu||!pv) return;
+      const onP = pathSet.has(u+"|"+v);
+      nctx.beginPath();
+      nctx.moveTo(NX(pu[0]),NY(pu[1]));
+      nctx.lineTo(NX(pv[0]),NY(pv[1]));
+      nctx.strokeStyle = onP ? (isDark?"#f59e0b":"#f59e0b") : (isDark?"#334155":"#DADCE0");
+      nctx.lineWidth = onP ? NR(5) : NR(1.5);
+      nctx.setLineDash(onP?[]:[NR(3),NR(4)]);
+      nctx.stroke();
+    });
   }
-
+  
+  nctx.setLineDash([]);
+  
   // Nodes
-  path.forEach((name,i) => {
-    const pos = NODE_POS[name]||GRAPH.nodes[name];
-    if(!pos) return;
-    const isStart = i===0, isEnd = i===path.length-1;
-    nctx.beginPath();
-    nctx.arc(NX(pos[0]),NY(pos[1]),NR(isStart||isEnd?12:7),0,Math.PI*2);
-    nctx.fillStyle = isEnd?"#f59e0b":isStart?"#ef4444":"rgba(245,158,11,0.5)";
-    nctx.shadowColor = isEnd?"#f59e0b":isStart?"#ef4444":"transparent";
-    nctx.shadowBlur = NR(8);
-    nctx.fill();
-    nctx.shadowBlur=0;
-    // Label
-    nctx.fillStyle="#fff";
-    nctx.font=`bold ${NR(8)}px Inter`;
-    nctx.textAlign="center";
-    nctx.textBaseline="middle";
-    nctx.fillText(isStart?"YOU":isEnd?"\uD83D\uDEA8":"",NX(pos[0]),NY(pos[1]));
-  });
+  if (path) {
+    path.forEach((name,i) => {
+      const pos = NODE_POS[name]||GRAPH.nodes[name];
+      if(!pos) return;
+      const isStart = i===0, isEnd = i===path.length-1;
+      nctx.beginPath();
+      nctx.arc(NX(pos[0]),NY(pos[1]),NR(isStart||isEnd?12:7),0,Math.PI*2);
+      nctx.fillStyle = isEnd?"#f59e0b":isStart?"#ef4444":"rgba(245,158,11,0.5)";
+      nctx.fill();
+      // Label
+      nctx.fillStyle="#fff";
+      nctx.font=`bold ${Math.max(NR(8), 10)}px Inter`;
+      nctx.textAlign="center";
+      nctx.textBaseline="middle";
+      nctx.fillText(isStart?"YOU":isEnd?"EXIT":"",NX(pos[0]),NY(pos[1]));
+    });
+  }
 
-  // Store for demo walk animation
   NAV._miniCtx = nctx;
   NAV._miniCanvas = nc;
-  NAV._miniPath = path;
-  NAV._nsx = nsx; NAV._nsy = nsy;
+  NAV._miniPath = path || [];
+  
+  // Store the transform functions so pointer updates work correctly
+  window._NX = NX;
+  window._NY = NY;
+  window._NR = NR;
 }
 
 // ── AUTO DEMO WALK ─────────────────────────────────
@@ -1868,36 +1935,25 @@ function stopDemoWalk() {
 // ── MINI-MAP LIVE POINTER ─────────────────────────
 // Redraws only the moving YOU pointer on the mini-map canvas during demo
 function drawDemoPointerOnMiniMap(pos) {
-  const nc = NAV._miniCanvas;
+  if (!NAV.demoRunning || !NAV._miniCtx || !NAV._miniCanvas || !pos || !window._NX) return;
+  // Clear the mini map and redraw
+  renderNavMiniMap(NAV._miniPath);
+  
   const nctx = NAV._miniCtx;
-  if (!nc || !nctx || !NAV._miniPath) return;
-
-  const path = NAV._miniPath;
-  const nsx = NAV._nsx, nsy = NAV._nsy;
-  const NX = x => x * nsx, NY = y => y * nsy, NR = r => r * Math.min(nsx, nsy);
-
-  // Redraw full mini-map (static parts) then pointer on top
-  renderNavMiniMap(path);
-
-  // Draw animated pointer
-  const x = NX(pos.x), y = NY(pos.y);
-  // Glow ring
+  const NX = window._NX;
+  const NY = window._NY;
+  const NR = window._NR;
+  
+  const x = NX(pos.x);
+  const y = NY(pos.y);
+  
   nctx.beginPath();
-  nctx.arc(x, y, NR(14), 0, Math.PI * 2);
-  nctx.strokeStyle = "rgba(239,68,68,0.35)";
-  nctx.lineWidth = NR(2);
-  nctx.stroke();
-  // Filled dot
-  nctx.beginPath();
-  nctx.arc(x, y, NR(9), 0, Math.PI * 2);
+  nctx.arc(x, y, Math.max(NR(12), 12), 0, Math.PI*2);
   nctx.fillStyle = "#ef4444";
-  nctx.shadowColor = "#ef4444"; nctx.shadowBlur = NR(12);
-  nctx.fill(); nctx.shadowBlur = 0;
-  nctx.strokeStyle = "rgba(255,255,255,0.4)"; nctx.lineWidth = NR(1.5);
-  nctx.stroke();
-  // YOU label
-  nctx.font = `bold ${NR(8)}px Inter`;
+  nctx.fill();
+  
   nctx.fillStyle = "#fff"; nctx.textAlign = "center"; nctx.textBaseline = "middle";
+  nctx.font = `bold ${Math.max(NR(10), 10)}px Inter`;
   nctx.fillText("YOU", x, y);
 }
 
@@ -1918,7 +1974,7 @@ function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
-  document.getElementById('themeIcon').innerHTML = next === 'dark' ? '&#9728;' : '&#127769;';
+  document.getElementById('themeIcon').innerHTML = next === 'dark' ? '☀️' : '🌙';
 }
 
 function openAudioSettings() { document.getElementById('audioModal').classList.add('active'); }
