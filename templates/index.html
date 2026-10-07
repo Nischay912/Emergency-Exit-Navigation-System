@@ -1914,7 +1914,8 @@ function toggleDemoWalk() {
 
 function startDemoWalk() {
   if (NAV.steps.length === 0) { showToast("No route to walk"); return; }
-  NAV.demoRunning = true;
+  window.preDemoUserLocation = currentUser;
+    NAV.demoRunning = true;
   NAV.currentStep = 0;
   NAV.demoPos = {...NAV.steps[0].fromPos};
   const btn = document.getElementById("navDemoBtn");
