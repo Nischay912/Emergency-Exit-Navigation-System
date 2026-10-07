@@ -117,6 +117,13 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 :root[data-theme="dark"] .nav-trigger { background: #174EA6; color: #FFFFFF; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
 :root[data-theme="dark"] .nav-trigger:hover { background: #1967D2; }
 
+
+.exit-reached-overlay { position: fixed; inset: 0; background: rgba(220, 38, 38, 0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; opacity: 0; pointer-events: none; transition: 0.3s; }
+.exit-reached-overlay.active { opacity: 1; pointer-events: auto; }
+.exit-reached-title { font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 16px; text-align: center; animation: pulse-text 1s infinite alternate; }
+@keyframes pulse-text { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+.exit-reached-btn { background: white; color: #dc2626; border: none; padding: 16px 32px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
 </style>
 
 </head>
@@ -804,17 +811,27 @@ function applyStep(headingDeg) {
     PDR.stepsSinceCorrection = 0;
     PDR.trail = [];
 
-    // --- LIVE VOICE NAVIGATION TRIGGER ---
-    if (document.getElementById("navOverlay") && document.getElementById("navOverlay").classList.contains("active")) {
-      // If nav UI is open, recalculate path from new node (like a GPS) and speak
-      openNavigation();
-    } else {
-      // If nav UI is closed, still guide them if Voice is enabled
-      announceLiveNavigationStep();
+        // --- LIVE VOICE NAVIGATION TRIGGER ---
+      let isExit = GRAPH && GRAPH.exit_nodes && GRAPH.exit_nodes.includes(near);
+      
+      if (document.getElementById("navOverlay") && document.getElementById("navOverlay").classList.contains("active")) {
+        openNavigation();
+        if (!isExit && typeof speakStep === 'function') {
+            if (typeof VOICE !== 'undefined') VOICE.lastSpoken = -1;
+            speakStep(0);
+        }
+      } else {
+        if (!isExit && typeof announceLiveNavigationStep === 'function') announceLiveNavigationStep();
+      }
+      
+      if (isExit) {
+          showToast("🚨 Emergency Exit Reached.");
+          document.getElementById('exitReachedOverlay').classList.add('active');
+          if (typeof speak === 'function') speak("Emergency Exit Reached. Evacuate Now!");
+          if (PDR.active && typeof toggleWalkMode === 'function') toggleWalkMode();
+      }
     }
-      if (GRAPH && GRAPH.exit_nodes && GRAPH.exit_nodes.includes(near)) { showToast("✅ Emergency Exit Reached."); if (PDR.active && typeof toggleWalkMode === "function") { toggleWalkMode(); } }
-  }
-  // Speed calculation
+    // Speed calculation
   const now = Date.now();
   if (PDR.lastStepTime) {
     const dt = (now - PDR.lastStepTime) / 1000; // seconds
@@ -1963,6 +1980,10 @@ function walkDemoStep(stepIdx) {
 }
 
 function finishDemoWalk() {
+    if (typeof speakStep === 'function') speakStep(NAV.steps.length);
+    document.getElementById('exitReachedOverlay').classList.add('active');
+    if (typeof speak === 'function') speak("Emergency Exit Reached. Evacuate Now!");
+    
   NAV.demoRunning = false;
   PDR.active = false;
   NAV.currentStep = NAV.steps.length; // past end
@@ -2012,8 +2033,10 @@ function drawDemoPointerOnMiniMap(pos) {
 
 // Refresh navigation instructions when crowd data changes (separate interval, no override)
 setInterval(async () => {
-  if(document.getElementById("navOverlay")&&document.getElementById("navOverlay").classList.contains("active")){ openNavigation(); if (typeof speakStep === "function") { if(typeof VOICE !== "undefined") VOICE.lastSpoken = -1; speakStep(0); } }
-}, 5000);
+    if (document.getElementById("navOverlay") && document.getElementById("navOverlay").classList.contains("active") && typeof NAV !== 'undefined' && !NAV.demoRunning && typeof PDR !== 'undefined' && PDR.active) {
+      openNavigation();
+    }
+  }, 5000);
 
 
 
@@ -2060,6 +2083,12 @@ window.toggleDemoWalk = function() {
 
 
 </script>
+
+
+<div class="exit-reached-overlay" id="exitReachedOverlay">
+  <div class="exit-reached-title">🚨 EMERGENCY EXIT REACHED 🚨<br><br>EVACUATE NOW!</div>
+  <button class="exit-reached-btn" onclick="document.getElementById('exitReachedOverlay').classList.remove('active')">Dismiss</button>
+</div>
 
 </body>
 </html>
