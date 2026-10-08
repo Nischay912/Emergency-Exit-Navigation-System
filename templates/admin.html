@@ -7,12 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
+:root {
+  --bg: #F8F9FA; --card: #FFFFFF; --panel: #F1F3F4; --border: #DADCE0;
+  --red: #D93025; --purple: #A142F4; --green: #1E8E3E; --amber: #F29900;
+  --blue: #1A73E8; --text: #202124; --muted: #5F6368;
+  --low: #1E8E3E; --med: #F29900; --high: #D93025;
+}
+:root[data-theme="dark"] {
   --bg:#08091a;--card:#0f1629;--panel:#111e38;--border:#1e2f55;
   --red:#e94560;--purple:#7c3aed;--green:#10b981;--amber:#f59e0b;
   --blue:#3b82f6;--text:#e2e8f0;--muted:#64748b;
   --low:#10b981;--med:#f59e0b;--high:#ef4444;
 }
+.theme-btn { background: var(--panel); border: 1px solid var(--border); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-left: 10px; }
+.theme-btn:hover { background: var(--card); }
 html,body{min-height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
 header{background:var(--panel);border-bottom:2px solid var(--red);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
 header h1{font-size:.95rem;font-weight:800;color:var(--red);}
@@ -112,7 +120,18 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
 
   :root[data-theme="light"] .alert { background: #FCE8E6; }
   :root[data-theme="light"] input[type=range]::-webkit-slider-runnable-track { background: var(--border); }
+
+  :root[data-theme="light"] .count-input { background: #FFFFFF; color: #000000; }
+  :root[data-theme="light"] .room-cnt-input { background: #FFFFFF; color: #000000; }
+  :root[data-theme="light"] .level-badge.Low { background: #E6F4EA; color: #137333; border-color: #137333; }
+  :root[data-theme="light"] .level-badge.Medium { background: #FEF7E0; color: #B06000; border-color: #B06000; }
+  :root[data-theme="light"] .level-badge.High { background: #FCE8E6; color: #C5221F; border-color: #C5221F; }
+  :root[data-theme="light"] .mini-btn:hover { background: #F1F3F4; color: #000; }
+  :root[data-theme="light"] .card { background: #FFFFFF; }
+  :root[data-theme="light"] .log-entry { border-bottom: 1px solid #E8EAED; color: #5F6368; }
+  :root[data-theme="light"] .log-e span { color: #202124; }
 </style>
+
 
 </head>
 <body>
@@ -170,6 +189,23 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
 </div>
 
 <script>
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    const btn = document.getElementById('themeIcon');
+    if (btn) btn.innerHTML = next === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('admin-theme', next);
+  }
+  
+  // Wait for DOM
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('admin-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const btn = document.getElementById('themeIcon');
+    if (btn) btn.innerHTML = savedTheme === 'dark' ? '☀️' : '🌙';
+  });
+
 let GRAPH=null,crowdData={},roomData={},simRunning=false,simInterval=null;
 
 const THRESH={low:20,med:55};

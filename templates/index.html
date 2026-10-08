@@ -98,7 +98,7 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 .alarm-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; display: none; animation: flash 0.6s infinite; }
 
 /* Modal and Theme Buttons */
-.floating-btn { position: fixed; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; font-size: 20px; transition: 0.2s; }
+.floating-btn { position: fixed; top: 75px; right: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; font-size: 20px; transition: 0.2s; }
 .floating-btn:hover { background: var(--bg); }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -145,7 +145,7 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 <button id="themeToggle" class="floating-btn" onclick="toggleTheme()">
   <span id="themeIcon">🌙</span>
 </button>
-<button id="audioToggle" class="floating-btn" onclick="openAudioSettings()" style="top: 80px;">
+<button id="audioToggle" class="floating-btn" onclick="openAudioSettings()" style="top: 135px;">
   <span id="audioIcon">&#128266;</span>
 </button>
 
