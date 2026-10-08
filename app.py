@@ -144,12 +144,16 @@ def api_status():
         "hazards": HAZARDS,
         "sos_alerts": SOS_ALERTS,
         "smoke_level": SMOKE_LEVEL,
-        "safe_list": SAFE_LIST
+        "safe_list": SAFE_LIST,
+        "broadcast": LATEST_BROADCAST
     })
 
 
 # --- HAZARDS (Fire / Debris) ---
 HAZARDS = {}
+
+# --- Voice Broadcast ---
+LATEST_BROADCAST = {"id": 0, "message": ""}
 
 # --- Safe Check-ins ---
 SAFE_LIST = []
@@ -230,6 +234,17 @@ def api_safe():
                 SAFE_LIST.append(entry)
         return jsonify({"success": True})
     return jsonify(SAFE_LIST)
+
+
+@app.route("/api/broadcast", methods=["POST"])
+def api_broadcast():
+    global LATEST_BROADCAST
+    data = request.json or {}
+    msg = data.get("message", "").strip()
+    if msg:
+        import time
+        LATEST_BROADCAST = {"id": int(time.time()), "message": msg}
+    return jsonify({"success": True})
 
 if __name__ == "__main__":
     import socket

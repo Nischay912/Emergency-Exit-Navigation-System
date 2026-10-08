@@ -209,6 +209,19 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
         </div>
       </div>
 
+
+      <!-- ADMIN MEGAPHONE -->
+      <div style="margin-bottom:24px;">
+        <div class="section-title" style="color:#f59e0b;">&#128227; Global Voice Megaphone</div>
+        <div style="background:var(--panel); border:1px solid var(--border); padding:16px; border-radius:12px;">
+          <p style="font-size:0.8rem; color:var(--muted); margin-bottom:12px;">Type a custom message and broadcast it to all users. Connected phones will speak the message out loud via Text-to-Speech.</p>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="broadcastMsg" placeholder="e.g. Please avoid the west corridor, fire spreading..." style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border); background:#0a0f1d; color:#fff; font-family:inherit;">
+            <button class="mini-btn" style="border-color:#f59e0b; color:#f59e0b; background:transparent; padding:10px 18px; font-weight:700; cursor:pointer;" onclick="sendBroadcast()">&#128227; Broadcast</button>
+          </div>
+        </div>
+      </div>
+
       <!-- SMOKE SIMULATOR -->
       <div style="margin-bottom:24px;">
         <div class="section-title" style="color:#64748b;">&#127787; Smoke Simulation</div>
@@ -723,6 +736,23 @@ init();
 
   setInterval(refreshSafe, 3000);
   refreshSafe();
+
+  
+  // ===== VOICE BROADCAST =====
+  async function sendBroadcast() {
+    const input = document.getElementById('broadcastMsg');
+    const msg = input.value.trim();
+    if (!msg) return;
+    
+    await fetch('/api/broadcast', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message: msg })
+    });
+    
+    addLog('&#128227; Broadcast sent: ' + msg);
+    input.value = '';
+  }
 
   </script>
 </body>

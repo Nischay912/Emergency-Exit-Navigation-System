@@ -353,6 +353,7 @@ const LEVEL_THRESH={low:20,med:55};
 
 let GLOBAL_HAZARDS = {};
   let SMOKE_LEVEL = "none";
+  let lastBroadcastId = 0;
 let GRAPH=null,crowdData={},roomData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
 
 function countToLevel(n){return n<=LEVEL_THRESH.low?"Low":n<=LEVEL_THRESH.med?"Medium":"High";}
@@ -984,7 +985,22 @@ async function pollCrowd(){
     } else if (SMOKE_LEVEL === "none") {
       window.smokeVoiceTriggered = false;
     }
-    // Sync global alarm state
+    
+      // Broadcast logic
+      if (st.broadcast && st.broadcast.id > lastBroadcastId) {
+        lastBroadcastId = st.broadcast.id;
+        if (typeof speak === 'function') speak(st.broadcast.message);
+        
+        // Show a prominent alert toast
+        const toast = document.getElementById("toast");
+        if (toast) {
+          toast.innerHTML = `<strong style="color:#facc15">&#128227; ADMIN BROADCAST:</strong><br>${st.broadcast.message}`;
+          toast.className = "toast show";
+          setTimeout(() => { toast.className = "toast"; }, 8000);
+        }
+      }
+
+      // Sync global alarm state
     if (st.alarm_active && !alarmInterval) {
       toggleEmergency(true);
     } else if (!st.alarm_active && alarmInterval) {
