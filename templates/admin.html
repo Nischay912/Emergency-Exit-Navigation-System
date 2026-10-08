@@ -162,7 +162,19 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
     <div class="section-title">Exit Crowd Control (Camera / Manual)</div>
     <div class="exits-grid" id="exitsGrid"></div>
 
-    <!-- ROOMS -->
+    
+      <!-- HAZARDS -->
+      <div class="section-title" style="color:var(--red);">⚠️ Hazard Simulator (Fire / Blockades)</div>
+      <div style="background:var(--panel); border:1px solid var(--border); padding:16px; border-radius:12px; margin-bottom:24px;">
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:12px;">Trigger a hazard to instantly block a path. The AI will immediately recalculate all user routes away from the danger zone!</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button id="haz-fire" class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--red); color:var(--red); font-weight:bold; cursor:pointer; background:transparent;" onclick="toggleHazard('Intersection_Mid1', 'fire', 'haz-fire', 'var(--red)')">🔥 Fire near Staff Lounge (Left)</button>
+          <button id="haz-deb" class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--amber); color:var(--amber); font-weight:bold; cursor:pointer; background:transparent;" onclick="toggleHazard('Corridor_East', 'debris', 'haz-deb', 'var(--amber)')">🚧 Blockade at East Hallway</button>
+          <button class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--green); color:var(--green); font-weight:bold; cursor:pointer; background:transparent;" onclick="clearHazards()">✅ Clear All Hazards</button>
+        </div>
+      </div>
+
+      <!-- ROOMS -->
     <div class="section-title">Room &amp; Corridor Occupancy</div>
     <div class="rooms-grid" id="roomsGrid"></div>
   </div>
@@ -481,6 +493,35 @@ function addLog(msg){
 }
 
 init();
+
+  let admin_hazards = {};
+  async function toggleHazard(node, type, btnId, color) {
+    const btn = document.getElementById(btnId);
+    if (admin_hazards[node] === type) {
+        await fetch('/api/hazards', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({node: node, type: 'clear'})});
+        admin_hazards[node] = null;
+        btn.style.background = 'transparent';
+        btn.style.color = color;
+        addLog(`✅ Hazard Cleared at ${node.replace(/_/g,' ')}`);
+    } else {
+        await fetch('/api/hazards', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({node: node, type: type})});
+        admin_hazards[node] = type;
+        btn.style.background = color;
+        btn.style.color = 'white';
+        addLog(`🚨 HAZARD TRIGGERED: ${type.toUpperCase()} at ${node.replace(/_/g,' ')}!`);
+    }
+  }
+  
+  async function clearHazards() {
+      await fetch('/api/hazards', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({clear_all: true})});
+      admin_hazards = {};
+      const fBtn = document.getElementById('haz-fire');
+      if(fBtn) { fBtn.style.background = 'transparent'; fBtn.style.color = 'var(--red)'; }
+      const dBtn = document.getElementById('haz-deb');
+      if(dBtn) { dBtn.style.background = 'transparent'; dBtn.style.color = 'var(--amber)'; }
+      addLog("✅ All hazards cleared. Paths restored.");
+  }
+
 </script>
 </body>
 </html>

@@ -140,8 +140,28 @@ def api_status():
         "crowd": {k: {"count": v, "level": count_to_level(v)} for k, v in crowd.items()},
         "rooms": rooms,
         "total_people": total,
-        "alarm_active": ALARM_ACTIVE
+        "alarm_active": ALARM_ACTIVE,
+        "hazards": HAZARDS
     })
+
+
+# --- HAZARDS (Fire / Debris) ---
+HAZARDS = {}
+
+@app.route("/api/hazards", methods=["GET", "POST"])
+def api_hazards():
+    global HAZARDS
+    if request.method == "POST":
+        data = request.json
+        if data.get("clear_all"):
+            HAZARDS.clear()
+        elif "node" in data and "type" in data:
+            if data["type"] == "clear":
+                HAZARDS.pop(data["node"], None)
+            else:
+                HAZARDS[data["node"]] = data["type"]
+        return jsonify({"success": True})
+    return jsonify(HAZARDS)
 
 if __name__ == "__main__":
     import socket
