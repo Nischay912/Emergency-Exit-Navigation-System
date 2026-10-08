@@ -163,6 +163,23 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
     text-align: center;
   }
 
+  
+  /* ===== SAFE BUTTON ===== */
+  .safe-btn {
+    width: 100%; margin-top: 10px; padding: 14px;
+    background: linear-gradient(135deg, #14532d, #166534);
+    border: 2px solid #22c55e; border-radius: 12px;
+    color: #fff; font-size: 1rem; font-weight: 800;
+    cursor: pointer; letter-spacing: 0.05em; font-family: inherit;
+  }
+  .safe-btn:hover { background: linear-gradient(135deg, #166534, #15803d); }
+  .safe-badge-confirmed {
+    display: none; margin-top: 10px; padding: 12px;
+    background: rgba(34,197,94,0.15); border: 1px solid #22c55e;
+    border-radius: 12px; color: #86efac; font-size: 0.9rem;
+    font-weight: 700; text-align: center;
+  }
+
   </style>
 
 </head>
@@ -242,6 +259,15 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
         <div class="sos-sent-badge" id="sosBadge">
           &#128681; SOS Sent! Rescue team notified. Stay calm &amp; stay put.
         </div>
+
+        <!-- SAFE CHECK-IN BUTTON -->
+        <button class="safe-btn" id="safeBtn" onclick="markSafe()">
+          &#9989; I'm Safe &mdash; Check-in
+        </button>
+        <div class="safe-badge-confirmed" id="safeBadgeConfirmed">
+          &#9989; You are marked Safe!
+        </div>
+
       </div>
 
     </div>
@@ -970,6 +996,42 @@ async function pollCrowd(){
 init();
 
 
+
+
+  // ===== SAFE CHECK-IN =====
+  let isMarkedSafe = false;
+  async function markSafe() {
+    if (isMarkedSafe) return;
+    const name = prompt("Enter your Name or ID to check-in at the Safe Assembly Point:");
+    if (!name || name.trim() === "") return;
+    
+    try {
+      await fetch('/api/safe', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name: name.trim() })
+      });
+      
+      isMarkedSafe = true;
+      document.getElementById('safeBtn').style.display = 'none';
+      document.getElementById('safeBadgeConfirmed').style.display = 'block';
+      
+      // Auto-cancel SOS if they were trapped but made it out
+      if (sosSent && mySosId) {
+        await fetch('/api/sos', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ action: 'clear', id: mySosId })
+        });
+        resetSOSButton();
+      }
+
+      if (typeof speak === 'function') speak('You have been accounted for at the safe assembly point.');
+      showToast('&#9989; Checked in successfully!');
+    } catch(e) {
+      showToast('Error connecting to server.');
+    }
+  }
 
   // ===== SOS PANIC BUTTON =====
   let sosSent = false;

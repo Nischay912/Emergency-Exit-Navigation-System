@@ -194,6 +194,21 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
       <!-- SOS ALERTS -->
       <div id="sosSection">
         
+
+      <!-- SAFE CHECK-INS -->
+      <div id="safeSection" style="margin-bottom:24px;">
+        <div class="section-title" style="color:var(--green);">&#9989; Safe Assembly Check-ins</div>
+        <div style="background:var(--panel); border:1px solid var(--border); padding:16px; border-radius:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+            <div style="font-size:0.95rem; color:var(--text);">People Accounted For: <strong id="safeCountTxt" style="color:var(--green); font-size:1.2rem; margin-left:8px;">0</strong></div>
+            <button class="mini-btn" style="border-color:var(--border); color:var(--muted); background:transparent; padding:6px 12px; cursor:pointer;" onclick="clearSafeList()">Reset List</button>
+          </div>
+          <div id="safeList" style="max-height:200px; overflow-y:auto; font-size:0.9rem; color:var(--text);">
+            <div style="color:var(--muted); font-size:0.85rem;">No check-ins yet.</div>
+          </div>
+        </div>
+      </div>
+
       <!-- SMOKE SIMULATOR -->
       <div style="margin-bottom:24px;">
         <div class="section-title" style="color:#64748b;">&#127787; Smoke Simulation</div>
@@ -660,6 +675,54 @@ init();
       statusEl.innerHTML = 'Status: ' + (msgs[currentSmoke] || currentSmoke);
     }
   }
+
+  
+  // ===== SAFE CHECK-INS =====
+  let admin_safe_list = [];
+  async function refreshSafe() {
+    try {
+      const r = await fetch('/api/safe');
+      admin_safe_list = await r.json();
+      renderSafeList();
+    } catch(e) {}
+  }
+
+  function renderSafeList() {
+    const list = document.getElementById('safeList');
+    const count = document.getElementById('safeCountTxt');
+    if (!list || !count) return;
+
+    count.textContent = admin_safe_list.length;
+
+    if (admin_safe_list.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted); font-size:0.85rem;">No check-ins yet.</div>';
+      return;
+    }
+
+    list.innerHTML = admin_safe_list.map(s => `
+      <div style="padding:10px 8px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span style="color:var(--green); margin-right:8px;">&#9989;</span> 
+          <strong>${s.name}</strong>
+        </div>
+        <div style="color:var(--muted); font-size:0.8rem;">${s.time}</div>
+      </div>
+    `).reverse().join(''); // show newest at top
+  }
+
+  async function clearSafeList() {
+    if(!confirm("Are you sure you want to clear the assembly point ledger?")) return;
+    await fetch('/api/safe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'clear' })
+    });
+    addLog('&#9989; Safe Assembly ledger reset');
+    refreshSafe();
+  }
+
+  setInterval(refreshSafe, 3000);
+  refreshSafe();
 
   </script>
 </body>

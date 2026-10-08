@@ -143,12 +143,16 @@ def api_status():
         "alarm_active": ALARM_ACTIVE,
         "hazards": HAZARDS,
         "sos_alerts": SOS_ALERTS,
-        "smoke_level": SMOKE_LEVEL
+        "smoke_level": SMOKE_LEVEL,
+        "safe_list": SAFE_LIST
     })
 
 
 # --- HAZARDS (Fire / Debris) ---
 HAZARDS = {}
+
+# --- Safe Check-ins ---
+SAFE_LIST = []
 
 # --- Smoke Simulation ---
 SMOKE_LEVEL = "none"  # "none" | "light" | "heavy" | "blackout"
@@ -206,6 +210,26 @@ def api_smoke():
         SMOKE_LEVEL = data.get("level", "none")
         return jsonify({"success": True, "level": SMOKE_LEVEL})
     return jsonify({"level": SMOKE_LEVEL})
+
+
+@app.route("/api/safe", methods=["GET", "POST"])
+def api_safe():
+    global SAFE_LIST
+    if request.method == "POST":
+        data = request.json or {}
+        if data.get("action") == "clear":
+            SAFE_LIST = []
+        else:
+            import time
+            entry = {
+                "name": data.get("name", "Unknown User"),
+                "time": time.strftime("%H:%M:%S")
+            }
+            # Avoid exact duplicates
+            if not any(s["name"] == entry["name"] for s in SAFE_LIST):
+                SAFE_LIST.append(entry)
+        return jsonify({"success": True})
+    return jsonify(SAFE_LIST)
 
 if __name__ == "__main__":
     import socket
