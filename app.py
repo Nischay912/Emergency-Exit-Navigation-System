@@ -141,12 +141,16 @@ def api_status():
         "rooms": rooms,
         "total_people": total,
         "alarm_active": ALARM_ACTIVE,
-        "hazards": HAZARDS
+        "hazards": HAZARDS,
+        "sos_alerts": SOS_ALERTS
     })
 
 
 # --- HAZARDS (Fire / Debris) ---
 HAZARDS = {}
+
+# --- SOS Alerts ---
+SOS_ALERTS = []
 
 @app.route("/api/hazards", methods=["GET", "POST"])
 def api_hazards():
@@ -162,6 +166,32 @@ def api_hazards():
                 HAZARDS[data["node"]] = data["type"]
         return jsonify({"success": True})
     return jsonify(HAZARDS)
+
+
+@app.route("/api/sos", methods=["GET", "POST"])
+def api_sos():
+    global SOS_ALERTS
+    if request.method == "POST":
+        data = request.json or {}
+        if data.get("action") == "clear":
+            alert_id = data.get("id")
+            SOS_ALERTS = [a for a in SOS_ALERTS if a["id"] != alert_id]
+        elif data.get("action") == "clear_all":
+            SOS_ALERTS = []
+        else:
+            import time, uuid
+            alert_id = str(uuid.uuid4())[:8]
+            alert = {
+                "id": alert_id,
+                "room": data.get("room", "Unknown"),
+                "node": data.get("node", ""),
+                "message": data.get("message", "Help! I am trapped!"),
+                "time": time.strftime("%H:%M:%S"),
+            }
+            SOS_ALERTS.append(alert)
+            return jsonify({"success": True, "alert_id": alert_id})
+        return jsonify({"success": True})
+    return jsonify(SOS_ALERTS)
 
 if __name__ == "__main__":
     import socket

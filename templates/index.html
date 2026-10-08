@@ -124,7 +124,46 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 @keyframes pulse-text { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 .exit-reached-btn { background: white; color: #dc2626; border: none; padding: 16px 32px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
-</style>
+
+  /* ===== SOS BUTTON ===== */
+  .sos-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: linear-gradient(135deg, #7f1d1d, #991b1b);
+    border: 2px solid #ef4444;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+  }
+  .sos-btn.active {
+    background: linear-gradient(135deg, #991b1b, #b91c1c);
+    animation: sos-pulse 1s infinite;
+  }
+  @keyframes sos-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+    50%       { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+  }
+  .sos-sent-badge {
+    display: none;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(239,68,68,0.15);
+    border: 1px solid #ef4444;
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  </style>
 
 </head>
 <body>
@@ -195,6 +234,16 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
     <div class="sec">
       <div class="sec-lbl">All Exits &mdash; Live Crowd</div>
       <div id="exitList"></div>
+      <!-- SOS PANIC BUTTON -->
+      <div style="margin-top:16px; border-top: 1px solid var(--border); padding-top:16px;">
+        <button class="sos-btn" id="sosBtn" onclick="sendSOS()">
+          &#128682; SOS — I'm Trapped!
+        </button>
+        <div class="sos-sent-badge" id="sosBadge">
+          &#128681; SOS Sent! Rescue team notified. Stay calm &amp; stay put.
+        </div>
+      </div>
+
     </div>
     <!-- WALK MODE / PDR -->
     <div class="sec walk-sec">
@@ -585,6 +634,43 @@ function render() {
       }
     });
 
+    
+    /* === SOS BEACONS === */
+    SOS_BEACON_NODES.forEach(nodeName => {
+      const pos = NODE_POS[nodeName] || (GRAPH ? GRAPH.nodes[nodeName] : null);
+      if (!pos) return;
+      const cx = X(pos[0]), cy = Y(pos[1]);
+      const t = Date.now();
+
+      // Animated radar rings
+      for (let ring = 0; ring < 3; ring++) {
+        const phase = ((t / 800) + ring * 0.33) % 1;
+        const ringR = R(8) + phase * R(28);
+        const alpha = (1 - phase) * 0.7;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(239, 68, 68, ${alpha})`;
+        ctx.lineWidth = R(2.5);
+        ctx.stroke();
+      }
+
+      // Solid red center dot
+      ctx.beginPath();
+      ctx.arc(cx, cy, R(9), 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = R(15);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // SOS label
+      ctx.font = `bold ${Math.max(R(8), 9)}px Inter`;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SOS', cx, cy);
+    });
+
     /* === ROOM TEXTS === */
     Object.entries(ROOM_RECTS).forEach(([name, r]) => {
       const onPath = path.includes(name);
@@ -755,7 +841,81 @@ async function pollCrowd(){
 init();
 
 
-</script>
+
+  // ===== SOS PANIC BUTTON =====
+  let sosSent = false;
+  let mySosId = null; // track this user's SOS ID on server
+
+  async function sendSOS() {
+    const btn = document.getElementById('sosBtn');
+    const badge = document.getElementById('sosBadge');
+
+    if (sosSent) {
+      // Cancel - remove from server using our ID
+      if (mySosId) {
+        try {
+          await fetch('/api/sos', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'clear', id: mySosId })
+          });
+        } catch(e) {}
+      }
+      resetSOSButton();
+      showToast('SOS cancelled.');
+      return;
+    }
+
+    // Prevent duplicate SOS
+    if (mySosId) { showToast('SOS already active!'); return; }
+
+    const roomName = currentUser.replace(/_/g, ' ');
+    try {
+      const r = await fetch('/api/sos', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ room: roomName, node: currentUser, message: 'HELP! I am trapped at ' + roomName })
+      });
+      const data = await r.json();
+      mySosId = data.alert_id || null;
+    } catch(e) {}
+
+    sosSent = true;
+    btn.classList.add('active');
+    btn.innerHTML = '&#128681; SOS ACTIVE &mdash; Tap to Cancel';
+    badge.style.display = 'block';
+
+    if (typeof speak === 'function') speak('S O S sent! Help is on the way. Stay calm and stay put.');
+    showToast('SOS sent to Admin! Stay put.', 5000);
+  }
+
+  function resetSOSButton() {
+    sosSent = false;
+    mySosId = null;
+    const btn = document.getElementById('sosBtn');
+    const badge = document.getElementById('sosBadge');
+    if (btn) { btn.classList.remove('active'); btn.innerHTML = '&#128682; SOS &mdash; I\'m Trapped!'; }
+    if (badge) badge.style.display = 'none';
+  }
+
+  // Track SOS alerts from server for beacon rendering + auto-reset
+  let SOS_BEACON_NODES = [];
+  async function pollSOS() {
+    try {
+      const r = await fetch('/api/sos');
+      const alerts = await r.json();
+      SOS_BEACON_NODES = alerts.map(a => a.node);
+
+      // Auto-reset user's button if admin cleared their SOS
+      if (mySosId && !alerts.find(a => a.id === mySosId)) {
+        resetSOSButton();
+        showToast('Rescue team confirmed! You are safe.');
+      }
+    } catch(e) {}
+  }
+  setInterval(pollSOS, 3000);
+
+  </script>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
