@@ -326,6 +326,7 @@ const CROWD_MULT={Low:1,Medium:4,High:30};
 const LEVEL_THRESH={low:20,med:55};
 
 let GLOBAL_HAZARDS = {};
+  let SMOKE_LEVEL = "none";
 let GRAPH=null,crowdData={},roomData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
 
 function countToLevel(n){return n<=LEVEL_THRESH.low?"Low":n<=LEVEL_THRESH.med?"Medium":"High";}
@@ -559,83 +560,131 @@ function render() {
       const pos = NODE_POS[name] || (GRAPH ? GRAPH.nodes[name] : null);
       if (!pos) return;
       const type = GLOBAL_HAZARDS[name];
-      const cx = X(pos[0]);
-      const cy = Y(pos[1]);
+      const cx = X(pos[0]), cy = Y(pos[1]);
       const t = Date.now();
 
       if (type === 'fire') {
-          // Dynamic Fire Particle System
-          // Pulsing base glow
-          ctx.beginPath();
-          ctx.arc(cx, cy, R(22), 0, Math.PI*2);
-          ctx.fillStyle = `rgba(239, 68, 68, ${0.4 + 0.15*Math.sin(t/150)})`;
-          ctx.fill();
-          
-          // Flames
-          for (let i = 0; i < 12; i++) {
-            const pt = (t + i * 150) / 800; 
-            const yOffset = (pt % 1.5) * R(18);
-            const life = 1 - (yOffset / R(18));
-            const xOffset = Math.sin(pt * 8 + i * 2) * R(12);
-            const rad = R(14) * Math.pow(life, 1.5);
-            
-            ctx.beginPath();
-            ctx.arc(cx + xOffset, cy + R(10) - yOffset, rad, 0, Math.PI*2);
-            if (i % 3 === 0) ctx.fillStyle = `rgba(250, 204, 21, ${life})`; // Yellow core
-            else if (i % 3 === 1) ctx.fillStyle = `rgba(249, 115, 22, ${life})`; // Orange mid
-            else ctx.fillStyle = `rgba(239, 68, 68, ${life * 0.8})`; // Red outer
-            ctx.fill();
-          }
-      } else if (type === 'debris') {
-          // Earthquake Rubble / Debris System
-          // Pulsing dust cloud
-          ctx.beginPath();
-          ctx.arc(cx, cy, R(24), 0, Math.PI*2);
-          ctx.fillStyle = `rgba(100, 116, 139, ${0.4 + 0.1*Math.sin(t/200)})`;
-          ctx.fill();
+        // === FIRE: layered radial glow + rising flame particles ===
+        // 1. Wide outer heat glow
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R(38));
+        grad.addColorStop(0, `rgba(255,80,0,${0.35 + 0.1*Math.sin(t/120)})`);
+        grad.addColorStop(0.5, `rgba(239,68,68,${0.18 + 0.07*Math.sin(t/180)})`);
+        grad.addColorStop(1, 'rgba(239,68,68,0)');
+        ctx.beginPath();
+        ctx.arc(cx, cy, R(38), 0, Math.PI*2);
+        ctx.fillStyle = grad;
+        ctx.fill();
 
-          // Jagged Rocks
-          const seed = pos[0] + pos[1]; 
-          for(let i = 0; i < 7; i++) {
-            const rx = cx + (((seed * i * 13.7) % 40) - 20) * (R(1)/2); // Scale properly
-            const ry = cy + (((seed * i * 19.3) % 40) - 20) * (R(1)/2);
-            const size = R(6) + (((seed * i) % 10) * R(0.5));
-            
-            ctx.beginPath();
-            ctx.moveTo(rx, ry - size);
-            ctx.lineTo(rx + size * 1.2, ry + size*0.3);
-            ctx.lineTo(rx + size*0.5, ry + size);
-            ctx.lineTo(rx - size, ry + size*0.8);
-            ctx.closePath();
-            ctx.fillStyle = i % 2 === 0 ? '#475569' : '#64748b'; // Slate gray colors
-            ctx.fill();
-            ctx.strokeStyle = '#1e293b';
-            ctx.lineWidth = R(1);
-            ctx.stroke();
+        // 2. Rising flame particles (30 particles, 3 layers)
+        for (let i = 0; i < 30; i++) {
+          const speed   = 400 + (i % 5) * 90;
+          const phase   = (t / speed + i * 0.37) % 1.0;
+          const life    = Math.pow(1.0 - phase, 1.4); // fade as they rise
+          const yOff    = -phase * R(36);
+          const xOff    = Math.sin(t / 300 + i * 1.7) * R(10) * (1 - phase * 0.4);
+          const rad     = (R(11) + (i % 4) * R(2)) * life;
+
+          let color;
+          if (i % 4 === 0)      color = `rgba(255,240,80,${life})`;        // bright yellow core
+          else if (i % 4 === 1) color = `rgba(255,160,20,${life * 0.95})`; // orange
+          else if (i % 4 === 2) color = `rgba(239,68,68,${life * 0.85})`;  // red
+          else                  color = `rgba(120,20,0,${life * 0.5})`;    // dark smoke edge
+
+          ctx.beginPath();
+          ctx.arc(cx + xOff, cy + yOff, Math.max(rad, 1), 0, Math.PI*2);
+          ctx.fillStyle = color;
+          ctx.fill();
+        }
+
+        // 3. Small dark smoke puffs rising above flames
+        for (let i = 0; i < 8; i++) {
+          const phase  = (t / 1200 + i * 0.125) % 1.0;
+          const yOff   = -(R(30) + phase * R(20));
+          const xOff   = Math.sin(t / 600 + i * 0.8) * R(8);
+          const alpha  = Math.pow(1 - phase, 2) * 0.35;
+          ctx.beginPath();
+          ctx.arc(cx + xOff, cy + yOff, R(8), 0, Math.PI*2);
+          ctx.fillStyle = `rgba(30,30,30,${alpha})`;
+          ctx.fill();
+        }
+
+      } else if (type === 'debris') {
+        // === DEBRIS: dust cloud + polygonal rocks + hazard tape ===
+        // 1. Pulsing dust cloud (elliptical)
+        const dustGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R(30));
+        dustGrad.addColorStop(0, `rgba(120,110,90,${0.55 + 0.1*Math.sin(t/220)})`);
+        dustGrad.addColorStop(0.6, `rgba(100,90,75,0.3)`);
+        dustGrad.addColorStop(1, 'rgba(80,70,60,0)');
+        ctx.save();
+        ctx.scale(1, 0.65);
+        ctx.beginPath();
+        ctx.arc(cx, cy / 0.65, R(30), 0, Math.PI*2);
+        ctx.fillStyle = dustGrad;
+        ctx.fill();
+        ctx.restore();
+
+        // 2. Dust particles drifting outward
+        for (let i = 0; i < 10; i++) {
+          const phase  = (t / 1800 + i * 0.1) % 1.0;
+          const ang    = (i / 10) * Math.PI * 2;
+          const drift  = phase * R(22);
+          const alpha  = (1 - phase) * 0.4;
+          ctx.beginPath();
+          ctx.arc(cx + Math.cos(ang) * drift, cy + Math.sin(ang) * drift * 0.6, R(5), 0, Math.PI*2);
+          ctx.fillStyle = `rgba(160,150,130,${alpha})`;
+          ctx.fill();
+        }
+
+        // 3. Jagged rocks (5 polygons, pseudo-random placement via seed)
+        const seed = pos[0] * 3.7 + pos[1] * 5.3;
+        const rocks = [
+          { dx: -R(12), dy: -R(6),  s: R(8)  },
+          { dx:  R(8),  dy: -R(10), s: R(6)  },
+          { dx:  R(14), dy:  R(4),  s: R(7)  },
+          { dx: -R(4),  dy:  R(10), s: R(9)  },
+          { dx:  R(2),  dy: -R(2),  s: R(5)  },
+        ];
+        rocks.forEach((r, i) => {
+          const pts = 5 + (i % 2);
+          ctx.beginPath();
+          for (let p = 0; p < pts; p++) {
+            const a = (p / pts) * Math.PI * 2 + seed * 0.1 * i;
+            const jitter = 0.7 + ((seed * (p + i) * 11.3) % 0.6);
+            const px = cx + r.dx + Math.cos(a) * r.s * jitter;
+            const py = cy + r.dy + Math.sin(a) * r.s * jitter * 0.8;
+            p === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
           }
-          
-          // Hazard tape stripe across the debris
-          ctx.beginPath();
-          ctx.moveTo(cx - R(18), cy + R(10));
-          ctx.lineTo(cx + R(18), cy - R(10));
-          ctx.strokeStyle = '#F59E0B'; // Amber
-          ctx.lineWidth = R(5);
-          ctx.lineCap = "round";
+          ctx.closePath();
+          const shade = 60 + (i * 15);
+          ctx.fillStyle = `rgb(${shade},${shade-5},${shade-10})`;
+          ctx.fill();
+          ctx.strokeStyle = '#1e293b';
+          ctx.lineWidth = R(1);
           ctx.stroke();
-          
-          ctx.beginPath();
-          ctx.moveTo(cx - R(18), cy + R(10));
-          ctx.lineTo(cx + R(18), cy - R(10));
-          ctx.strokeStyle = '#000000'; // Black stripes on tape
-          ctx.setLineDash([R(5), R(5)]);
-          ctx.lineWidth = R(5);
-          ctx.stroke();
-          ctx.setLineDash([]); // reset
+        });
+
+        // 4. Hazard tape (black + amber dashes)
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineWidth = R(6);
+        ctx.beginPath();
+        ctx.moveTo(cx - R(20), cy + R(8));
+        ctx.lineTo(cx + R(20), cy - R(8));
+        ctx.strokeStyle = '#F59E0B';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - R(20), cy + R(8));
+        ctx.lineTo(cx + R(20), cy - R(8));
+        ctx.setLineDash([R(6), R(6)]);
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
       }
     });
 
-    
     /* === SOS BEACONS === */
+        /* === SOS BEACONS === */
     SOS_BEACON_NODES.forEach(nodeName => {
       const pos = NODE_POS[nodeName] || (GRAPH ? GRAPH.nodes[nodeName] : null);
       if (!pos) return;
@@ -670,6 +719,78 @@ function render() {
       ctx.textBaseline = 'middle';
       ctx.fillText('SOS', cx, cy);
     });
+
+
+    /* === SMOKE OVERLAY === */
+    if (SMOKE_LEVEL && SMOKE_LEVEL !== "none") {
+      const cw = canvas.width  / (window.devicePixelRatio||1);
+      const ch = canvas.height / (window.devicePixelRatio||1);
+      const t  = Date.now();
+
+      // Background fog layer
+      let fogAlpha = SMOKE_LEVEL === "light" ? 0.25 : SMOKE_LEVEL === "heavy" ? 0.60 : 0.88;
+      ctx.fillStyle = `rgba(60,60,60,${fogAlpha})`;
+      ctx.fillRect(0, 0, cw, ch);
+
+      // Animated drifting smoke puffs
+      const puffCount = SMOKE_LEVEL === "light" ? 14 : SMOKE_LEVEL === "heavy" ? 24 : 10;
+      for (let i = 0; i < puffCount; i++) {
+        const seedX = (i * 137.5) % 1.0;
+        const seedY = (i * 97.3)  % 1.0;
+        const phase = (t / (3000 + i * 200) + i * 0.07) % 1.0;
+        const px = (seedX * cw + Math.sin(t/2000 + i) * cw * 0.08 + phase * cw * 0.12) % cw;
+        const py = (seedY * ch + Math.cos(t/2500 + i * 0.7) * ch * 0.06) % ch;
+        const rad = (cw * 0.06) + (i % 4) * (cw * 0.02);
+        const alpha = (SMOKE_LEVEL === "blackout" ? 0.15 : 0.22) + 0.06 * Math.sin(t/800 + i);
+
+        const grad = ctx.createRadialGradient(px, py, 0, px, py, rad);
+        grad.addColorStop(0, `rgba(80,80,80,${alpha})`);
+        grad.addColorStop(1, 'rgba(60,60,60,0)');
+        ctx.beginPath();
+        ctx.arc(px, py, rad, 0, Math.PI*2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      // === BLACKOUT MODE: make the escape path GLOW ===
+      if (SMOKE_LEVEL === "blackout") {
+        // Re-draw the path on top with a neon glow effect
+        ctx.save();
+        ctx.shadowColor = '#22c55e';
+        ctx.shadowBlur  = R(20);
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth   = R(6);
+        ctx.lineCap     = 'round';
+        ctx.lineJoin    = 'round';
+        ctx.beginPath();
+        let started = false;
+        for (let i = 0; i < path.length - 1; i++) {
+          const p1 = NODE_POS[path[i]]   || (GRAPH ? GRAPH.nodes[path[i]]   : null);
+          const p2 = NODE_POS[path[i+1]] || (GRAPH ? GRAPH.nodes[path[i+1]] : null);
+          if (!p1 || !p2) continue;
+          if (!started) { ctx.moveTo(X(p1[0]), Y(p1[1])); started = true; }
+          ctx.lineTo(X(p2[0]), Y(p2[1]));
+        }
+        ctx.stroke();
+
+        // Second glow pass (wider, dimmer)
+        ctx.lineWidth = R(14);
+        ctx.strokeStyle = 'rgba(34,197,94,0.25)';
+        ctx.shadowBlur = R(30);
+        ctx.beginPath();
+        started = false;
+        for (let i = 0; i < path.length - 1; i++) {
+          const p1 = NODE_POS[path[i]]   || (GRAPH ? GRAPH.nodes[path[i]]   : null);
+          const p2 = NODE_POS[path[i+1]] || (GRAPH ? GRAPH.nodes[path[i+1]] : null);
+          if (!p1 || !p2) continue;
+          if (!started) { ctx.moveTo(X(p1[0]), Y(p1[1])); started = true; }
+          ctx.lineTo(X(p2[0]), Y(p2[1]));
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+    }
 
     /* === ROOM TEXTS === */
     Object.entries(ROOM_RECTS).forEach(([name, r]) => {
@@ -829,6 +950,14 @@ async function pollCrowd(){
     roomData = await rr.json();
     const st = await ar.json();
     GLOBAL_HAZARDS = st.hazards || {};
+    SMOKE_LEVEL = st.smoke_level || "none";
+    if (SMOKE_LEVEL !== "none" && !window.smokeVoiceTriggered) {
+      window.smokeVoiceTriggered = true;
+      if (typeof speak === 'function') speak("Warning! Smoke detected. Follow the glowing path to the nearest exit immediately!");
+      showToast("⚠️ Smoke detected! Follow the lit route!", 6000);
+    } else if (SMOKE_LEVEL === "none") {
+      window.smokeVoiceTriggered = false;
+    }
     // Sync global alarm state
     if (st.alarm_active && !alarmInterval) {
       toggleEmergency(true);

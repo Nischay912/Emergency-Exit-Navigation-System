@@ -142,12 +142,16 @@ def api_status():
         "total_people": total,
         "alarm_active": ALARM_ACTIVE,
         "hazards": HAZARDS,
-        "sos_alerts": SOS_ALERTS
+        "sos_alerts": SOS_ALERTS,
+        "smoke_level": SMOKE_LEVEL
     })
 
 
 # --- HAZARDS (Fire / Debris) ---
 HAZARDS = {}
+
+# --- Smoke Simulation ---
+SMOKE_LEVEL = "none"  # "none" | "light" | "heavy" | "blackout"
 
 # --- SOS Alerts ---
 SOS_ALERTS = []
@@ -192,6 +196,16 @@ def api_sos():
             return jsonify({"success": True, "alert_id": alert_id})
         return jsonify({"success": True})
     return jsonify(SOS_ALERTS)
+
+
+@app.route("/api/smoke", methods=["GET", "POST"])
+def api_smoke():
+    global SMOKE_LEVEL
+    if request.method == "POST":
+        data = request.json or {}
+        SMOKE_LEVEL = data.get("level", "none")
+        return jsonify({"success": True, "level": SMOKE_LEVEL})
+    return jsonify({"level": SMOKE_LEVEL})
 
 if __name__ == "__main__":
     import socket

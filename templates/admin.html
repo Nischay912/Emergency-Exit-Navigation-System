@@ -193,7 +193,23 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
       
       <!-- SOS ALERTS -->
       <div id="sosSection">
-        <div class="section-title" style="color:var(--red);">&#128682; Live SOS Alerts</div>
+        
+      <!-- SMOKE SIMULATOR -->
+      <div style="margin-bottom:24px;">
+        <div class="section-title" style="color:#64748b;">&#127787; Smoke Simulation</div>
+        <div style="background:var(--panel); border:1px solid var(--border); padding:16px; border-radius:12px;">
+          <p style="font-size:0.8rem; color:var(--muted); margin-bottom:14px;">Simulate smoke filling the building. Blackout mode makes the escape route glow like emergency runway lights.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button id="smk-none"  class="mini-btn" style="border-color:var(--green);  color:var(--green);  background:transparent; padding:8px 14px; font-weight:700; cursor:pointer;" onclick="setSmoke('none')">&#9989; Clear Smoke</button>
+            <button id="smk-light" class="mini-btn" style="border-color:#94a3b8; color:#94a3b8; background:transparent; padding:8px 14px; font-weight:700; cursor:pointer;" onclick="setSmoke('light')">&#127787; Light Smoke</button>
+            <button id="smk-heavy" class="mini-btn" style="border-color:#64748b; color:#64748b; background:transparent; padding:8px 14px; font-weight:700; cursor:pointer;" onclick="setSmoke('heavy')">&#128168; Heavy Smoke</button>
+            <button id="smk-black" class="mini-btn" style="border-color:#0f172a; color:#e2e8f0; background:#0f172a;  padding:8px 14px; font-weight:700; cursor:pointer;" onclick="setSmoke('blackout')">&#11035; BLACKOUT</button>
+          </div>
+          <div id="smokeStatus" style="margin-top:10px; font-size:0.78rem; color:var(--muted);">Status: No smoke active</div>
+        </div>
+      </div>
+
+<div class="section-title" style="color:var(--red);">&#128682; Live SOS Alerts</div>
         <div id="sosList">
           <div id="sosEmpty" style="font-size:0.82rem; color:var(--muted); padding:10px 0;">No active SOS signals. All clear &#9989;</div>
         </div>
@@ -604,6 +620,46 @@ init();
   // Poll SOS every 3 seconds
   setInterval(refreshSOS, 3000);
   refreshSOS();
+
+  
+  // ===== SMOKE SIMULATOR =====
+  let currentSmoke = "none";
+  async function setSmoke(level) {
+    await fetch('/api/smoke', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({level: level})
+    });
+    currentSmoke = level;
+    updateSmokeUI();
+    const labels = { none:'Clear', light:'Light Smoke', heavy:'Heavy Smoke', blackout:'BLACKOUT' };
+    addLog('&#127787; Smoke set to: ' + (labels[level] || level));
+  }
+
+  function updateSmokeUI() {
+    const smkIds = ['smk-none','smk-light','smk-heavy','smk-black'];
+    const smkLvl = ['none','light','heavy','blackout'];
+    const colors  = ['var(--green)','#94a3b8','#64748b','#e2e8f0'];
+    const bgs     = ['transparent','transparent','transparent','#0f172a'];
+    smkIds.forEach((id, i) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      if (smkLvl[i] === currentSmoke) {
+        btn.style.background = colors[i];
+        btn.style.color = smkLvl[i] === 'blackout' ? '#0f172a' : '#0a0f1d';
+        btn.style.fontWeight = '900';
+      } else {
+        btn.style.background = bgs[i];
+        btn.style.color = colors[i];
+        btn.style.fontWeight = '700';
+      }
+    });
+    const statusEl = document.getElementById('smokeStatus');
+    if (statusEl) {
+      const msgs = { none:'No smoke active', light:'&#127787; Light smoke drifting...', heavy:'&#128168; Heavy smoke — limited visibility!', blackout:'&#11035; BLACKOUT — emergency route glowing only!' };
+      statusEl.innerHTML = 'Status: ' + (msgs[currentSmoke] || currentSmoke);
+    }
+  }
 
   </script>
 </body>
