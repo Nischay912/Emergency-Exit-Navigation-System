@@ -1,45 +1,202 @@
 {
   "nodes": {
-    "Intersection_West": ["corridor", "hall", "corridor"],
-    "Intersection_Mid1": ["corridor", "hall", "corridor"],
-    "Intersection_Mid2": ["corridor", "hall", "corridor"],
-    "Corridor_North": ["corridor", "hall", "corridor"],
-    "Corridor_South": ["corridor", "hall", "corridor"],
-    "Corridor_West_N": ["corridor", "hall", "corridor"],
-    "Corridor_West_S": ["corridor", "hall", "corridor"],
-    "Corridor_East": ["corridor", "hall", "corridor"],
-    "Classroom_A": ["room", "academic", "room"],
-    "Classroom_B": ["room", "academic", "room"],
-    "AI_Lab": ["room", "lab", "room"],
-    "HOD_Cabin": ["room", "office", "room"],
-    "Staff_Lounge": ["room", "office", "room"],
-    "Server_Room": ["room", "infrastructure", "room"],
-    "Library": ["room", "academic", "room"],
-    "Main_Staircase": ["exit", "stairs", "exit"],
-    "East_Fire_Exit": ["exit", "fire_door", "exit"],
-    "South_Emergency_Stairs": ["exit", "stairs", "exit"]
+    "Intersection_West": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Intersection_Mid1": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Intersection_Mid2": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Corridor_North": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Corridor_South": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Corridor_West_N": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Corridor_West_S": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Corridor_East": [
+      "corridor",
+      "hall",
+      "corridor"
+    ],
+    "Classroom_A": [
+      "room",
+      "academic",
+      "room"
+    ],
+    "Classroom_B": [
+      "room",
+      "academic",
+      "room"
+    ],
+    "AI_Lab": [
+      "room",
+      "lab",
+      "room"
+    ],
+    "HOD_Cabin": [
+      "room",
+      "office",
+      "room"
+    ],
+    "Staff_Lounge": [
+      "room",
+      "office",
+      "room"
+    ],
+    "Server_Room": [
+      "room",
+      "infrastructure",
+      "room"
+    ],
+    "Library": [
+      "room",
+      "academic",
+      "room"
+    ],
+    "Main_Staircase": [
+      "exit",
+      "stairs",
+      "exit"
+    ],
+    "East_Fire_Exit": [
+      "exit",
+      "fire_door",
+      "exit"
+    ],
+    "South_Emergency_Stairs": [
+      "exit",
+      "stairs",
+      "exit"
+    ]
   },
   "edges": [
-    ["Main_Staircase", "Corridor_West_N", 10],
-    ["Corridor_West_N", "Classroom_A", 15],
-    ["Corridor_West_N", "Intersection_West", 20],
-    ["Intersection_West", "HOD_Cabin", 15],
-    ["Intersection_West", "Corridor_West_S", 20],
-    ["Intersection_West", "Library", 12],
-    ["Intersection_West", "Intersection_Mid1", 25],
-    ["Classroom_A", "Corridor_North", 20],
-    ["Corridor_North", "Classroom_B", 15],
-    ["Corridor_North", "Intersection_Mid1", 20],
-    ["Library", "Intersection_Mid1", 12],
-    ["Intersection_Mid1", "Staff_Lounge", 18],
-    ["Intersection_Mid1", "Intersection_Mid2", 30],
-    ["Intersection_Mid2", "AI_Lab", 15],
-    ["Intersection_Mid2", "Corridor_East", 20],
-    ["Intersection_Mid2", "Corridor_South", 20],
-    ["Corridor_East", "East_Fire_Exit", 10],
-    ["Corridor_South", "Server_Room", 15],
-    ["Corridor_South", "South_Emergency_Stairs", 10]
+    [
+      "Main_Staircase",
+      "Corridor_West_N",
+      10
+    ],
+    [
+      "Corridor_West_N",
+      "Classroom_A",
+      15
+    ],
+    [
+      "Corridor_West_N",
+      "Intersection_West",
+      20
+    ],
+    [
+      "Corridor_West_S",
+      "HOD_Cabin",
+      15
+    ],
+    [
+      "Intersection_West",
+      "Corridor_West_S",
+      20
+    ],
+    [
+      "Intersection_West",
+      "Library",
+      12
+    ],
+    [
+      "Intersection_West",
+      "Intersection_Mid1",
+      25
+    ],
+    [
+      "Classroom_A",
+      "Corridor_North",
+      20
+    ],
+    [
+      "Corridor_North",
+      "Classroom_B",
+      15
+    ],
+    [
+      "Corridor_North",
+      "Intersection_Mid1",
+      20
+    ],
+    [
+      "Library",
+      "Intersection_Mid1",
+      12
+    ],
+    [
+      "Intersection_Mid1",
+      "Staff_Lounge",
+      18
+    ],
+    [
+      "Intersection_Mid1",
+      "Intersection_Mid2",
+      30
+    ],
+    [
+      "Intersection_Mid2",
+      "AI_Lab",
+      15
+    ],
+    [
+      "Intersection_Mid2",
+      "Corridor_East",
+      20
+    ],
+    [
+      "Intersection_Mid2",
+      "Corridor_South",
+      20
+    ],
+    [
+      "Corridor_East",
+      "East_Fire_Exit",
+      10
+    ],
+    [
+      "Corridor_South",
+      "Server_Room",
+      15
+    ],
+    [
+      "Corridor_South",
+      "South_Emergency_Stairs",
+      10
+    ],
+    [
+      "Intersection_Mid2",
+      "Staff_Lounge",
+      18
+    ]
   ],
-  "exit_nodes": ["Main_Staircase", "East_Fire_Exit", "South_Emergency_Stairs"],
+  "exit_nodes": [
+    "Main_Staircase",
+    "East_Fire_Exit",
+    "South_Emergency_Stairs"
+  ],
   "camera_exit": "Main_Staircase"
 }

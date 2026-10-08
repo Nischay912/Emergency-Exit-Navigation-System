@@ -109,7 +109,11 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
 .alert.show{display:block;}
 @keyframes flash{0%,100%{opacity:1}50%{opacity:.45}}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  :root[data-theme="light"] .alert { background: #FCE8E6; }
+  :root[data-theme="light"] input[type=range]::-webkit-slider-runnable-track { background: var(--border); }
 </style>
+
 </head>
 <body>
 <header>
@@ -117,8 +121,11 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
     <h1>&#128295; Admin Control Panel &mdash; Emergency Exit System</h1>
     <p>ISE Department &nbsp;|&nbsp; Full floor monitoring &amp; crowd control</p>
   </div>
-  <div class="badge-live"><span class="dot"></span>CONNECTED</div>
-</header>
+  <div style="display:flex; align-items:center; gap: 12px;">
+      <div class="badge-live"><span class="dot"></span>CONNECTED</div>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeIcon">☀️</button>
+    </div>
+  </header>
 
 <div class="main">
   <div>
