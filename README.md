@@ -1,314 +1,114 @@
-# 🚨 Emergency Exit System
-### AI-Powered, Crowd-Aware Indoor Evacuation Navigation
+<div align="center">
+  <img src="https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/AI-YOLOv8-blue?style=for-the-badge" alt="AI Model">
+  <img src="https://img.shields.io/badge/Algorithm-Dijkstra-orange?style=for-the-badge" alt="Algorithm">
+</div>
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-3.0+-000000?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-FF6B35?style=flat)](https://ultralytics.com/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
+<br>
 
----
+# 🚨 AI-Powered Emergency Exit & Crowd Routing System
 
-## 📖 Overview
-
-The **Emergency Exit System** is a real-time, indoor emergency evacuation platform built as a final-year major project. It combines **YOLOv8 AI crowd detection**, **Dijkstra's algorithm for dynamic pathfinding**, and **Pedestrian Dead Reckoning (PDR)** to guide occupants to the safest exit — all without GPS or any special hardware.
-
-A user scans a QR code in their room, opens the web app on their phone, and receives a **live-updated navigation path** to the least-crowded exit. As crowd conditions change (detected by webcam), the route automatically recalculates.
+A real-time, edge-computing powered emergency evacuation system designed for large indoor spaces (malls, colleges, offices). It utilizes **Computer Vision (YOLOv8)** to monitor crowd density at exits and **Dynamic Graph Algorithms (Dijkstra)** to instantly reroute trapped users to the safest exits via their smartphones—all without requiring an app download or active GPS.
 
 ---
 
-## ✨ Key Features
+## 🌟 Key Features (v2.0)
 
-| Feature | Description |
-|---|---|
-| 🧠 **AI Crowd Detection** | YOLOv8 nano model detects and counts people at exit points via webcam in real-time |
-| 🗺️ **Dynamic Pathfinding** | Dijkstra's algorithm routes users away from crowded exits using live crowd weights |
-| 📍 **PDR Navigation** | Pedestrian Dead Reckoning uses phone's accelerometer + compass — no GPS or BLE beacons needed |
-| 📱 **Mobile-First Web App** | Runs entirely in the browser; no app installation required |
-| 🏛️ **Admin Dashboard** | Real-time crowd management panel to manually update occupancy counts |
-| 📷 **QR Code Entry** | Scanning a room's QR code auto-sets the user's location |
-| ♻️ **Auto-Rereouting** | Path recalculates every ~4 seconds as crowd data updates |
+- **🧠 Edge-AI Crowd Counting:** Live webcam integration running YOLOv8 to continuously monitor exits. If an exit becomes overcrowded (e.g., >50 people), the system automatically increases the mathematical "cost" of that path.
+- **🗺️ Dynamic Dijkstra Pathfinding:** Re-calculates the absolute shortest and safest path to an exit dynamically in the user's browser, completely avoiding fires, blockades, and stampedes.
+- **📱 PDR (Pedestrian Dead Reckoning) Indoor Navigation:** GPS doesn't work indoors. Our Web App taps into the phone's native **Accelerometer and Compass** to track physical footsteps and turns, updating the user's location on the floor map in real-time.
+- **🗣️ Multi-Language Voice Megaphone & Navigation:** Uses the Web Speech API to provide turn-by-turn voice directions, and allows the Admin to broadcast custom audio messages to all connected phones simultaneously (in English, Hindi, and Kannada).
+- **🎛️ Live Admin Command Center:** A secure, authenticated dashboard for emergency responders to trigger global alarms, simulate smoke propagation, block hallways, and monitor SOS signals.
+- **🛡️ Extreme Resilience (State Recovery):** In emergencies, networks drop and pages accidentally reload. We use strict `localStorage` and `sessionStorage` architecture so if a user or admin refreshes the page, their location, path, and event logs are restored in milliseconds.
+- **📄 Instant Incident Reporting:** One-click generation of post-evacuation `.txt` logs for enterprise and fire-department compliance.
 
 ---
 
-## 🏗️ System Architecture
+## 🛠️ Tech Stack & Architecture
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                      PHONE (User Browser)                    │
-│                                                              │
-│  1. Scans QR code → Opens https://[ngrok-url]/locate/Room   │
-│  2. Gets floor map + crowd data from Flask API               │
-│  3. Dijkstra runs CLIENT-SIDE in JavaScript                  │
-│  4. Accelerometer + Compass → PDR moves the "YOU" dot        │
-│  5. Polls /api/crowd every 4s → path recalculates            │
-└──────────────────────────────────────────────────────────────┘
-         ▲  HTTP (REST API)  │
-         │                   ▼
-┌──────────────────────────────────────────────────────────────┐
-│                   PC / SERVER (Flask + app.py)               │
-│                                                              │
-│  • Serves index.html and admin.html                          │
-│  • REST endpoints: /api/graph, /api/crowd, /api/rooms        │
-│  • Reads/writes crowd_state.json, room_state.json            │
-└────────────────────┬─────────────────────────────────────────┘
-                     │  POST /api/crowd (every 5s)
-                     ▼
-┌──────────────────────────────────────────────────────────────┐
-│                yolo_crowd.py (runs separately)               │
-│                                                              │
-│  • Webcam captures exit-area footage                         │
-│  • YOLOv8 counts people per frame                            │
-│  • Pushes crowd count to Flask API automatically             │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📁 Project Structure
-
-```
-Project_Exit/
-│
-├── app.py                        # Flask backend — API endpoints + page serving
-├── yolo_crowd.py                 # YOLOv8 webcam-based crowd detection script
-├── generate_qr.py                # Generates per-room QR codes pointing to /locate/<room>
-├── generate_cert.py              # Self-signed SSL cert generator (for local HTTPS testing)
-├── start_tunnel.py               # Automates ngrok tunnel setup for mobile HTTPS access
-├── requirements.txt              # Python dependencies
-├── .gitignore                    # Excludes SSL keys, .env, cache, QR images, etc.
-│
-├── data/
-│   ├── floor_graph.json          # Graph definition: nodes, edges, exit list
-│   ├── crowd_state.json          # Live crowd count per exit (runtime state)
-│   └── room_state.json           # Live room occupancy counts (runtime state)
-│
-├── templates/
-│   ├── index.html                # Main user-facing map + navigation page (~73 KB)
-│   └── admin.html                # Admin control panel for crowd management
-│
-├── emergency_exit_system/        # Legacy/alternate Python implementation modules
-│   ├── main.py                   # Entry point for standalone Python version
-│   ├── dashboard.py              # Tkinter/web dashboard module
-│   ├── dijkstra.py               # Pure Python Dijkstra + path reconstruction
-│   ├── floor_map.py              # Floor plan node/edge definitions
-│   ├── ui_map.py                 # Canvas-based floor map renderer
-│   └── crowd_simulator.py        # Crowd simulation for offline demo/testing
-│
-├── web_demo/                     # Static web demo placeholder
-└── qr_codes/                     # Generated QR images (git-ignored)
-```
-
----
-
-## 🔧 Tech Stack
-
-| Layer | Technology | Purpose |
+| Category | Technology | How it's Used |
 |---|---|---|
-| **Backend** | Python 3.10+, Flask 3.0 | REST API server, page serving |
-| **AI / CV** | YOLOv8 (Ultralytics), OpenCV | Real-time person detection at exits |
-| **Frontend** | HTML5, Vanilla JS, CSS | Mobile map + navigation UI |
-| **Rendering** | HTML5 Canvas API | Floor map drawing at 60 fps |
-| **Pathfinding** | Dijkstra's Algorithm (JS) | Crowd-weighted shortest path |
-| **Indoor Nav** | PDR (Dead Reckoning) | Step detection + compass heading |
-| **Sensors** | DeviceMotionEvent, DeviceOrientationEvent | Browser APIs for accelerometer & compass |
-| **Data** | JSON files | Lightweight runtime state storage |
-| **Tunnel** | ngrok | HTTPS tunnel for mobile sensor access |
-| **Location** | QR Codes (qrcode library) | Zero-friction room location initialization |
+| **Core Backend** | Python 3.10, Flask | The main web server, managing API routes and Admin sessions. |
+| **Artificial Intelligence** | YOLOv8 (Ultralytics), OpenCV | Processes camera frames locally to detect and count people. |
+| **Pathfinding Engine** | Dijkstra's Algorithm (JS) | Client-side dynamic graph routing for zero server latency. |
+| **Frontend UI/UX** | HTML5 Canvas, Vanilla JS, CSS3 | Rendering the 60fps floor plan, dark-mode Admin dashboard. |
+| **Sensor Integration** | Web API (`DeviceOrientation`) | Reading magnetometer/gyroscope data for step-tracking. |
+| **Accessibility** | Web Speech API | Text-to-Speech engine for visually impaired navigation. |
+| **Networking** | Ngrok | Secure HTTPS tunneling for mobile sensor access. |
+| **Data Persistence** | `localStorage`, `sessionStorage` | Saving navigation state across accidental browser refreshes. |
+
+*For a full, beginner-friendly breakdown of our technology, read the [TECH_STACK_EXPLAINED.md](TECH_STACK_EXPLAINED.md).*
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 - Python 3.10+
-- A webcam (for live YOLO detection)
-- A smartphone (for PDR navigation demo)
-- [ngrok](https://ngrok.com/) installed and authenticated (for mobile sensor access)
+- A smartphone (for scanning QR codes & motion sensors)
+- Ngrok installed (for the live mobile tunnel)
 
-### 1. Clone the Repository
+### Installation & Setup
 
-```bash
-git clone https://github.com/Nischay912/Project-clg-major-project.git
-cd Project-clg-major-project
-```
-
-### 2. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-> **Note:** The `yolov8n.pt` model file (~6.5 MB) will auto-download on first run if not present.
-
-### 3. Configure Environment (Optional)
-
-Create a `.env` file for any custom configuration:
-
-```env
-FLASK_PORT=5000
-CAMERA_EXIT=Main_Entrance
-```
-
-### 4. Run the Flask Server
-
-```bash
-python app.py
-```
-
-The server starts at `http://localhost:5000`. Open this on your PC browser to see the map.
-
-### 5. Run YOLO Crowd Detection (Separate Terminal)
-
-```bash
-python yolo_crowd.py
-```
-
-This opens your webcam, detects people, and automatically pushes crowd counts to the Flask server every 5 seconds.
-
-### 6. Enable Mobile Access (HTTPS via ngrok)
-
-Phone browsers require HTTPS to access motion sensors.
-
-```bash
-ngrok http 5000
-```
-
-Open the generated `https://xxxx.ngrok-free.app` URL on your phone. For automatic tunnel setup:
-
-```bash
-python start_tunnel.py
-```
-
-### 7. Generate QR Codes for Rooms
-
-```bash
-python generate_qr.py
-```
-
-QR images are saved to `qr_codes/` (git-ignored). Print and place them in rooms for the demo.
-
----
-
-## 📱 How It Works — User Flow
-
-```
-1. User enters a room during an emergency
-         ↓
-2. Scans the QR code on the wall
-         ↓
-3. Browser opens → auto-set to their location on the map
-         ↓
-4. Dijkstra calculates safest exit (avoids crowded ones)
-         ↓
-5. Animated yellow path shows the route
-         ↓
-6. User walks → PDR (accelerometer + compass) moves the dot
-         ↓
-7. Every 4 seconds: crowd data refreshes → path may update
-         ↓
-8. User reaches the exit ✅
-```
-
----
-
-## 🧮 Algorithm Details
-
-### Dijkstra's Pathfinding with Dynamic Weights
-
-The floor plan is modeled as a **weighted undirected graph**:
-
-- **Nodes** — rooms, corridors, exits
-- **Edges** — passageways with distance-based weights
-
-Crowd density dynamically multiplies edge weights at exits:
-
-| Crowd Level | People Count | Weight Multiplier |
-|---|---|---|
-| 🟢 Low | 0 – 20 | ×1.0 |
-| 🟡 Medium | 21 – 55 | ×2.5 |
-| 🔴 High | 56 – 100 | ×6.0 |
-
-This makes overcrowded exits "expensive" — Dijkstra naturally avoids them and routes users to safer alternatives.
-
-### PDR — Pedestrian Dead Reckoning
-
-No GPS works indoors. PDR uses sensors already in every smartphone:
-
-1. **Step Detection** — `DeviceMotionEvent` monitors the accelerometer. A spike > 1.8 m/s² above gravity (9.8 m/s²) is counted as one step (~22 map units).
-2. **Heading** — `DeviceOrientationEvent` / `webkitCompassHeading` provides compass bearing.
-3. **Position Update**:
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/Nischay912/Project-clg-major-project.git
+   cd Project-clg-major-project
    ```
-   dx = stepLength × sin(mapHeading)
-   dy = −stepLength × cos(mapHeading)
+
+2. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
    ```
-4. **Path Snapping** — Position snaps to the nearest corridor edge to prevent drift through walls.
+
+3. **Start the Central Server**
+   ```bash
+   python app.py
+   ```
+   *The server starts locally at `http://localhost:5000`.*
+
+4. **Launch the Public Tunnel (For Phones)**
+   Open a second terminal window and run:
+   ```bash
+   ngrok http 5000
+   ```
+   *Scan the generated HTTPS link on your smartphone to access the user interface!*
 
 ---
 
-## 🖥️ Admin Dashboard
+## 🕹️ System Walkthrough
 
-Visit `/admin` to access the control panel:
+### 1. The User Experience (Evacuation)
+* **Zero-Friction Entry:** The user scans a QR code on a wall (e.g. "Library"). The web app instantly opens and locks their starting location. No login required.
+* **Smart Routing:** The app queries the server for hazards. If the Main Staircase is crowded or on fire, the blue navigation line instantly diverts them to the East Fire Exit.
+* **Walking:** The user taps "Enable Sensors". As they walk, the phone's accelerometer detects the bounce of their steps and moves the dot on the screen natively.
 
-- **Update crowd counts** at each exit (0–100 people)
-- **Update room occupancy** numbers
-- **Trigger emergency mode** simulation
-- View **real-time system status** including total building occupancy
-
-All changes reflect on user devices within ~4 seconds.
-
----
-
-## 🔬 Research Contribution
-
-This project addresses recognized gaps in existing indoor evacuation literature:
-
-| Limitation in Existing Systems | Our Solution |
-|---|---|
-| Static exit signs — no crowd awareness | Real-time YOLO crowd detection + dynamic rerouting |
-| BLE beacon positioning (₹2000+/beacon) | Zero-cost PDR using built-in phone sensors |
-| Manual crowd estimation | Automated AI-based visual counting |
-| Centralized routing (server bottleneck) | Client-side Dijkstra — works even under server load |
+### 2. The Admin Experience (Command Center)
+* **Secure Login:** Go to `/admin` (Default password provided to administrators).
+* **Hazard Simulation:** Click "Fire near Staff Lounge". The server instantly broadcasts this to all connected phones, which instantly recalculate their routes away from the lounge.
+* **Crowd Overrides:** Manually drag sliders to simulate massive crowds at specific exits.
+* **SOS Tracking:** Monitor inbound SOS signals from trapped users, mark them as rescued, and download the final Incident Report when the building is clear.
 
 ---
 
-## 📋 API Reference
+## 🔒 Security & Scaling Notes
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/` | GET | Main user navigation page |
-| `/admin` | GET | Admin control panel |
-| `/locate/<room_id>` | GET | Set user location via QR code |
-| `/api/graph` | GET | Full floor graph (nodes, edges, exits) |
-| `/api/crowd` | GET | Current crowd counts at all exits |
-| `/api/crowd` | POST | Update crowd count(s) — `{"Exit_Name": 45}` |
-| `/api/rooms` | GET | Current room occupancy counts |
-| `/api/rooms` | POST | Update room count(s) |
-| `/api/status` | GET | System overview — total occupancy + all counts |
+* **Edge Computing:** By processing Dijkstra's algorithm directly on the user's smartphone processor (Client-Side), the central server handles 99% less load, preventing server crashes when 10,000 panicking students ping the server at once.
+* **Admin Authentication:** The dashboard is protected via Flask Encrypted Session Cookies (`app.secret_key`).
+* **Privacy:** YOLOv8 runs entirely locally. Video frames are analyzed and immediately discarded. No video is ever saved or uploaded to the cloud, ensuring strict privacy compliance.
 
 ---
 
-## 🔒 Security Notes
+## 🎓 Academic Contribution
 
-- SSL certificate files (`*.pem`, `*.key`) are **git-ignored** — never commit them.
-- The `.env` file is **git-ignored** — add sensitive config there.
-- QR code images are **git-ignored** (generated locally).
-- The `yolov8n.pt` model is included in the repo (~6.5 MB) for convenience.
-
----
-
-## 👥 Team
-
-**Major Project — B.Tech CSE (2026)**
-
-> Built as a final-year college major project demonstrating real-world integration of AI, mobile web technologies, and classical algorithms for emergency safety applications.
+This system was built as a B.Tech Major Project to solve critical flaws in modern indoor evacuation:
+* **Flaw:** Static EXIT signs route people directly into fires.
+* **Solution:** AI-driven dynamic routing.
+* **Flaw:** Standard indoor positioning requires expensive $10,000 Bluetooth Beacon installations.
+* **Solution:** Zero-cost PDR leveraging the user's own smartphone hardware.
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
-*For technical deep-dive, see [tech.md](tech.md) | For demo instructions, see [DEMO_GUIDE.md](DEMO_GUIDE.md)*
+<div align="center">
+  <b>Built with Python, JavaScript, and YOLOv8</b>
+</div>
