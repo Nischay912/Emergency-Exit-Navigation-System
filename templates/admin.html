@@ -531,7 +531,7 @@ async function toggleGlobalAlarm(){
     b.className="action-btn btn-red";
     b.style.animation="blink 1.4s infinite";
     alert.classList.remove("show");
-    addLog("âœ… Global Alarm Deactivated");
+    addLog("&#9989; Global Alarm Deactivated");
   }
 }
 
@@ -566,6 +566,9 @@ async function resetAll(){
 }
 
 function addLog(msg){
+    // INJECTED LOG SAVE
+    setTimeout(() => { sessionStorage.setItem('admin_events', document.getElementById("logList").innerHTML); }, 50);
+
   const log=document.getElementById("logList");
   const t=new Date().toLocaleTimeString();
   const e=document.createElement("div");e.className="log-e";
@@ -584,13 +587,13 @@ init();
         admin_hazards[node] = null;
         btn.style.background = 'transparent';
         btn.style.color = color;
-        addLog(`âœ… Hazard Cleared at ${node.replace(/_/g,' ')}`);
+        addLog(`&#9989; Hazard Cleared at ${node.replace(/_/g,' ')}`);
     } else {
         await fetch('/api/hazards', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({node: node, type: type})});
         admin_hazards[node] = type;
         btn.style.background = color;
         btn.style.color = 'white';
-        addLog(`ðŸš¨ HAZARD TRIGGERED: ${type.toUpperCase()} at ${node.replace(/_/g,' ')}!`);
+        addLog(`&#9888; HAZARD TRIGGERED: ${type.toUpperCase()} at ${node.replace(/_/g,' ')}!`);
     }
   }
   
@@ -601,7 +604,7 @@ init();
       if(fBtn) { fBtn.style.background = 'transparent'; fBtn.style.color = 'var(--red)'; }
       const dBtn = document.getElementById('haz-deb');
       if(dBtn) { dBtn.style.background = 'transparent'; dBtn.style.color = 'var(--amber)'; }
-      addLog("âœ… All hazards cleared. Paths restored.");
+      addLog("&#9989; All hazards cleared. Paths restored.");
   }
 
 
@@ -644,7 +647,7 @@ init();
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ action: 'clear', id: alertId })
     });
-    addLog('&#9989; SOS cleared â€” person rescued at ID: ' + alertId);
+    addLog('&#9989; SOS cleared | person rescued at ID: ' + alertId);
     refreshSOS();
   }
 
@@ -801,6 +804,35 @@ function downloadReport() {
     a.download = `Evac_Incident_Report_${Date.now()}.txt`;
     a.click();
 }
+
+
+// ==========================================
+// ROBUST STATE RESTORATION ON LOAD
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    // 1. Restore Logs
+    const savedLogs = sessionStorage.getItem('admin_events');
+    if(savedLogs) document.getElementById('logList').innerHTML = savedLogs;
+
+    // 2. Source of Truth Sync (Hazards & Smoke)
+    fetch('/api/status').then(r=>r.json()).then(data => {
+        if(data.hazards) {
+            if('Intersection_Mid1' in data.hazards) {
+                const b = document.getElementById('haz-fire');
+                if(b) { b.style.background = 'var(--red)'; b.style.color = 'white'; }
+            }
+            if('Corridor_East' in data.hazards) {
+                const b = document.getElementById('haz-deb');
+                if(b) { b.style.background = 'var(--amber)'; b.style.color = 'white'; }
+            }
+        }
+        if(data.smoke_level && data.smoke_level !== 'none') {
+            const lbl = {light:'Light Smoke', heavy:'Heavy Smoke', blackout:'BLACKOUT'};
+            document.getElementById('smokeStat').innerHTML = 'Status: <span style="color:var(--amber)">' + (lbl[data.smoke_level] || data.smoke_level) + '</span>';
+            // Also color the active smoke button if possible (we don't have IDs on them, so this is fine)
+        }
+    });
+});
 
 </script>
 </body>

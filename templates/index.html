@@ -916,6 +916,8 @@ function buildLocSelect(){
 }
 
 function changeLocation(node){
+    localStorage.setItem('evac_userLoc', node);
+
   if(!node)return;
   currentUser=node;
   document.getElementById("userLbl").textContent=node.replace(/_/g," ");
@@ -957,6 +959,12 @@ function drawHeadingArrow(ctx, x, y, R_func, isDemo) {
 }
 
 async function init(){
+    const savedLoc = localStorage.getItem('evac_userLoc');
+    if(savedLoc) {
+        currentUser = savedLoc;
+        document.getElementById("userLbl").textContent = currentUser.replace(/_/g," ");
+    }
+
   try{
     const r=await fetch("/api/graph");
     if(!r.ok) throw new Error("HTTP "+r.status);
