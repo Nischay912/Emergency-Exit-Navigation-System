@@ -275,6 +275,9 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
     <div class="panel">
       <h2>Event Log</h2>
       <div class="log-list" id="logList"></div>
+      <button onclick="downloadReport()" class="action-btn" style="margin-top: 16px; background: #2563eb; color: white; border: none; font-weight: bold;">
+        &#128196; Download Official Incident Report
+      </button>
     </div>
   </div>
 </div>
@@ -754,6 +757,51 @@ init();
     input.value = '';
   }
 
-  </script>
+  
+function downloadReport() {
+    const time = new Date().toLocaleString();
+    let report = `=================================\n`;
+    report += ` EMERGENCY EVACUATION REPORT\n`;
+    report += ` Generated: ${time}\n`;
+    report += `=================================\n\n`;
+
+    const safeCount = document.getElementById("safeCount") ? document.getElementById("safeCount").innerText : "0";
+    report += `[PERSONNEL STATUS]\n`;
+    report += `Total Confirmed Safe: ${safeCount} individuals\n\n`;
+
+    report += `[HAZARD STATUS]\n`;
+    if(typeof addLog === 'function') addLog("&#128196; Incident Report Generated.");
+
+    const haz1 = document.getElementById("haz-fire");
+    const haz2 = document.getElementById("haz-deb");
+    
+    // Check if the button text is white (which means it's active in the UI)
+    let fireActive = haz1 && (haz1.style.color === 'white' || haz1.style.color === 'rgb(255, 255, 255)');
+    let debActive = haz2 && (haz2.style.color === 'white' || haz2.style.color === 'rgb(255, 255, 255)');
+    
+    if(fireActive) report += `- Fire at Staff Lounge: ACTIVE\n`;
+    if(debActive) report += `- Blockade at East Hallway: ACTIVE\n`;
+    if(!fireActive && !debActive) report += `- No active hazards.\n`;
+    report += `\n`;
+
+    report += `[SYSTEM EVENT LOG]\n`;
+    const logList = document.getElementById("logList");
+    if (logList) {
+        // Reverse logs to chronological order for the file
+        const logs = Array.from(logList.children).map(d => d.innerText).reverse();
+        report += logs.join("\n") + "\n";
+    }
+
+    report += `\n=================================\n`;
+    report += `End of Report.\n`;
+
+    const blob = new Blob([report], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Evac_Incident_Report_${Date.now()}.txt`;
+    a.click();
+}
+
+</script>
 </body>
 </html>
