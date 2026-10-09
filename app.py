@@ -1,5 +1,5 @@
-"""
-app.py — Emergency Exit System Backend (v2)
+﻿"""
+app.py â€” Emergency Exit System Backend (v2)
 Numeric crowd values (0-100 people). Thresholds: <=20 Low, <=55 Medium, >55 High
 """
 import json, threading
@@ -36,7 +36,7 @@ def count_to_level(n):
 # Global alarm state in-memory
 ALARM_ACTIVE = False
 
-# ── PAGES ──
+# â”€â”€ PAGES â”€â”€
 from flask import make_response
 
 @app.route("/")
@@ -72,7 +72,7 @@ def admin():
         """
     return render_template("admin.html")
 
-# ── API ──
+# â”€â”€ API â”€â”€
 @app.route("/api/alarm", methods=["GET"])
 def get_alarm():
     global ALARM_ACTIVE
@@ -243,8 +243,32 @@ def api_broadcast():
     msg = data.get("message", "").strip()
     if msg:
         import time
-        LATEST_BROADCAST = {"id": int(time.time()), "message": msg}
+        try:
+            from deep_translator import MyMemoryTranslator
+            msg_hi = MyMemoryTranslator(source='en-US', target='hi-IN').translate(msg)
+            msg_kn = MyMemoryTranslator(source='en-US', target='kn-IN').translate(msg)
+        except Exception:
+            msg_hi = msg
+            msg_kn = msg
+            
+        LATEST_BROADCAST = {
+            "id": int(time.time()), 
+            "message": msg,
+            "message_hi": msg_hi,
+            "message_kn": msg_kn
+        }
     return jsonify({"success": True})
+
+
+@app.route("/manifest.json")
+def serve_manifest():
+    from flask import send_file
+    return send_file("manifest.json")
+
+@app.route("/sw.js")
+def serve_sw():
+    from flask import send_file
+    return send_file("sw.js")
 
 if __name__ == "__main__":
     import socket
@@ -257,7 +281,7 @@ if __name__ == "__main__":
         local_ip = "YOUR_PC_IP"
 
     print("=" * 60)
-    print("  Emergency Exit System — Running")
+    print("  Emergency Exit System â€” Running")
     print("=" * 60)
     print(f"  Local PC    -> http://localhost:5000/")
     print(f"  Local Phone -> http://{local_ip}:5000/")

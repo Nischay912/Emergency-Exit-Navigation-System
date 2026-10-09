@@ -182,6 +182,11 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 
   </style>
 
+  <!-- PWA Support -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Evac AI">
 </head>
 <body>
 <div id="emergencyFlash" class="alarm-overlay"></div>
@@ -980,8 +985,15 @@ async function pollCrowd(){
     SMOKE_LEVEL = st.smoke_level || "none";
     if (SMOKE_LEVEL !== "none" && !window.smokeVoiceTriggered) {
       window.smokeVoiceTriggered = true;
-      if (typeof speak === 'function') speak("Warning! Smoke detected. Follow the glowing path to the nearest exit immediately!");
-      showToast("⚠️ Smoke detected! Follow the lit route!", 6000);
+      if (typeof speak === 'function') {
+          let smokeMsg = "Warning! Smoke detected. Follow the glowing path to the nearest exit immediately!";
+          if (typeof VOICE !== 'undefined') {
+            if (VOICE.lang === 'hi-IN') smokeMsg = "चेतावनी! धुआं पाया गया है। तुरंत चमकते हुए रास्ते से बाहर निकलें!";
+            if (VOICE.lang === 'kn-IN') smokeMsg = "ಎಚ್ಚರಿಕೆ! ಹೊಗೆ ಪತ್ತೆಯಾಗಿದೆ. ಹೊಳೆಯುವ ದಾರಿಯನ್ನು ಅನುಸರಿಸಿ ತಕ್ಷಣ ಹೊರಬನ್ನಿ!";
+          }
+          speak(smokeMsg);
+        }
+        showToast("⚠️ Smoke detected! Follow the lit route!", 6000);
     } else if (SMOKE_LEVEL === "none") {
       window.smokeVoiceTriggered = false;
     }
@@ -989,14 +1001,21 @@ async function pollCrowd(){
       // Broadcast logic
       if (st.broadcast && st.broadcast.id > lastBroadcastId) {
         lastBroadcastId = st.broadcast.id;
-        if (typeof speak === 'function') speak(st.broadcast.message);
+        
+        let bMsg = st.broadcast.message;
+        if (typeof VOICE !== 'undefined') {
+            if (VOICE.lang === 'hi-IN' && st.broadcast.message_hi) bMsg = st.broadcast.message_hi;
+            if (VOICE.lang === 'kn-IN' && st.broadcast.message_kn) bMsg = st.broadcast.message_kn;
+        }
+        
+        if (typeof speak === 'function') speak(bMsg);
         
         // Show a prominent alert toast
         const toast = document.getElementById("toast");
         if (toast) {
-          toast.innerHTML = `<strong style="color:#facc15">&#128227; ADMIN BROADCAST:</strong><br>${st.broadcast.message}`;
+          toast.innerHTML = `<strong style="color:#facc15">&#128227; ADMIN BROADCAST:</strong><br>${bMsg}`;
           toast.className = "toast show";
-          setTimeout(() => { toast.className = "toast"; }, 8000);
+          setTimeout(() => { toast.className = "toast"; }, 10000);
         }
       }
 
@@ -1042,7 +1061,14 @@ init();
         resetSOSButton();
       }
 
-      if (typeof speak === 'function') speak('You have been accounted for at the safe assembly point.');
+      if (typeof speak === 'function') {
+        let safeMsg = 'You have been accounted for at the safe assembly point.';
+        if (typeof VOICE !== 'undefined') {
+          if (VOICE.lang === 'hi-IN') safeMsg = "सुरक्षित क्षेत्र में आपकी उपस्थिति दर्ज कर ली गई है।";
+          if (VOICE.lang === 'kn-IN') safeMsg = "ಸುರಕ್ಷಿತ ಸ್ಥಳದಲ್ಲಿ ನಿಮ್ಮ ಹಾಜರಾತಿಯನ್ನು ದಾಖಲಿಸಲಾಗಿದೆ.";
+        }
+        speak(safeMsg);
+      }
       showToast('&#9989; Checked in successfully!');
     } catch(e) {
       showToast('Error connecting to server.');
@@ -1092,7 +1118,14 @@ init();
     btn.innerHTML = '&#128681; SOS ACTIVE &mdash; Tap to Cancel';
     badge.style.display = 'block';
 
-    if (typeof speak === 'function') speak('S O S sent! Help is on the way. Stay calm and stay put.');
+    if (typeof speak === 'function') {
+      let sosMsg = 'S O S sent! Help is on the way. Stay calm and stay put.';
+      if (typeof VOICE !== 'undefined') {
+        if (VOICE.lang === 'hi-IN') sosMsg = "एस ओ एस भेज दिया गया है! मदद आ रही है। शांत रहें और वहीं रहें।";
+        if (VOICE.lang === 'kn-IN') sosMsg = "ಎಸ್ ಓ ಎಸ್ ಕಳುಹಿಸಲಾಗಿದೆ! ಸಹಾಯ ಬರುತ್ತಿದೆ. ಶಾಂತರಾಗಿರಿ ಮತ್ತು ಅಲ್ಲೇ ಇರಿ.";
+      }
+      speak(sosMsg);
+    }
     showToast('SOS sent to Admin! Stay put.', 5000);
   }
 
@@ -1121,6 +1154,12 @@ init();
     } catch(e) {}
   }
   setInterval(pollSOS, 3000);
+
+  
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+  }
 
   </script>
 
