@@ -168,7 +168,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
   </div>
   <div style="display:flex; align-items:center; gap: 12px;"><a href="/logout" style="color:#ef4444; font-size:12px; font-weight:bold; text-decoration:none; padding:4px 10px; border:1px solid #ef4444; border-radius:4px; transition:0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">&#128274; Logout</a>
       <div class="badge-live"><span class="dot"></span>CONNECTED</div>
-      <button class="theme-btn" onclick="toggleTheme()" id="themeIcon">â˜€ï¸</button>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeIcon">&#127769;</button>
     </div>
   </header>
 
@@ -243,13 +243,13 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
         </div>
       </div>
 
-<div class="section-title" style="color:var(--red);">âš ï¸ Hazard Simulator (Fire / Blockades)</div>
+<div class="section-title" style="color:var(--red);">&#128680; Hazard Simulator (Fire / Blockades)</div>
       <div style="background:var(--panel); border:1px solid var(--border); padding:16px; border-radius:12px; margin-bottom:24px;">
         <p style="font-size:0.8rem; color:var(--muted); margin-bottom:12px;">Trigger a hazard to instantly block a path. The AI will immediately recalculate all user routes away from the danger zone!</p>
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
-          <button id="haz-fire" class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--red); color:var(--red); font-weight:bold; cursor:pointer; background:transparent;" onclick="toggleHazard('Intersection_Mid1', 'fire', 'haz-fire', 'var(--red)')">ðŸ”¥ Fire near Staff Lounge (Left)</button>
-          <button id="haz-deb" class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--amber); color:var(--amber); font-weight:bold; cursor:pointer; background:transparent;" onclick="toggleHazard('Corridor_East', 'debris', 'haz-deb', 'var(--amber)')">ðŸš§ Blockade at East Hallway</button>
-          <button class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--green); color:var(--green); font-weight:bold; cursor:pointer; background:transparent;" onclick="clearHazards()">âœ… Clear All Hazards</button>
+          <button id="haz-fire" class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--red); color:var(--red); font-weight:bold; cursor:pointer; background:transparent;" onclick="toggleHazard('Intersection_Mid1', 'fire', 'haz-fire', 'var(--red)')">&#128293; Fire near Staff Lounge (Left)</button>
+          <button id="haz-deb" class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--amber); color:var(--amber); font-weight:bold; cursor:pointer; background:transparent;" onclick="toggleHazard('Corridor_East', 'debris', 'haz-deb', 'var(--amber)')">&#128647; Blockade at East Hallway</button>
+          <button class="mini-btn" style="flex:none; padding:8px 16px; border-color:var(--green); color:var(--green); font-weight:bold; cursor:pointer; background:transparent;" onclick="clearHazards()">&#9989; Clear All Hazards</button>
         </div>
       </div>
 
@@ -285,7 +285,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
     const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     const btn = document.getElementById('themeIcon');
-    if (btn) btn.innerHTML = next === 'dark' ? 'â˜€ï¸' : 'ðŸŒ™';
+    if (btn) btn.innerHTML = next === 'dark' ? '&#9728;' : '&#127769;';
     localStorage.setItem('admin-theme', next);
   }
   
@@ -294,7 +294,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
     const savedTheme = localStorage.getItem('admin-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const btn = document.getElementById('themeIcon');
-    if (btn) btn.innerHTML = savedTheme === 'dark' ? 'â˜€ï¸' : 'ðŸŒ™';
+    if (btn) btn.innerHTML = savedTheme === 'dark' ? '&#9728;' : '&#127769;';
   });
 
 let GRAPH=null,crowdData={},roomData={},simRunning=false,simInterval=null;
@@ -522,7 +522,7 @@ async function toggleGlobalAlarm(){
     b.className="action-btn btn-stop";
     b.style.animation="none";
     alert.classList.add("show");
-    addLog("ðŸš¨ GLOBAL ALARM TRIGGERED");
+    addLog("&#128680; GLOBAL ALARM TRIGGERED");
   }else{
     b.innerHTML="&#128308; TRIGGER GLOBAL ALARM";
     b.className="action-btn btn-red";
