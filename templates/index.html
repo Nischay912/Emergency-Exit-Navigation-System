@@ -358,7 +358,7 @@ const LEVEL_THRESH={low:20,med:55};
 
 let GLOBAL_HAZARDS = {};
   let SMOKE_LEVEL = "none";
-  let lastBroadcastId = 0;
+  let lastBroadcastId = null;
 let GRAPH=null,crowdData={},roomData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
 
 function countToLevel(n){return n<=LEVEL_THRESH.low?"Low":n<=LEVEL_THRESH.med?"Medium":"High";}
@@ -977,7 +977,7 @@ async function init(){
 
 async function pollCrowd(){
   try{
-    const [cr, rr, ar] = await Promise.all([fetch("/api/crowd"), fetch("/api/rooms"), fetch("/api/status")]);
+    const [cr, rr, ar] = await Promise.all([fetch("/api/crowd"), fetch("/api/rooms"), fetch(`/api/status?t=${Date.now()}`)]);
     crowdData = await cr.json();
     roomData = await rr.json();
     const st = await ar.json();
@@ -999,10 +999,13 @@ async function pollCrowd(){
     }
     
       // Broadcast logic
-      if (st.broadcast && st.broadcast.id > lastBroadcastId) {
-        lastBroadcastId = st.broadcast.id;
-        
-        let bMsg = st.broadcast.message;
+      if (st.broadcast) {
+        if (lastBroadcastId === null) {
+          lastBroadcastId = st.broadcast.id; // Silent sync on first page load
+        } else if (st.broadcast.id > lastBroadcastId) {
+          lastBroadcastId = st.broadcast.id;
+          
+          let bMsg = st.broadcast.message;
         if (typeof VOICE !== 'undefined') {
             if (VOICE.lang === 'hi-IN' && st.broadcast.message_hi) bMsg = st.broadcast.message_hi;
             if (VOICE.lang === 'kn-IN' && st.broadcast.message_kn) bMsg = st.broadcast.message_kn;
@@ -1016,6 +1019,7 @@ async function pollCrowd(){
           toast.innerHTML = `<strong style="color:#facc15">&#128227; ADMIN BROADCAST:</strong><br>${bMsg}`;
           toast.className = "toast show";
           setTimeout(() => { toast.className = "toast"; }, 10000);
+          }
         }
       }
 

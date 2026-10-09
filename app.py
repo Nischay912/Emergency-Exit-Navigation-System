@@ -35,6 +35,7 @@ def count_to_level(n):
 
 # Global alarm state in-memory
 ALARM_ACTIVE = False
+HAZARDS = {}
 
 # â”€â”€ PAGES â”€â”€
 from flask import make_response
@@ -77,6 +78,7 @@ def admin():
 def get_alarm():
     global ALARM_ACTIVE
     return jsonify({"active": ALARM_ACTIVE})
+    return jsonify({"active": ALARM_ACTIVE})
 
 @app.route("/api/alarm", methods=["POST"])
 def post_alarm():
@@ -86,6 +88,7 @@ def post_alarm():
         ALARM_ACTIVE = bool(data["active"])
     else:
         ALARM_ACTIVE = not ALARM_ACTIVE # toggle
+    return jsonify({"active": ALARM_ACTIVE})
     return jsonify({"active": ALARM_ACTIVE})
 
 @app.route("/api/graph")
@@ -130,11 +133,12 @@ def api_rooms_post():
 
 @app.route("/api/status")
 def api_status():
+    from flask import make_response
     g = load_json(GRAPH_FILE)
     crowd = load_json(CROWD_FILE)
     rooms = load_json(ROOM_FILE)
     total = sum(crowd.values()) + sum(rooms.values())
-    return jsonify({
+    resp = make_response(jsonify({
         "status": "online",
         "camera_exit": g.get("camera_exit", "Main_Entrance"),
         "crowd": {k: {"count": v, "level": count_to_level(v)} for k, v in crowd.items()},
@@ -146,13 +150,11 @@ def api_status():
         "smoke_level": SMOKE_LEVEL,
         "safe_list": SAFE_LIST,
         "broadcast": LATEST_BROADCAST
-    })
+    }))
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return resp
 
-
-# --- HAZARDS (Fire / Debris) ---
-HAZARDS = {}
-
-# --- Voice Broadcast ---
+# --- Voice Broadcast ---# --- Voice Broadcast ---
 LATEST_BROADCAST = {"id": 0, "message": ""}
 
 # --- Safe Check-ins ---
