@@ -5,15 +5,15 @@
 *.key
 *.crt
 *.p12
+.env
 
 # ========================
-# Python
+# Python & Environments
 # ========================
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
-.env
 venv/
 env/
 .venv/
@@ -27,8 +27,8 @@ qr_codes/
 # data/room_state.json
 
 # ========================
-# Large model weights (optional - see note below)
-# ========================
+# Large model weights (optional)
+# Uncomment to exclude YOLO weights if you don't want them in the repo
 # yolov8n.pt
 
 # ========================
@@ -42,14 +42,12 @@ Thumbs.db
 # ========================
 # Internal / Dev-only files
 # ========================
-see.txt
 web_demo/
-features-list.md
-# Documentation and Patch Scripts
 project_notes/
 patch_history/
 scratch/
-
-TECH_STACK_EXPLAINED.md
-PRESENTATION_PITCH.md
-WIRELESS_SCREEN_MIRROR_GUIDE.md
+scripts/
+see.txt
+features-list.md
+paper/
+docs/
