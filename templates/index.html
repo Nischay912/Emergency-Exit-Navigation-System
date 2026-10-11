@@ -180,6 +180,64 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
     font-weight: 700; text-align: center;
   }
 
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(30, 41, 59, 0.95);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* Haptic Pulse Animation & Badge */
+  @keyframes haptic-pulse {
+    0% { transform: translateX(-50%) scale(0.9); opacity: 0; }
+    40% { transform: translateX(-50%) scale(1.08); opacity: 1; }
+    100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  }
+  .haptic-indicator {
+    position: fixed;
+    top: 75px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    color: #c7d2fe;
+    border: 1px solid #818cf8;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 9999;
+    box-shadow: 0 4px 18px rgba(99, 102, 241, 0.45);
+    pointer-events: none;
+    letter-spacing: 0.02em;
+  }
+  .haptic-indicator.active {
+    display: inline-flex;
+    animation: haptic-pulse 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   </style>
 
   <!-- PWA Support -->
@@ -190,6 +248,7 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 </head>
 <body>
 <div id="emergencyFlash" class="alarm-overlay"></div>
+<div id="hapticIndicator" class="haptic-indicator">📳 Haptic Alert</div>
 
 <header>
   <div class="logo">
@@ -212,7 +271,7 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
 
 <div id="audioModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="margin-top:0; color:var(--text);">Audio Settings</h3>
+    <h3 style="margin-top:0; color:var(--text);">Audio & Haptic Settings</h3>
     <div style="margin-bottom: 12px;">
       <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Language</label>
       <select id="langSelect" class="loc-select" onchange="changeLanguage(this.value)">
@@ -221,11 +280,25 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
         <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
       </select>
     </div>
-    <div style="margin-bottom: 20px;">
-      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Voice</label>
+    <div style="margin-bottom: 14px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Voice Navigation</label>
       <button id="muteBtn" class="walk-btn start" onclick="toggleMute()" style="width:100%;">
         &#128266; Mute
       </button>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Haptic Vibration Alerts</label>
+      <div style="display:flex; gap:8px;">
+        <button id="vibeToggleBtn" class="walk-btn start" onclick="toggleHaptics()" style="flex:1; margin-bottom:0; font-size:13px;">
+          📳 Vibe: ON
+        </button>
+        <button class="walk-btn" onclick="testHapticVibration()" style="flex:1; margin-bottom:0; background:#E8F0FE; color:#1A73E8; border-color:#1A73E8; font-size:13px;">
+          ⚡ Test Vibe
+        </button>
+      </div>
+      <div id="vibeStatusSub" style="font-size:11px; color:var(--muted); margin-top:5px; line-height:1.3;">
+        Vibrates on phone when arriving at intersections, turns & exits.
+      </div>
     </div>
     <button class="nav-trigger" onclick="closeAudioSettings()">Done</button>
   </div>
@@ -326,9 +399,10 @@ header { background: var(--panel); padding: 12px 20px; display: flex; align-item
               </svg>
             </div>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);padding:0 2px">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.65rem;color:var(--muted);padding:0 2px">
             <span>Steps: <strong id="stepCountTxt" style="color:var(--purple)">0</strong></span>
             <span>Speed: <strong id="speedTxt" style="color:#10b981">0.0 km/h</strong></span>
+            <span>📳 Vibe: <strong id="pdrHapticBadge" style="color:#4ade80">Active</strong></span>
             <span id="accelLive" style="color:#f59e0b">accel: --</span>
           </div>
         </div>
@@ -993,6 +1067,7 @@ async function pollCrowd(){
     SMOKE_LEVEL = st.smoke_level || "none";
     if (SMOKE_LEVEL !== "none" && !window.smokeVoiceTriggered) {
       window.smokeVoiceTriggered = true;
+      if (typeof triggerHaptic === 'function') triggerHaptic('hazard');
       if (typeof speak === 'function') {
           let smokeMsg = "Warning! Smoke detected. Follow the glowing path to the nearest exit immediately!";
           if (typeof VOICE !== 'undefined') {
@@ -1019,6 +1094,7 @@ async function pollCrowd(){
             if (VOICE.lang === 'kn-IN' && st.broadcast.message_kn) bMsg = st.broadcast.message_kn;
         }
         
+        if (typeof triggerHaptic === 'function') triggerHaptic('hazard');
         if (typeof speak === 'function') speak(bMsg);
         
         // Show a prominent alert toast
@@ -1211,6 +1287,116 @@ const PDR = {
   sensorsEnabled: false, // true = permission granted
 };
 
+// ═══════════════════════════════════════════════
+//  HAPTIC VIBRATION MANAGER
+//  Tactile guidance for Turns, Intersections & Exits
+// ═══════════════════════════════════════════════
+
+const HAPTICS = {
+  enabled: true,
+  supported: ('vibrate' in navigator),
+  vibrate(pattern) {
+    if (!this.enabled || !this.supported) return false;
+    try {
+      return navigator.vibrate(pattern);
+    } catch(e) {
+      console.warn("Haptic error:", e);
+      return false;
+    }
+  },
+  trigger(type, detail) {
+    if (!this.enabled) return false;
+    let pattern = 150;
+    let label = "📳 Vibration Alert";
+
+    if (type === 'intersection') {
+      // Strong double-pulse pattern when arriving at an intersection corridor junction
+      pattern = [220, 100, 220];
+      const name = detail ? detail.replace(/_/g, " ") : "Intersection";
+      label = `📳 Arrived at ${name} (Double-Pulse Vibe)`;
+    } else if (type === 'turn') {
+      // Distinct double tap when turning
+      pattern = [180, 80, 180];
+      label = `📳 Turn Direction Alert`;
+    } else if (type === 'exit') {
+      // Long emergency celebration pulse
+      pattern = [300, 120, 300, 120, 500];
+      label = `🚨 EXIT REACHED — Emergency Evacuation Buzz!`;
+    } else if (type === 'waypoint') {
+      // Single solid pulse for waypoint nodes
+      pattern = 160;
+      const name = detail ? detail.replace(/_/g, " ") : "Waypoint";
+      label = `📳 Waypoint Reached: ${name}`;
+    } else if (type === 'start_walk') {
+      // Triple confirmatory tick on walking start
+      pattern = [100, 60, 100, 60, 100];
+      label = `📳 PDR Walking Mode Engaged`;
+    } else if (type === 'stop_walk') {
+      pattern = 80;
+      label = `📳 Walking Mode Stopped`;
+    } else if (type === 'tap') {
+      pattern = 50;
+      label = `📳 Sensor Ready`;
+    } else if (type === 'hazard') {
+      pattern = [400, 150, 400, 150, 400];
+      label = `⚠️ Hazard Emergency Haptic Alert!`;
+    }
+
+    const success = this.vibrate(pattern);
+    showHapticIndicator(label);
+    return success;
+  }
+};
+
+let hapticTimer = null;
+function showHapticIndicator(text) {
+  const el = document.getElementById("hapticIndicator");
+  if (!el) return;
+  el.innerHTML = text;
+  el.classList.add("active");
+  clearTimeout(hapticTimer);
+  hapticTimer = setTimeout(() => {
+    el.classList.remove("active");
+  }, 2000);
+}
+
+function triggerHaptic(type, detail) {
+  return HAPTICS.trigger(type, detail);
+}
+
+function toggleHaptics() {
+  HAPTICS.enabled = !HAPTICS.enabled;
+  const btn = document.getElementById("vibeToggleBtn");
+  const sub = document.getElementById("vibeStatusSub");
+  const pdrBadge = document.getElementById("pdrHapticBadge");
+  if (btn) {
+    btn.innerHTML = HAPTICS.enabled ? "📳 Vibe: ON" : "📴 Vibe: OFF";
+    btn.className = HAPTICS.enabled ? "walk-btn start" : "walk-btn";
+  }
+  if (sub) {
+    sub.textContent = HAPTICS.enabled ? "Vibrates on phone when arriving at intersections, turns & exits." : "Vibration alerts disabled.";
+  }
+  if (pdrBadge) {
+    pdrBadge.textContent = HAPTICS.enabled ? "Active" : "Off";
+    pdrBadge.style.color = HAPTICS.enabled ? "#4ade80" : "#94a3b8";
+  }
+  if (HAPTICS.enabled) {
+    HAPTICS.trigger('tap');
+    showToast("📳 Vibration alerts ON");
+  } else {
+    showToast("📴 Vibration alerts OFF");
+  }
+}
+
+function testHapticVibration() {
+  const ok = HAPTICS.trigger('intersection', 'Intersection Mid1');
+  if (HAPTICS.supported && ok) {
+    showToast("📳 Vibrating: Double pulse [220ms, 100ms, 220ms]");
+  } else if (!HAPTICS.supported) {
+    showToast("⚠️ Browser vibration motor not available. Visual haptic feedback active!");
+  }
+}
+
 // ── UTILS ──────────────────────────────────────
 
 function showToast(msg, dur=2500) {
@@ -1338,8 +1524,19 @@ function applyStep(headingDeg) {
     PDR.stepsSinceCorrection = 0;
     PDR.trail = [];
 
-        // --- LIVE VOICE NAVIGATION TRIGGER ---
-      let isExit = GRAPH && GRAPH.exit_nodes && GRAPH.exit_nodes.includes(near);
+    // --- HAPTIC VIBRATION TRIGGER ---
+    let isExit = GRAPH && GRAPH.exit_nodes && GRAPH.exit_nodes.includes(near);
+    let isIntersection = near.toLowerCase().includes("intersection");
+
+    if (isExit) {
+      triggerHaptic('exit');
+    } else if (isIntersection) {
+      triggerHaptic('intersection', near);
+    } else {
+      triggerHaptic('waypoint', near);
+    }
+
+    // --- LIVE VOICE NAVIGATION TRIGGER ---
       
       if (document.getElementById("navOverlay") && document.getElementById("navOverlay").classList.contains("active")) {
         openNavigation();
@@ -1455,6 +1652,7 @@ const _origRender = window._renderPatchDone;
 // ── SENSOR SETUP ────────────────────────────────
 // Call this from the "Enable Sensors" button — must be a user gesture for iOS
 function enableSensors() {
+  triggerHaptic('tap');
   const btn = document.getElementById('enableSensorsBtn');
   const row = document.getElementById('sensorStatusRow');
   if (row) row.style.display = 'flex';
@@ -1605,6 +1803,7 @@ function startCalibration() {
 function doCalibration() {
   PDR.northOffset = PDR.heading;
   PDR.calibrated = true;
+  triggerHaptic('tap');
   showToast(`✅ North set! Offset: ${Math.round(PDR.northOffset)}°`, 3000);
   document.getElementById("calibBtn").textContent = "✅ Calibrated (tap to redo)";
 }
@@ -1669,6 +1868,7 @@ function toggleWalkMode() {
     showToast('🚶 Walking mode ON — start moving!');
     
     unlockAudio(); // iOS audio fix
+    triggerHaptic('start_walk');
 
   } else {
     btn.textContent = '🚶 Step 3: Start Walking';
@@ -1677,6 +1877,7 @@ function toggleWalkMode() {
     PDR.trail = [];
     setWalkStatus('Select location → Enable Sensors → Calibrate → Walk');
     showToast('Walking mode OFF');
+    triggerHaptic('stop_walk');
   }
 }
 
@@ -1947,6 +2148,12 @@ function speakStep(stepIdx) {
     if (step.dist && arrow !== "🚨") phrase += `, about ${step.dist} meters.`;
   }
   
+  if (arrow === "🚨") {
+    triggerHaptic('exit');
+  } else if (arrow === "→" || arrow === "←" || arrow === "↗" || arrow === "↖" || arrow === "↓") {
+    triggerHaptic('turn');
+  }
+
   speak(phrase);
 }
 
@@ -1962,6 +2169,7 @@ function announceLiveNavigationStep() {
   if (steps.length === 0) return;
   
   if (path.length === 1 && GRAPH.exit_nodes.includes(currentUser)) {
+    triggerHaptic('exit');
     speak(VOICE.lang === 'hi-IN' ? HINDI_PHRASES["🚨"] : "You have arrived at the emergency exit. Please evacuate safely.");
     return;
   }
@@ -1970,6 +2178,10 @@ function announceLiveNavigationStep() {
   let phrase = "";
   let target = currentNavStep.target.replace(/[🏫🚪🎓📚💻🧑‍💼☕🖧📖]/g,"").trim();
   let arrow = currentNavStep.arrow;
+
+  if (arrow === "→" || arrow === "←" || arrow === "↗" || arrow === "↖" || arrow === "↓") {
+    triggerHaptic('turn');
+  }
 
   if (VOICE.lang === 'hi-IN') {
     if (HINDI_PHRASES[arrow]) phrase = `${target} ${HINDI_PHRASES[arrow]}`;
@@ -2513,6 +2725,12 @@ function walkDemoStep(stepIdx) {
       if (toNode) {
         document.getElementById("userLbl").textContent = toNode.replace(/_/g," ");
         showToast("\uD83D\uDCCD Arrived: " + toNode.replace(/_/g," "));
+
+        let isExit = GRAPH && GRAPH.exit_nodes && GRAPH.exit_nodes.includes(toNode);
+        let isIntersection = toNode.toLowerCase().includes("intersection");
+        if (isExit) triggerHaptic('exit');
+        else if (isIntersection) triggerHaptic('intersection', toNode);
+        else triggerHaptic('waypoint', toNode);
       }
       // Pause 600ms then advance to next step
       setTimeout(() => walkDemoStep(stepIdx+1), 600);
@@ -2523,6 +2741,7 @@ function walkDemoStep(stepIdx) {
 }
 
 function finishDemoWalk() {
+    triggerHaptic('exit');
     if (typeof speakStep === 'function') speakStep(NAV.steps.length);
 
           let exitSpokenMsg = "Emergency Exit Reached. Evacuate Now!";
