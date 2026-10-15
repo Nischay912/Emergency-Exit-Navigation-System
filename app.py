@@ -1,4 +1,4 @@
-﻿"""
+"""
 app.py â€” Emergency Exit System Backend (v2)
 Numeric crowd values (0-100 people). Thresholds: <=20 Low, <=55 Medium, >55 High
 """
@@ -43,7 +43,11 @@ from flask import make_response
 
 @app.route("/")
 def index():
-    resp = make_response(render_template("index.html", user_node="Library"))
+    node = request.args.get("loc") or request.args.get("room") or "Library"
+    g = load_json(GRAPH_FILE)
+    if node not in g.get("nodes", {}):
+        node = "Library"
+    resp = make_response(render_template("index.html", user_node=node))
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"

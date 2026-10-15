@@ -433,7 +433,9 @@ const LEVEL_THRESH={low:20,med:55};
 let GLOBAL_HAZARDS = {};
   let SMOKE_LEVEL = "none";
   let lastBroadcastId = null;
-let GRAPH=null,crowdData={},roomData={},currentUser=USER_NODE_INIT,bestExit=null,animT=0;
+const _urlP = new URLSearchParams(window.location.search);
+const _qLoc = _urlP.get('loc') || _urlP.get('room') || _urlP.get('start');
+let GRAPH=null,crowdData={},roomData={},currentUser=_qLoc || (USER_NODE_INIT && USER_NODE_INIT !== 'None' ? USER_NODE_INIT : 'Library'),bestExit=null,animT=0;
 
 function countToLevel(n){return n<=LEVEL_THRESH.low?"Low":n<=LEVEL_THRESH.med?"Medium":"High";}
 

@@ -19,16 +19,16 @@ env/
 .venv/
 
 # ========================
-# Generated / Runtime files
+# Personal / User Guides (Do NOT push to GitHub)
 # ========================
-qr_codes/
-# Uncomment below if you want to exclude the runtime state JSONs:
-# data/crowd_state.json
-# data/room_state.json
+guide for qr generation.md
+guide_for_qr_generation.md
+guide*.md
 
 # ========================
 # Large model weights (optional)
-# Uncomment to exclude YOLO weights if you don't want them in the repo
+# ========================
+# Uncomment to exclude YOLO weights if you don't want them in the repo:
 # yolov8n.pt
 
 # ========================
@@ -40,7 +40,7 @@ Thumbs.db
 *.swp
 
 # ========================
-# Internal / Dev-only files
+# Internal / Dev-only files & Scratch
 # ========================
 web_demo/
 project_notes/
@@ -51,4 +51,10 @@ see.txt
 features-list.md
 paper/
 docs/
+report_chapters/
 *.tex
+Project_Report_Front_Matter.pdf
+report_figures/
+scratch/
+logo.svg
+logo.png
