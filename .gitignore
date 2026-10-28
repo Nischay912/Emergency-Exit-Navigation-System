@@ -24,6 +24,7 @@ env/
 guide for qr generation.md
 guide_for_qr_generation.md
 guide*.md
+DEMO_DAY_GUIDE.*
 
 # ========================
 # Large model weights (optional)
